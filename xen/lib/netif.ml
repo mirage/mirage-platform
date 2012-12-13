@@ -291,7 +291,8 @@ let enumerate () =
     try_lwt
       lwt sid = Xs.(immediate (fun h -> read h (sprintf "device/vif/%d/backend-id" num))) in
       printf "found: num=%d backend-id=%s\n%!" num sid;
-      read_vif (succ num) (sid :: acc)
+      (* read_vif (succ num) (sid :: acc) *)
+      read_vif (succ num) ((string_of_int num) :: acc)
     with
       _ -> return (List.rev acc)
   in
