@@ -41,13 +41,13 @@ type topo_t = {
 let topo = 
   {nodes=(Hashtbl.create 64);links=[];}
 
-let log typ data = 
-  let msg = Json.to_string (
+let log typ data = ()
+(*  let msg = Json.to_string (
     Json.Object [
       ("ts", (Json.Float (Clock.time ())));
       ("type", (Json.String typ)); 
     ("data", (Json.String data));]) in
-    ns3_log msg
+    ns3_log msg*)
 
 let get_topology () =
   let ix = ref 0L in 
@@ -104,7 +104,7 @@ let get_link_utilization () =
   ) topo.links [] in 
         Json.to_string (Json.Array utilisation) 
 
-let monitor_links () = 
+(*let monitor_links () = 
   let _ = printf "starting link monitoring\n%!" in
   while_lwt true do 
     lwt _ = Time.sleep 1.0 in 
@@ -112,8 +112,8 @@ let monitor_links () =
     let res = get_link_utilization () in 
     let _ = log "link_utilization" res in 
       return ()
-  done
-
+  done 
+*)
 let exec fn () =
   Lwt.ignore_result (fn ())
 
@@ -121,7 +121,7 @@ let load t =
   Printf.printf "OS.Topology started...\n%!";
   let _ = t () in
   let _ = log "topology" (Json.to_string (get_topology ())) in 
-  let _ = exec (monitor_links) () in 
+  (*let _ = exec (monitor_links) () in *)
   let _ = ns3_run (Time.get_duration ()) in
     ()
 

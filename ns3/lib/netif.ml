@@ -23,7 +23,7 @@ let resolve t = Lwt.on_success t (fun _ -> ())
 
 type t = {
   id: id;
-  fd_read : Io_page.t Lwt_condition.t;
+  fd_read : Cstruct.t Lwt_condition.t;
   fd_read_ret : unit Lwt_condition.t;
   fd_write : unit Lwt_condition.t;
   mutable active: bool;
@@ -69,9 +69,9 @@ let demux_pkt node_name dev_id frame =
     let dev = 
       List.find (
         fun dev -> (dev.id = (string_of_int dev_id)) ) devs in
-    let pkt = Io_page.get () in 
+    let pkt = Io_page.to_cstruct (Io_page.get ()) in 
     let pkt_len = (String.length frame) in
-    let _ = (Cstruct.set_buffer frame 0 pkt 0 pkt_len) in
+    let _ = (Cstruct.blit_from_string frame 0 pkt 0 pkt_len) in
     let pkt = Cstruct.sub pkt 0 pkt_len in 
     
     let _ = Lwt_condition.signal dev.fd_read pkt in
@@ -124,7 +124,7 @@ let create ?(dev=None) fn =
       return ()
 
 let get_writebuf t =
-  let page = Io_page.get () in
+  let page = Io_page.to_cstruct (Io_page.get ()) in
     (* TODO: record statistics for requesting thread here (in debug mode?)
      * *)
     return page
@@ -172,8 +172,6 @@ let unblock_device name ix =
 
 (* Transmit a packet from an Io_page *)
 let write t page =
-  let off = Cstruct.base_offset page in
-  let len = Cstruct.len page in
   let Some(node_name) = Lwt.get Topology.node_name in 
   let rec wait_for_queue t = 
     match (queue_check node_name (int_of_string t.id)) with
@@ -190,7 +188,8 @@ let write t page =
         wait_for_queue t
     in
   lwt _ = wait_for_queue t in
-  let _ = pkt_write node_name (int_of_string t.id) page off len in
+  let _ = pkt_write node_name (int_of_string t.id) page.Cstruct.buffer 
+            page.Cstruct.off page.Cstruct.len in
     return ()
 
 
@@ -200,11 +199,11 @@ let writev t pages =
   |[] -> return ()
   |[page] -> write t page
   |pages ->
-    let page = Io_page.get () in
+    let page = Io_page.to_cstruct (Io_page.get ()) in
     let off = ref 0 in
     let _ = List.iter (fun p ->
       let len = Cstruct.len p in
-      Cstruct.blit_buffer p 0 page !off len;
+      Cstruct.blit p 0 page !off len;
       off := !off + len;
     ) pages in 
     let v = Cstruct.sub page 0 !off in

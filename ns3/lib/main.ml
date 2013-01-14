@@ -21,6 +21,7 @@
  * 02111-1307, USA.
  *)
 
+open Printf
 open Lwt
 
 external ns3_run : int -> int = "ocaml_ns3_run" 
@@ -35,15 +36,13 @@ let rec call_hooks hooks  =
     | Some f ->
         (* Run the hooks in parallel *)
         let _ =
-          try_lwt
+(*          try_lwt*)
             f ()
-          with exn ->
+(*          with exn ->
             Printf.printf "enter_t: exn %s\n%!" (Printexc.to_string exn);
-            return ()
+            return ()*)
         in
         call_hooks hooks
-
-open Printf
 
 (* Main runloop, which registers a callback so it can be invoked
    when timeouts expire. Thus, the program may only call this function
