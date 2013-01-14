@@ -49,7 +49,7 @@ let log typ data = ()
     ("data", (Json.String data));]) in
     ns3_log msg*)
 
-let get_topology () =
+(*let get_topology () =
   let ix = ref 0L in 
   let names = Hashtbl.create 64 in 
   let nodes = Hashtbl.fold
@@ -73,9 +73,9 @@ let get_topology () =
       ("value",(Json.Int 1L))])] 
   ) topo.links [] in 
       Json.Object [("nodes",(Json.Array nodes));
-      ("links", (Json.Array links));]
+      ("links", (Json.Array links));] *)
 
-let get_link_utilization () = 
+(*let get_link_utilization () = 
   let utilisation = List.fold_right (
     fun (node_a, node_b, rate) r -> 
       let utilization_a_b = 
@@ -102,7 +102,7 @@ let get_link_utilization () =
               ("ts", (Json.Float (Clock.time ()) ));
               ("value", (Json.Float (utilization_b_a /. rate) ))]);]
   ) topo.links [] in 
-        Json.to_string (Json.Array utilisation) 
+        Json.to_string (Json.Array utilisation) *)
 
 (*let monitor_links () = 
   let _ = printf "starting link monitoring\n%!" in
@@ -120,7 +120,7 @@ let exec fn () =
 let load t =
   Printf.printf "OS.Topology started...\n%!";
   let _ = t () in
-  let _ = log "topology" (Json.to_string (get_topology ())) in 
+(*  let _ = log "topology" (Json.to_string (get_topology ())) in *)
   (*let _ = exec (monitor_links) () in *)
   let _ = ns3_run (Time.get_duration ()) in
     ()
