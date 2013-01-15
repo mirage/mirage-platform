@@ -30,6 +30,31 @@ link_xen_native() {
     ${LIB}/libxencaml.a ${LIB}/libdiet.a ${LIB}/libm.a ${LIB}/longjmp.o -o $2
 }
 
+link_ns3_native() {
+  OBJ=$1
+  OUTPUT=$2
+  LIB=`ocamlfind query mirage`
+  cc  \
+   ${LIB}/main_stubs.o \
+    ${LIB}/clock_stubs.o \
+    ${LIB}/console_stubs.o \
+    ${LIB}/ns_stubs.o \
+    ${LIB}/libns3run.a \
+    ${LIB}/../cstruct/libcstruct_stubs.a \
+    ${LIB}/../ocaml/libbigarray.a \
+    ${LIB}/../ocaml/libunix.a \
+    ${LIB}/../ocaml/libasmrun.a \
+    -lstdc++ \
+    -L/usr/local/lib \
+    -lns3-dev-core-debug \
+    -lns3-dev-network-debug \
+    -lns3-dev-point-to-point-debug \
+    -lns3-dev-tap-bridge-debug \
+    ${OBJ} \
+    -o ${OUTPUT}
+}
+
+
 BACKEND=xen-native
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -58,6 +83,9 @@ fi
 case "$BACKEND" in
 "xen-native")
   link_xen_native ${OBJFILE} ${OUTPUT}
+  ;;
+"ns3-native")
+  link_ns3_native ${OBJFILE} ${OUTPUT}
   ;;
 *)
   echo Unknown backend $BACKEND
