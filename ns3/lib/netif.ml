@@ -45,7 +45,6 @@ let ethernet_mac_to_string x =
 
 let plug node_name id mac =
  let active = true in
-   printf "Plugging in device %d \n%!" id; 
  let fd_read = Lwt_condition.create () in
  let fd_read_ret = Lwt_condition.create  () in 
  let fd_write = Lwt_condition.create () in
@@ -76,14 +75,8 @@ let demux_pkt node_name dev_id frame =
     
     let _ = Lwt_condition.signal dev.fd_read pkt in
     let _ = resolve (Lwt_condition.wait dev.fd_read_ret) in
-(*    let _ = Lwt.wakeup_all () in
-    let _ = Lwt.wakeup_all () in
-    let _ = Lwt.wakeup_all () in
-    let _ = Lwt.wakeup_all () in
-    let _ = Lwt.wakeup_all () in
-    let _ = Lwt.wakeup_all () in
-*)
-      ()
+    let _ = Lwt.wakeup_paused () in 
+     ()
   with 
   | Not_found ->
     Printf.printf "Packet cannot be processed for node %s\n" node_name
@@ -119,9 +112,8 @@ let create ?(dev=None) fn =
           let user = fn t.id t in
           let th,_ = Lwt.task () in
             Lwt.on_cancel th (fun _ -> unplug name t.id);
-            th <?> user) devs 
-    with Not_found ->
-      return ()
+            th <?> user) devs  
+    with exn -> return (printf "manager error %s\n%!" (Printexc.to_string exn))
 
 let get_writebuf t =
   let page = Io_page.to_cstruct (Io_page.get ()) in
@@ -139,6 +131,7 @@ let rec listen t fn =
         lwt frame = Lwt_condition.wait t.fd_read in
         lwt _ = fn frame in
         let _ = Lwt_condition.signal t.fd_read_ret in
+        let _ = Lwt.wakeup_paused () in 
           return ()
       with exn ->
         return (printf "EXN: %s bt: %s\n%!" (Printexc.to_string exn) 
@@ -149,9 +142,7 @@ let rec listen t fn =
     return ()
 
 (* Shutdown a netfront *)
-let destroy nf =
-  printf "tap_destroy\n%!";
-  return ()
+let destroy nf = return ()
 
 let unblock_device name ix = 
   try
@@ -159,14 +150,8 @@ let unblock_device name ix =
     let dev = List.find 
       (fun dev -> (dev.id = (string_of_int ix))) devs in
     let _ =  Lwt_condition.signal dev.fd_write () in
-(*    let _ = Lwt.wakeup_all () in 
-    let _ = Lwt.wakeup_all () in 
-    let _ = Lwt.wakeup_all () in 
-    let _ = Lwt.wakeup_all () in 
-    let _ = Lwt.wakeup_all () in 
-    let _ = Lwt.wakeup_all () in 
-  *)
-      ()
+    let _ = Lwt.wakeup_paused () in 
+     ()
   with Not_found ->
     Printf.printf "Packet cannot be processed for node %s\n" name
 
@@ -177,14 +162,14 @@ let write t page =
     match (queue_check node_name (int_of_string t.id)) with
     | true -> return ()
     | false ->
-(*       let _ = printf "%03.6f: traffic blocked %s\n%!" (Clock.time ()) *)
-(*         node_name in   *)
+(*       let _ = printf "%03.6f: traffic blocked %s\n%!" (Clock.time ()) 
+         node_name in   *)
       let _ = register_check_queue node_name (int_of_string t.id) in
       lwt _ = Lwt_condition.wait t.fd_write in
-(*
-      let _ = printf "%03.6f: traffic unblocked %s\n%!" (Clock.time ())
-        node_name in  
-*)
+
+(*      let _ = printf "%03.6f: traffic unblocked %s\n%!" (Clock.time ())
+        node_name in  *)
+
         wait_for_queue t
     in
   lwt _ = wait_for_queue t in

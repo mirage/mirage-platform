@@ -38,10 +38,8 @@ using namespace std;
 using namespace ns3;
 
 #ifndef USE_MPI
-#define USE_MPI 0
+#define USE_MPI 1
 #endif
-
-NS_LOG_COMPONENT_DEFINE ("MirageExample");
 
 #ifdef  __cplusplus
 extern "C" {
@@ -50,7 +48,7 @@ extern "C" {
 void ns3_init(void);
 
 //time event handling function
-CAMLprim value ocaml_ns3_add_timer_event(value p_ts, value p_id);
+CAMLprim value ocaml_ns3_add_timer_event(value, value);
 CAMLprim value ocaml_ns3_del_timer_event(value p_id);
 
 // topology functions
@@ -152,7 +150,7 @@ ocaml_ns3_add_timer_event(value p_ts, value p_id) {
   double ts = (Double_val(p_ts) * 1e6);
   int id = Int_val(p_id);
   events[id] = Simulator::Schedule(MicroSeconds (ts), &TimerEventHandler, id );
-  CAMLreturn( Val_int(id) );
+  CAMLreturn( Val_unit );
 }
 
 CAMLprim value
@@ -206,12 +204,13 @@ PktDemux(Ptr<NetDevice> dev, Ptr<const Packet> pktIn, uint16_t proto,
   caml_register_global_root(&ml_data);
   Ptr<Packet> pkt = pktIn->Copy();
   int pkt_len = pkt->GetSize();
-  ml_data = caml_alloc_string(pkt_len);
-  uint8_t *data = (uint8_t *)String_val(ml_data);
-  pkt->CopyData(data, pkt_len);
 
   // find host name
   string node_name = Names::FindName(dev->GetNode());
+
+  ml_data = caml_alloc_string(pkt_len);
+  uint8_t *data = (uint8_t *)String_val(ml_data);
+  pkt->CopyData(data, pkt_len);
 
   // call packet handling code in caml
   caml_callback3(*ns3_cb->pkt_in_cb,
@@ -232,11 +231,11 @@ caml_pkt_write(value v_name, value v_ifIx, value v_ba,
   int len = Int_val(v_len);
 
   //TODO: this appeared invalid on the openflow switch case
-  int off =  0; //Int_val(v_off);
+  int off = Int_val(v_off);
 
   //get a pointer to the packet byte data
   uint8_t *buf = (uint8_t *) Caml_ba_data_val(v_ba);
-  Ptr< Packet> pkt = Create<Packet>(buf, len);
+  Ptr< Packet> pkt = Create<Packet>(buf + off, len);
 
   // find the right device for the node and send packet
   Ptr<Node> node = nodes[name]->node;

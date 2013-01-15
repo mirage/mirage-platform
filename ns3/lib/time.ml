@@ -48,7 +48,7 @@ let sleep d =
   count := (!count) + 1;
   let sleeper = { time = t; canceled = false; thread = w; id; } in 
   Hashtbl.replace sleeping_threads id sleeper;
-  ns3_add_timer_event d id;
+  let _ = ns3_add_timer_event d id in 
   Lwt.on_cancel res (fun _ -> sleeper.canceled <- true);
   res
 
@@ -80,6 +80,7 @@ let wakeup_thread id =
           Lwt.wakeup thread ();
           Hashtbl.remove sleeping_threads id
   in
+  let _ = Lwt.wakeup_paused () in 
 (*  let _= Lwt.wakeup_all () in *)
     () 
 
