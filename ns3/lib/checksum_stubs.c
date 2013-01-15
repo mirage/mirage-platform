@@ -21,78 +21,19 @@
 #include <caml/fail.h>
 #include <caml/bigarray.h>
 
-static uint32_t
-checksum_bigarray(unsigned char *addr, size_t count, uint32_t sum)
-{
-  while (count > 1) {
-    uint16_t v = (*addr << 8) + (*(addr+1));
-    sum += v;
-    count -= 2;
-    addr += 2;
-  }
-  if (count > 0)
-    sum += (*(unsigned char *)addr) << 8;
-  while (sum >> 16)
-    sum = (sum & 0xffff) + (sum >> 16);
-  return sum;
-}
-
 CAMLprim value
-caml_ones_complement_checksum(value v_ba, value v_len)
+caml_ones_complement_checksum(value v_cstruct)
 {
-  CAMLparam2(v_ba, v_len);
-  uint32_t sum = 0;
-  uint16_t checksum = 0;
-  sum = checksum_bigarray(Caml_ba_data_val(v_ba), Int_val(v_len), 0);
-  checksum = ~sum;
-  CAMLreturn(Val_int(checksum));
+  CAMLparam1(v_cstruct);
+  CAMLreturn(Val_int(0));
 }
 
-/* Checksum a list of bigarrays. The complexity of overflow is due to
+/* Checksum a list of cstruct.ts. The complexity of overflow is due to
  * having potentially odd-sized buffers, and the odd byte must be carried
  * forward as 16-byte 1s complement addition if there are more buffers in
  * the chain. */
 CAMLprim value
-caml_ones_complement_checksum_list(value v_bal)
-{
-  CAMLparam1(v_bal);
-  CAMLlocal1(v_hd);
-  uint32_t sum = 0;
-  uint16_t checksum = 0;
-  uint16_t overflow = 0;
-  size_t count = 0;
-  struct caml_ba_array *a = NULL;
-  unsigned char *addr;
-  while (v_bal != Val_emptylist) {
-    v_hd = Field(v_bal, 0);
-    v_bal = Field(v_bal, 1);
-    a = Caml_ba_array_val(v_hd);
-    addr = a->data;
-    count = a->dim[0];
-    if (count <= 0) continue;
-    if (overflow != 0) {
-      sum += (overflow << 8) + (*addr);
-      overflow = 0;
-      addr++;
-      count--;
-    }
-    while (count > 1) {
-      uint16_t v = (*addr << 8) + (*(addr+1));
-      sum += v;
-      count -= 2;
-      addr += 2;
-    }
-    if (count > 0) {
-      if (v_bal == Val_emptylist)
-        sum += (*(unsigned char *)addr) << 8;
-      else
-        overflow = *addr;
-    }
-  }
-  if (overflow != 0)
-    sum += overflow << 8;
-  while (sum >> 16)
-    sum = (sum & 0xffff) + (sum >> 16);
-  checksum = ~sum;
-  CAMLreturn(Val_int(checksum));
+caml_ones_complement_checksum_list(value v_cstruct_list) {
+  CAMLparam1(v_cstruct_list);
+  CAMLreturn(Val_int(0));
 }

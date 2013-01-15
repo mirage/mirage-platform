@@ -13,30 +13,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-
-#include <iostream>
-#include <fstream>
-// #include <net/if.h>
-// #include <linux/if_tun.h>
-
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <err.h>
-#include <sys/ioctl.h>
-
-#include <arpa/inet.h>
-
 #include <ns3/core-module.h>
 #include <ns3/network-module.h>
 #include <ns3/point-to-point-module.h>
-#include <ns3/internet-module.h>
-#include <ns3/applications-module.h>
-#include <ns3/log.h>
 #include <ns3/tap-bridge-module.h>
 #include <ns3/mpi-interface.h>
 
@@ -63,8 +42,6 @@ using namespace ns3;
 #endif
 
 NS_LOG_COMPONENT_DEFINE ("MirageExample");
-
-ns3::Time timeout = ns3::Seconds (0);
 
 #ifdef  __cplusplus
 extern "C" {
@@ -333,10 +310,8 @@ addNs3Node(string name) {
   NodeContainer node;
 
 #if USE_MPI 
-  printf("using mpi\n");
   node.Create(1, node_count);
 #else 
-  printf("not using mpi\n");
   node.Create(1);
 #endif
   // add in the last hashmap
@@ -477,16 +452,12 @@ ns3_add_net_intf(value v_intf, value v_node,
 
   //set a packet interception callback and dump a pcap trace
   dev->SetPromiscReceiveCallback(MakeCallback(&PktDemux));
-//  p2p.EnablePcap("ns3", dev, false);
 
   // Install the tap bridge on the vitrual interface node
   tapBridge.SetAttribute ("Mode", StringValue ("UseLocal"));
   tapBridge.SetAttribute ("DeviceName", StringValue (intf));
   Ptr< NetDevice > tapDev = tapBridge.Install (nodes[intf]->node,
       node_intf->GetDevice(0));
-
-  //create the tap/tun interface
-  //tap_opendev(intf, ip, mask );
 
   CAMLreturn ( Val_unit );
 }
@@ -497,14 +468,13 @@ ns3_add_net_intf(value v_intf, value v_node,
 // inform ocaml code initialize
 void
 ns3_init(void) {
+#if USE_MPI 
   int argc = 0;
   char *arg[] = {};
-#if USE_MPI 
   MpiInterface::Enable (&argc, (char ***)&arg);
   GlobalValue::Bind ("SimulatorImplementationType",
       StringValue ("ns3::DistributedSimulatorImpl"));
 #endif
-
 // param to run simulation in real time. Invalid with mpi simulation
 //  GlobalValue::Bind ("SimulatorImplementationType", 
 //      StringValue ("ns3::RealtimeSimulatorImpl"));  
@@ -513,7 +483,6 @@ ns3_init(void) {
 static void
 call_init_method (string name) {
   value ml_name;
-
 #if USE_MPI
   if ((MpiInterface::GetSystemId ()) !=
       nodes[name]->node_id)
@@ -526,59 +495,10 @@ call_init_method (string name) {
   caml_remove_global_root(&ml_name);
 }
 
-int log_fd = -1;
-int connect_socket (char *server, int port) {
-  int sock;                        /* Socket descriptor */
-  struct sockaddr_in echoServAddr; /* Echo server address */
 
-  /* Create a reliable, stream socket using TCP */
-  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("socket() error");
-    exit(1);
-  }
-
-  /* Construct the server address structure */
-  memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
-  echoServAddr.sin_family      = AF_INET;             /* Internet address family */
-  echoServAddr.sin_addr.s_addr = inet_addr(server);   /* Server IP address */
-  echoServAddr.sin_port        = htons(port); /* Server port */
-
-  /* Establish the connection to the echo server */
-  if (connect(sock, (struct sockaddr *) &echoServAddr, 
-        sizeof(echoServAddr)) < 0) {
-    perror("connect() failed");
-    exit(1);
-  }
-  return sock;
-}
-
-CAMLprim value
-ocaml_ns3_log(value v_message) {
-  CAMLparam1(v_message);
-  uint32_t msglen = 0;
-  uint32_t send_len = 0;
-
-  if(log_fd < 0) {
-    log_fd = connect_socket("54.243.253.206", 8124);
-  }
-
-  msglen = strlen(String_val(v_message)); /* Determine input length */
-  send_len = htonl(msglen);
-  printf("sending %s\n", String_val(v_message));
-
-  /* Send the string to the server */
-  send(log_fd, &send_len, 4, 0);
-  if (send(log_fd, String_val(v_message), 
-        msglen, 0) != msglen) {
-    perror("send() sent a different number of bytes than expected");
-    exit(1);
-  }
-
-  CAMLreturn(Val_unit);
-
-}
-
-
+/*
+ * A method to get network card counters
+ */
 CAMLprim value
 ocaml_ns3_get_dev_byte_counter(value node_a, value node_b) {
   CAMLparam2(node_a, node_b);
@@ -619,8 +539,8 @@ ocaml_ns3_run(value v_duration) {
   // for each host I need a signle process 
   if (MpiInterface::GetSize() < nodes.size()) {
     char msg[2048];
-    snprintf(msg, 2048, "Insufficient number of mpi processes. Need %d processes.", 
-        (int)nodes.size());
+    snprintf(msg, 2048, "Insufficient number of mpi processes. \
+        Need %d processes.", (int)nodes.size());
     NS_FATAL_ERROR(msg);
     exit(1);
   }
@@ -628,9 +548,9 @@ ocaml_ns3_run(value v_duration) {
 
   // Configure the logging functionality
   // LogComponentEnable ("TapBridge", LOG_LEVEL_LOGIC);
-  //LogComponentEnable ("TapBridgeHelper", LOG_LEVEL_LOGIC);
-  //  LogComponentEnable ("MirageQueue", LOG_LEVEL_LOGIC);
-  //  LogComponentEnable ("PointToPointNetDevice", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("TapBridgeHelper", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("MirageQueue", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("PointToPointNetDevice", LOG_LEVEL_LOGIC);
 
   if (duration) {
     printf("Setting duration to %d seconds\n", duration);
@@ -646,10 +566,6 @@ ocaml_ns3_run(value v_duration) {
   ns3_cb->queue_unblock_cb = caml_named_value("unblock_device");
 
   map<string, struct node_state* >::iterator it;
-  printf("parse nodes\n");
-  for (it=nodes.begin(); it != nodes.end(); it++) {
-    printf("node %s found\n", it->first.c_str());
-  }
 
   // on time 0 run the init code
   for (it=nodes.begin() ; it != nodes.end(); it++) {

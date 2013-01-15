@@ -34,15 +34,8 @@ let rec call_hooks hooks  =
     | None ->
         return ()
     | Some f ->
-        (* Run the hooks in parallel *)
-        let _ =
-(*          try_lwt*)
-            f ()
-(*          with exn ->
-            Printf.printf "enter_t: exn %s\n%!" (Printexc.to_string exn);
-            return ()*)
-        in
-        call_hooks hooks
+        let _ = f () in
+          call_hooks hooks
 
 (* Main runloop, which registers a callback so it can be invoked
    when timeouts expire. Thus, the program may only call this function
@@ -69,12 +62,9 @@ let run t =
          |Some tm -> tm
        in
         printf "sleep for %f seconds\n%!" timeout;
-(*       Activations.wait timeout; *)
        fn ()
   in
   fn ()
-(*  let _ = ns3_run (Time.get_duration ()) in
-  () *)
 
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)

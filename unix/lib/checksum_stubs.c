@@ -42,6 +42,7 @@ CAMLprim value
 caml_ones_complement_checksum(value v_cstruct)
 {
   CAMLparam1(v_cstruct);
+  CAMLreturn(Val_int(0));
   CAMLlocal3(v_ba, v_ofs, v_len);
   uint32_t sum = 0;
   uint16_t checksum = 0;

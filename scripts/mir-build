@@ -34,24 +34,28 @@ link_ns3_native() {
   OBJ=$1
   OUTPUT=$2
   LIB=`ocamlfind query mirage`
-  cc  \
-   ${LIB}/main_stubs.o \
-    ${LIB}/clock_stubs.o \
-    ${LIB}/console_stubs.o \
-    ${LIB}/ns_stubs.o \
+  cc -arch x86_64 \
+    -execute \
+    -lc \
+    ${LIB}/main_stubs.o \
+    ${OBJ} \
     ${LIB}/libns3run.a \
-    ${LIB}/../cstruct/libcstruct_stubs.a \
-    ${LIB}/../ocaml/libbigarray.a \
     ${LIB}/../ocaml/libunix.a \
     ${LIB}/../ocaml/libasmrun.a \
+    ${LIB}/../cstruct/libcstruct_stubs.a \
+    ${LIB}/../ocaml/libbigarray.a \
     -lstdc++ \
     -L/usr/local/lib \
     -lns3-dev-core-debug \
     -lns3-dev-network-debug \
     -lns3-dev-point-to-point-debug \
     -lns3-dev-tap-bridge-debug \
-    ${OBJ} \
-    -o ${OUTPUT}
+    -lns3-dev-mpi-debug \
+    ${LIB}/clock_stubs.o \
+    ${LIB}/console_stubs.o \
+    ${LIB}/checksum_stubs.o \
+    ${LIB}/ns_stubs.o \
+     -o ${OUTPUT}
 }
 
 
