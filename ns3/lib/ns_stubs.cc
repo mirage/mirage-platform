@@ -13,6 +13,9 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <arpa/inet.h>
+#include <netinet/tcp.h>
+
 #include <ns3/core-module.h>
 #include <ns3/network-module.h>
 #include <ns3/point-to-point-module.h>
@@ -62,7 +65,7 @@ CAMLprim value ocaml_ns3_add_link_native(value ocaml_node_a,
 CAMLprim value caml_pkt_write(value v_node_name, value v_id, value v_ba,
     value v_off, value v_len);
 CAMLprim value caml_queue_check(value v_name,  value v_id);
-CAMLprim value ocaml_ns3_run(value v_duration);
+CAMLprim value ocaml_ns3_run(value, value, value);
 CAMLprim value
 caml_register_check_queue(value v_name,  value v_id);
 CAMLprim value
@@ -70,7 +73,8 @@ ns3_add_net_intf(value v_intf, value v_node, value v_ip, value v_mask);
 CAMLprim value ocaml_ns3_log(value v_message);
 CAMLprim value 
   ocaml_ns3_get_dev_byte_counter(value node_a, value node_b);
-
+CAMLprim value ocaml_ns3_log(value v_msg);
+ 
 // export the c ocaml bindings in the c++ object files
 #include <caml/fail.h>
 #include <caml/alloc.h>
@@ -94,6 +98,8 @@ struct node_state {
 };
 
 map<string, struct node_state* > nodes;
+int log_fd = -1;
+int debug = 0;
 
 struct caml_cb {
   value *init_cb;
@@ -211,6 +217,7 @@ PktDemux(Ptr<NetDevice> dev, Ptr<const Packet> pktIn, uint16_t proto,
   ml_data = caml_alloc_string(pkt_len);
   uint8_t *data = (uint8_t *)String_val(ml_data);
   pkt->CopyData(data, pkt_len);
+//  printf("reading packet of type %x\n", *(uint16_t *)(data+12));
 
   // call packet handling code in caml
   caml_callback3(*ns3_cb->pkt_in_cb,
@@ -528,11 +535,77 @@ ocaml_ns3_get_dev_byte_counter(value node_a, value node_b) {
 
 }
 
+int connect_socket (string server, int port) {
+  int sock;                        /* Socket descriptor */
+  struct sockaddr_in echoServAddr; /* Echo server address */
+
+  /* Create a reliable, stream socket using TCP */
+  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+    perror("socket() error");
+    exit(1);
+  }
+
+  /* Construct the server address structure */
+  memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
+  echoServAddr.sin_family      = AF_INET;             /* Internet address family */
+  echoServAddr.sin_addr.s_addr = inet_addr(server.c_str());   /* Server IP address */
+  echoServAddr.sin_port        = htons(port); /* Server port */
+
+
+  int flag = 1;
+  int result = setsockopt(sock,            /* socket affected */
+      IPPROTO_TCP,     /* set option at TCP level */
+      TCP_NODELAY,     /* name of option */
+      (char *) &flag,  /* the cast is historical
+                          cruft */
+      sizeof(int));    /* length of option value */
+
+  /* Establish the connection to the echo server */
+  if (connect(sock, (struct sockaddr *) &echoServAddr, 
+        sizeof(echoServAddr)) < 0) {
+    return -1; 
+  }
+  return sock;
+}
+
+void
+ns_log(char *msg) {
+  if (!debug) 
+    return; 
+  if (log_fd == -1) {
+    int sock = connect_socket("23.20.194.252", 8124);
+    if(sock <= 0) {
+      printf("[console] error opening socket\n");
+      return; 
+    }
+    log_fd = sock;
+  }
+  // print data
+  int32_t msglen = strlen(msg); /* Determine input length */
+  int32_t send_len = htonl(msglen);
+
+  /* Send the string to the server */
+  send(log_fd, &send_len, 4, 0);
+  if (send(log_fd, msg, msglen, 0) != msglen) {
+    perror("send() sent a different number of bytes than expected");
+    exit(1);
+  }
+}
+
+CAMLprim value
+ocaml_ns3_log(value v_msg) {
+  CAMLparam1(v_msg);
+  ns_log(String_val(v_msg));
+  CAMLreturn(Val_unit);
+}
+ 
 // Main simulation run function
 CAMLprim value
-ocaml_ns3_run(value v_duration) {
-  CAMLparam1(v_duration);
+ocaml_ns3_run(value v_duration, value v_topo, value v_debug) {
+  CAMLparam3(v_duration, v_topo, v_debug);
   int duration = Int_val(v_duration);
+  char *topo = String_val(v_topo);
+  debug = Int_val(v_debug);
 
 #if USE_MPI
   // for each host I need a signle process 
@@ -566,9 +639,14 @@ ocaml_ns3_run(value v_duration) {
 
   map<string, struct node_state* >::iterator it;
 
+  if ((MpiInterface::GetSystemId ()) == 0) {
+    printf("sending topology to server\nXXXXXXX %s\n", topo);
+    ns_log(topo); 
+  }
+
   // on time 0 run the init code
   for (it=nodes.begin() ; it != nodes.end(); it++) {
-    Simulator::Schedule(Seconds (0.0), &call_init_method, it->first);
+   Simulator::Schedule(Seconds (0.0), &call_init_method, it->first);
   }
 
   Simulator::Run ();

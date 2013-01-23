@@ -25,7 +25,7 @@ external ns3_get_dev_byte_counter : string -> string -> int =
   "ocaml_ns3_get_dev_byte_counter"
 
 (* Main run thread *) 
-external ns3_run : int -> int = "ocaml_ns3_run" 
+external ns3_run : int -> string -> int -> int = "ocaml_ns3_run" 
 
 type node_t = {
   name: string;
@@ -42,11 +42,90 @@ let topo =
 
 let exec fn () =
   Lwt.ignore_result (fn ())
+ 
+let get_topology () =
+  let ix = ref 0L in 
+  let names = Hashtbl.create 64 in 
+  let nodes = Hashtbl.fold
+    (fun name _ r ->
+      Hashtbl.add names name !ix;
+      let _ = ix := Int64.add !ix 1L in 
+      r @ [(Json.Object [
+        ("name", (Json.String name));
+        ("flows", (Json.Array []));
+        ("dev", (Json.Array []));
+    ] )]
+    ) topo.nodes [] in
+  let links = List.fold_right (
+    fun (nodes_a, nodes_b, _) r -> 
+      let ix_a = Hashtbl.find names nodes_a in 
+      let ix_b = Hashtbl.find names nodes_b in
+      r @ [(Json.Object 
+      [("source",(Json.Int ix_a));
+      ("target",(Json.Int ix_b));
+      ("ts", (Json.Float (Clock.time ()) ));
+      ("value",(Json.Int 1L))])] 
+  ) topo.links [] in 
+      Json.Object [("nodes",(Json.Array nodes));
+      ("links", (Json.Array links));]
 
-let load t =
-  Printf.printf "OS.Topology started...\n%!";
+let get_link_utilization () = 
+  let utilisation = List.fold_right (
+    fun (node_a, node_b, rate) r -> 
+      let utilization_a_b = 
+        float_of_int ((ns3_get_dev_byte_counter node_a node_b) lsl 11) in
+      let res = r @ (
+        if (utilization_a_b < 0.0) then
+          []
+        else
+         [(Json.Object [
+          ("source", (Json.String node_a));
+          ("target", (Json.String node_b));
+          ("ts", (Json.Float (Clock.time ()) ));
+          ("value", (Json.Float (utilization_a_b /. rate)))])])
+      in
+      let utilization_b_a = 
+        float_of_int ((ns3_get_dev_byte_counter node_b node_a) lsl 11) in 
+        if (utilization_b_a < 0.0) then
+          res
+        else
+          res @ [
+            (Json.Object [
+              ("source", (Json.String node_b));
+              ("target", (Json.String node_a));
+              ("ts", (Json.Float (Clock.time ()) ));
+              ("value", (Json.Float (utilization_b_a /. rate) ))]);]
+  ) topo.links [] in 
+        Json.to_string (Json.Array utilisation) 
+
+let monitor_links () =                                                
+  let _ = printf "starting link monitoring\n%!" in               
+  while_lwt true do                                         
+    lwt _ = Time.sleep 1.0 in            
+    let res = get_link_utilization () in                                
+(*    let msg = Json.to_string (
+      Json.Object [
+        ("ts", (Json.Float (Clock.time ())));
+        ("type", (Json.String "link_utilization"));
+        ("data", (Json.String res));]) in *)
+     let _ = Console.broadcast "link_utilization" res in
+     return ()                                                      
+  done    
+
+let load ?(debug=true) t =
   let _ = t () in
-  let _ = ns3_run (Time.get_duration ()) in
+  let msg =  Json.to_string (get_topology ()) in 
+  let msg = Json.to_string (
+    Json.Object [
+      ("ts", (Json.Float (Clock.time ())));
+      ("type", (Json.String "topology"));
+    ("data", (Json.String msg));]) in
+  let _ =
+    if (debug) then
+      ignore_result (monitor_links ()) 
+  in
+  let debug = if (debug) then 1 else 0 in 
+  let _ = ns3_run (Time.get_duration ()) msg debug in
     ()
 
 let add_node name cb_init =
@@ -74,8 +153,8 @@ let add_link ?(rate=1000) ?(prop_delay=0) ?(queue_size=100) ?(pcap=false)
   try 
     let _ = Hashtbl.find topo.nodes node_a in 
     let _ = Hashtbl.find topo.nodes node_b in 
-    let _ = topo.links <- topo.links @ [(node_a, node_b, 
-    (float_of_int (rate*1000000)))] in 
+    let _ = topo.links <- (node_a, node_b, 
+    (float_of_int (rate*1000000))) :: topo.links in 
       ns3_add_link node_a node_b rate prop_delay queue_size pcap  
   with Not_found -> ()
 

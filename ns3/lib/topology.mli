@@ -16,7 +16,7 @@
 
 val node_name: string Lwt.key
 
-val load: (unit -> unit) -> unit
+val load: ?debug:bool -> (unit -> unit) -> unit
 
 val add_node: string -> (unit -> unit Lwt.t) -> unit
 val add_link: ?rate:int -> ?prop_delay:int -> 
