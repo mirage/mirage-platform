@@ -19,7 +19,9 @@
 #include <ns3/core-module.h>
 #include <ns3/network-module.h>
 #include <ns3/point-to-point-module.h>
-#include <ns3/tap-bridge-module.h>
+
+// #include <ns3/tap-bridge-module.h>
+
 #include <ns3/mpi-interface.h>
 
 #define TAP_CREATOR "/usr/local/bin/ns3-dev-tap-creator-debug"
@@ -68,8 +70,8 @@ CAMLprim value caml_queue_check(value v_name,  value v_id);
 CAMLprim value ocaml_ns3_run(value, value, value);
 CAMLprim value
 caml_register_check_queue(value v_name,  value v_id);
-CAMLprim value
-ns3_add_net_intf(value v_intf, value v_node, value v_ip, value v_mask);
+// CAMLprim value
+// ns3_add_net_intf(value v_intf, value v_node, value v_ip, value v_mask);
 CAMLprim value ocaml_ns3_log(value v_message);
 CAMLprim value 
   ocaml_ns3_get_dev_byte_counter(value node_a, value node_b);
@@ -401,28 +403,7 @@ ocaml_ns3_add_link_native(value ocaml_node_a, value ocaml_node_b, value v_rate,
   CAMLreturn ( Val_unit );
 }
 
-/* 
- * Configure a tun/tap intf, so we avoid having an internet stack
- * */
-/* bool
-tap_opendev(string intf, string ip, string mask) {
-  char dev[IFNAMSIZ];
-  char buf[4096];
-
-  snprintf(buf, sizeof buf, "tunctl -t %s", intf.c_str());
-  if (system(buf) < 0) err(1, "system");
-  snprintf(buf, sizeof buf, "ip link set %s up", intf.c_str());
-  if (system(buf) < 0) err(1, "system");
-  snprintf(buf, sizeof buf, "/sbin/ifconfig %s %s netmask %s up", 
-      intf.c_str(), ip.c_str(), mask.c_str());
-  fprintf(stderr, "%s\n", buf);
-  system(buf);
-  if (system(buf) < 0) err(1, "system");
-  fprintf(stderr, "tap_opendev: %s\n", dev);
-  // return Val_int(fd);
-  return true;
-} */
-
+/*
 CAMLprim value
 ns3_add_net_intf(value v_intf, value v_node,
     value v_ip, value v_mask) {
@@ -467,6 +448,7 @@ ns3_add_net_intf(value v_intf, value v_node,
 
   CAMLreturn ( Val_unit );
 }
+*/
 
 /*
  * Main function methods to init and run the ocaml code

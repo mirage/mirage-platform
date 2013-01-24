@@ -21,4 +21,4 @@ val load: ?debug:bool -> (unit -> unit) -> unit
 val add_node: string -> (unit -> unit Lwt.t) -> unit
 val add_link: ?rate:int -> ?prop_delay:int -> 
   ?queue_size:int -> ?pcap:bool -> string -> string -> unit
-val add_external_dev: string -> string -> string -> string -> unit
+(* val add_external_dev: string -> string -> string -> string -> unit *)

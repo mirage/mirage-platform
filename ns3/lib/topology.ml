@@ -20,7 +20,8 @@ open Printf
 external ns3_add_node : string -> unit = "ocaml_ns3_add_node"
 external ns3_add_link : string -> string -> int -> int -> int -> bool -> unit 
 = "ocaml_ns3_add_link_bytecode" "ocaml_ns3_add_link_native"
-external ns3_add_net_intf : string -> string -> string -> string -> unit = "ns3_add_net_intf"
+(* external ns3_add_net_intf : string -> string -> string -> string -> unit =
+  * "ns3_add_net_intf" *)
 external ns3_get_dev_byte_counter : string -> string -> int = 
   "ocaml_ns3_get_dev_byte_counter"
 
@@ -134,7 +135,7 @@ let add_node name cb_init =
 
 let no_act_init () =
   return ()
-
+(*
 let add_external_dev dev node ip mask =
 (*  let (ip, mask) = 
     match config with 
@@ -146,7 +147,8 @@ let add_external_dev dev node ip mask =
   in *)
   Hashtbl.replace topo.nodes dev {name=dev; cb_init=no_act_init;};
   ns3_add_net_intf dev node ip mask
-  
+*)
+
 (* rate is in Mbps. *)
 let add_link ?(rate=1000) ?(prop_delay=0) ?(queue_size=100) ?(pcap=false)
     node_a node_b =
