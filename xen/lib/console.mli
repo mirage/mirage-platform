@@ -23,3 +23,4 @@ val sync_write : t -> string -> int -> int -> unit Lwt.t
 val write : t -> string -> int -> int -> unit
 val log : string -> unit
 val log_s : string -> unit Lwt.t
+val broadcast : string -> string -> unit

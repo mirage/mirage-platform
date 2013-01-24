@@ -67,7 +67,7 @@ CAMLprim value ocaml_ns3_add_link_native(value ocaml_node_a,
 CAMLprim value caml_pkt_write(value v_node_name, value v_id, value v_ba,
     value v_off, value v_len);
 CAMLprim value caml_queue_check(value v_name,  value v_id);
-CAMLprim value ocaml_ns3_run(value, value, value);
+CAMLprim value ocaml_ns3_run(value, value, value, value, value);
 CAMLprim value
 caml_register_check_queue(value v_name,  value v_id);
 // CAMLprim value
@@ -100,9 +100,6 @@ struct node_state {
 };
 
 map<string, struct node_state* > nodes;
-int log_fd = -1;
-int debug = 0;
-
 struct caml_cb {
   value *init_cb;
   value *timer_cb;
@@ -534,13 +531,13 @@ int connect_socket (string server, int port) {
   echoServAddr.sin_port        = htons(port); /* Server port */
 
 
-  int flag = 1;
-  int result = setsockopt(sock,            /* socket affected */
-      IPPROTO_TCP,     /* set option at TCP level */
-      TCP_NODELAY,     /* name of option */
-      (char *) &flag,  /* the cast is historical
-                          cruft */
-      sizeof(int));    /* length of option value */
+//  int flag = 1;
+//  int result = setsockopt(sock,            /* socket affected */
+//      IPPROTO_TCP,     /* set option at TCP level */
+//      TCP_NODELAY,     /* name of option */
+//      (char *) &flag,  /* the cast is historical
+//                          cruft */
+//      sizeof(int));    /* length of option value */
 
   /* Establish the connection to the echo server */
   if (connect(sock, (struct sockaddr *) &echoServAddr, 
@@ -550,12 +547,17 @@ int connect_socket (string server, int port) {
   return sock;
 }
 
+int log_fd = -1;
+int debug = 0;
+string log_server = ""; 
+int log_port = 0; 
+
 void
 ns_log(char *msg) {
   if (!debug) 
     return; 
   if (log_fd == -1) {
-    int sock = connect_socket("23.20.194.252", 8124);
+    int sock = connect_socket(log_server, log_port);
     if(sock <= 0) {
       printf("[console] error opening socket\n");
       return; 
@@ -568,9 +570,16 @@ ns_log(char *msg) {
 
   /* Send the string to the server */
   send(log_fd, &send_len, 4, 0);
-  if (send(log_fd, msg, msglen, 0) != msglen) {
-    perror("send() sent a different number of bytes than expected");
-    exit(1);
+  int sending = 0; 
+  while ( sending < msglen) {
+    int ret = send(log_fd, (msg + sending), (msglen - sending), 0);
+    if (ret < 0) { 
+      perror("ns_log err");
+      close(log_fd);
+      log_fd = -1; 
+      break;
+    }
+    sending += ret; 
   }
 }
 
@@ -583,11 +592,13 @@ ocaml_ns3_log(value v_msg) {
  
 // Main simulation run function
 CAMLprim value
-ocaml_ns3_run(value v_duration, value v_topo, value v_debug) {
-  CAMLparam3(v_duration, v_topo, v_debug);
+ocaml_ns3_run(value v_duration, value v_topo, value v_debug, value v_srv, value v_p) {
+  CAMLparam5(v_duration, v_topo, v_debug, v_srv, v_p);
   int duration = Int_val(v_duration);
   char *topo = String_val(v_topo);
   debug = Int_val(v_debug);
+  log_server =  string(String_val(v_srv));
+  log_port = (Int_val(v_p));
 
 #if USE_MPI
   // for each host I need a signle process 

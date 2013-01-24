@@ -41,3 +41,8 @@ let log s =
 let log_s s =
   let s = s ^ "\n" in
   sync_write t s 0 (String.length s)
+
+let broadcast typ data =
+  log (sprintf "[%s] %s" typ data)
+
+

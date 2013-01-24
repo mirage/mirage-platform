@@ -25,9 +25,6 @@ external ns3_add_link : string -> string -> int -> int -> int -> bool -> unit
 external ns3_get_dev_byte_counter : string -> string -> int = 
   "ocaml_ns3_get_dev_byte_counter"
 
-(* Main run thread *) 
-external ns3_run : int -> string -> int -> int = "ocaml_ns3_run" 
-
 type node_t = {
   name: string;
   cb_init : (unit -> unit Lwt.t);
@@ -113,7 +110,11 @@ let monitor_links () =
      return ()                                                      
   done    
 
-let load ?(debug=true) t =
+(* Main run thread *) 
+external ns3_run : int -> string -> int ->  string -> int -> unit = "ocaml_ns3_run" 
+
+
+let load ?(debug=None) t =
   let _ = t () in
   let msg =  Json.to_string (get_topology ()) in 
   let msg = Json.to_string (
@@ -122,12 +123,12 @@ let load ?(debug=true) t =
       ("type", (Json.String "topology"));
     ("data", (Json.String msg));]) in
   let _ =
-    if (debug) then
+    if (debug <> None) then
       ignore_result (monitor_links ()) 
   in
-  let debug = if (debug) then 1 else 0 in 
-  let _ = ns3_run (Time.get_duration ()) msg debug in
-    ()
+  match (debug) with 
+  | None -> ns3_run (Time.get_duration ()) msg 0 "" 0 
+  | Some(srv, p) ->  ns3_run (Time.get_duration ()) msg 1 srv p 
 
 let add_node name cb_init =
   let _ = ns3_add_node name in
