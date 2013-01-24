@@ -34,6 +34,19 @@ link_ns3_native() {
   OBJ=$1
   OUTPUT=$2
   LIB=`ocamlfind query mirage`
+
+  if [ -e "/usr/local/lib/libns3.16-core-optimized.dylib" ]; then
+    NS3_LIB="-L/usr/local/lib/ -lns3.16-core-optimized -lns3.16-network-optimized -lns3.16-point-to-point-optimized -lns3.16-mpi-optimized "
+  elif [ -e "/usr/local/lib/libns3.16-core-optimized.so" ]; then
+    NS3_LIB="-L/usr/local/lib/ -lns3.16-core-optimized -lns3.16-network-optimized -lns3.16-point-to-point-optimized -lns3.16-tap-bridge-optimized -lns3.16-mpi-optimized "
+  elif [ -e "/usr/lib/libns3-core.so" ]; then
+    NS3_LIB="-lns3-core -lns3-network -lns3-point-to-point -lns3-tap-bridge -lns3-mpi"
+  else
+    echo "cannot find libns3 in a known location. Please follow instruction to install ns3 libraries."
+  fi
+
+  echo "using $NS3_LIB flags for app building"
+
   cc -arch x86_64 \
     -execute \
     -lc \
@@ -45,12 +58,7 @@ link_ns3_native() {
     ${LIB}/../cstruct/libcstruct_stubs.a \
     ${LIB}/../ocaml/libbigarray.a \
     -lstdc++ \
-    -L/usr/local/lib \
-    -lns3-dev-core-debug \
-    -lns3-dev-network-debug \
-    -lns3-dev-point-to-point-debug \
-    -lns3-dev-tap-bridge-debug \
-    -lns3-dev-mpi-debug \
+    $NS3_LIB \
     ${LIB}/clock_stubs.o \
     ${LIB}/console_stubs.o \
     ${LIB}/checksum_stubs.o \
