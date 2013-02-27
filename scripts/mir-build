@@ -46,8 +46,9 @@ link_ns3_native() {
   fi
 
   echo "using $NS3_LIB flags for app building"
-
-  cc -arch x86_64 \
+  case `uname` in 
+    Darwin) 
+    cc -arch x86_64 \
     -execute \
     -lc \
     ${LIB}/main_stubs.o \
@@ -63,7 +64,25 @@ link_ns3_native() {
     ${LIB}/console_stubs.o \
     ${LIB}/checksum_stubs.o \
     ${LIB}/ns_stubs.o \
-     -o ${OUTPUT}
+    -o ${OUTPUT}
+    ;;
+    Linux)
+    g++ \
+    ${OBJ} \
+    ${LIB}/libns3run.a \
+    ${LIB}/../ocaml/libunix.a \
+    ${LIB}/../ocaml/libasmrun.a \
+    ${LIB}/../cstruct/libcstruct_stubs.a \
+    ${LIB}/../ocaml/libbigarray.a \
+    -L/usr/local/lib/ \
+    -lns3.16-core-optimized \
+    -lns3.16-network-optimized \
+    -lns3.16-point-to-point-optimized \
+    -lns3.16-tap-bridge-optimized \
+    -lns3.16-mpi-optimized \
+    -o ${OUTPUT}
+    ;;
+  esac
 }
 
 
