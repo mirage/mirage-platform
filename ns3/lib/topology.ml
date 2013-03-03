@@ -156,8 +156,7 @@ let add_link ?(rate=1000) ?(prop_delay=0) ?(queue_size=100) ?(pcap=false)
   try 
     let _ = Hashtbl.find topo.nodes node_a in 
     let _ = Hashtbl.find topo.nodes node_b in 
-    let _ = topo.links <- (node_a, node_b, 
-    (float_of_int (rate*1000000))) :: topo.links in 
+    let _ = topo.links <- (node_a, node_b, (float_of_int (rate * 1048576))) :: topo.links in 
       ns3_add_link node_a node_b rate prop_delay queue_size pcap  
   with Not_found -> ()
 

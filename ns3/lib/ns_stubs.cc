@@ -209,6 +209,10 @@ PktDemux(Ptr<NetDevice> dev, Ptr<const Packet> pktIn, uint16_t proto,
   caml_register_global_root(&ml_data);
   Ptr<Packet> pkt = pktIn->Copy();
   int pkt_len = pkt->GetSize();
+  if ((pkt_len < 10 ) || (pkt_len > 1514)) {
+    printf("MALAKIA lower %d\n\n\n\n\n", pkt_len);
+    exit(1);
+  }
 
   // find host name
   string node_name = Names::FindName(dev->GetNode());
@@ -217,6 +221,10 @@ PktDemux(Ptr<NetDevice> dev, Ptr<const Packet> pktIn, uint16_t proto,
   uint8_t *data = (uint8_t *)String_val(ml_data);
   pkt->CopyData(data, pkt_len);
 //  printf("reading packet of type %x\n", *(uint16_t *)(data+12));
+  if ((caml_string_length(ml_data) < 10 ) || (caml_string_length(ml_data) > 1514)) {
+    printf("MALAKIA lower %d %d\n\n\n\n", pkt_len, caml_string_length(ml_data));
+    exit(1);
+  }
 
   // call packet handling code in caml
   caml_callback3(*ns3_cb->pkt_in_cb,
@@ -358,7 +366,7 @@ ocaml_ns3_add_link_native(value ocaml_node_a, value ocaml_node_b, value v_rate,
   CAMLxparam1(v_pcap);
   string node_a = string(String_val(ocaml_node_a));
   string node_b = string(String_val(ocaml_node_b));
-  uint32_t rate = ((uint32_t)Int_val(v_rate))*1e6;
+  uint32_t rate = ((uint32_t)Int_val(v_rate)) * 1048576;
   int propagation = Int_val(v_prop_d);
   int queue_size = Int_val(v_queue_size);
   bool use_pcap = Bool_val(v_pcap);

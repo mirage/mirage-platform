@@ -64,19 +64,25 @@ let plug node_name id mac =
 
 let demux_pkt node_name dev_id frame = 
   try
-    let devs = Hashtbl.find devices node_name in 
-    let dev = 
-      List.find (
-        fun dev -> (dev.id = (string_of_int dev_id)) ) devs in
-    let pkt = Io_page.to_cstruct (Io_page.get ()) in 
-    let pkt_len = (String.length frame) in
-    let _ = (Cstruct.blit_from_string frame 0 pkt 0 pkt_len) in
-    let pkt = Cstruct.sub pkt 0 pkt_len in 
-    
-    let _ = Lwt_condition.signal dev.fd_read pkt in
-    let _ = resolve (Lwt_condition.wait dev.fd_read_ret) in
-    let _ = Lwt.wakeup_paused () in 
-     ()
+    let pkt_len = String.length frame in
+      if ((pkt_len < 10) || (pkt_len > 1514)) then
+        printf "MALAKIA %d\n%!" pkt_len
+      else
+        let devs = Hashtbl.find devices node_name in 
+        let dev = 
+          List.find (
+            fun dev -> (dev.id = (string_of_int dev_id)) ) devs in
+        let pkt = Io_page.to_cstruct (Io_page.get ()) in 
+        let _ = (Cstruct.blit_from_string frame 0 pkt 0 pkt_len) in
+        let pkt = Cstruct.sub pkt 0 pkt_len in 
+
+        let _ = Lwt_condition.signal dev.fd_read pkt in
+        let _ = resolve (Lwt_condition.wait dev.fd_read_ret) in
+        let _ = Lwt.wakeup_paused () in 
+        let _ = Lwt.wakeup_paused () in 
+        let _ = Lwt.wakeup_paused () in 
+        let _ = Lwt.wakeup_paused () in 
+        let _ = Lwt.wakeup_paused () in () 
   with 
   | Not_found ->
     Printf.printf "Packet cannot be processed for node %s\n" node_name
