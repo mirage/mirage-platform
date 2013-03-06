@@ -15,9 +15,11 @@
  *)
 
 type t
-type id = string
-exception Device_down of id
 
+(** Name of the interface on the OS, e.g. tap0 *)
+type id = string
+
+exception Device_down of id
 
 val listen : t -> (Cstruct.t -> unit Lwt.t) -> unit Lwt.t
 val destroy : t -> unit Lwt.t
@@ -28,5 +30,5 @@ val writev : t -> Cstruct.t list -> unit Lwt.t
 val create : ?dev:(string option) -> (id -> t -> unit Lwt.t) -> unit Lwt.t
 val get_writebuf : t -> Cstruct.t Lwt.t
 
-val mac : t -> string 
+val mac : t -> string
 val ethid : t -> id

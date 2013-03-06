@@ -3,3 +3,4 @@
 <*.c>: pic,unix_header,include_system_ocaml
 <syntax/*>: build_syntax
 true: camlp4o
+true: annot

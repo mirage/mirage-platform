@@ -43,7 +43,7 @@ external pcap_get_buf_len: Unix.file_descr -> int = "pcap_get_buf_len"
 exception Ethif_closed
 
 (* We must generate a fake MAC for the Unix "VM", as using the
-   tuntap one will cause all sorts of unfortunate MAC routing 
+   tuntap one will cause all sorts of unfortunate MAC routing
    loops in some stacks (notably Darwin tuntap). *)
 let generate_local_mac () =
   let x = String.create 6 in
@@ -60,33 +60,35 @@ let generate_local_mac () =
 
 let devices = Hashtbl.create 1
 
+(* This actually creates the interface [id] (as opposed to plug into
+   an existing interface) and adds it into the hashtable *)
 let plug id =
   let tapfd = tap_opendev id in
   let dev = Lwt_unix.of_unix_file_descr ~blocking:false tapfd in
   let mac = generate_local_mac () in
   let active = true in
-  let t = { id; dev; active; mac; typ=ETH;buf_sz=4096; 
+  let t = { id; dev; active; mac; typ=ETH;buf_sz=4096;
             buf=Io_page.to_cstruct (Lwt_bytes.create 0);} in
   Hashtbl.add devices id t;
   printf "Netif: plug %s\n%!" id;
   return t
 
-let mac_to_string mac = 
-  let ret = ref "" in 
-  let _ = 
+let mac_to_string mac =
+  let ret = ref "" in
+  let _ =
     String.iter (
-      fun ch -> 
+      fun ch ->
         ret := sprintf "%s%02X:" !ret (int_of_char ch)
-    ) mac  in 
-    !ret 
+    ) mac  in
+  !ret
 
-(* like the plug method, but for an existing interface *)    
+(* like the plug method, but for an existing interface *)
 let attach id =
   let tapfd = eth_opendev id in
   let dev = Lwt_unix.of_unix_file_descr ~blocking:false tapfd in
   let mac = get_mac_addr id in
   printf "attaching %s with mac %s..\n%!" id (mac_to_string mac);
-  let buf_sz = pcap_get_buf_len tapfd in 
+  let buf_sz = pcap_get_buf_len tapfd in
   let active = true in
   let t = { id; dev; active; mac; typ=PCAP; buf_sz;
             buf=Io_page.to_cstruct (Lwt_bytes.create 0);} in
@@ -99,21 +101,21 @@ let unplug id =
   try
     let t = Hashtbl.find devices id in
     t.active <- false;
-    let _ = Lwt_unix.close t.dev in 
+    let _ = Lwt_unix.close t.dev in
     printf "Netif: unplug %s\n%!" id;
     Hashtbl.remove devices id
   with Not_found -> ()
-  
+
 let tapnum = ref (-1)
 let create ?(dev=None) fn =
-  let name = 
+  let name =
     match dev with
-      | None -> 
+      | None ->
           incr tapnum;
           Printf.sprintf "tap%d" !tapnum
       | Some(a) -> a
   in
-  lwt t = 
+  lwt t =
     match dev with
       | None -> plug name
       | Some(a) -> attach a
@@ -133,7 +135,7 @@ cstruct bpf_hdr {
 
 (* Input a frame, and block if nothing is available *)
 let rec input t =
-  match t.typ with 
+  match t.typ with
     | ETH -> begin
         let page = Io_page.get () in
         lwt len = Lwt_bytes.read t.dev page 0 t.buf_sz in
@@ -145,14 +147,14 @@ let rec input t =
                 input t
             |n -> return (Cstruct.sub (Io_page.to_cstruct page) 0 len)
       end
-    | PCAP -> begin 
+    | PCAP -> begin
       (* very ineficient mechanism, but fine for now *)
         (*reading pcap header first*)
         lwt _ =
           if (0 >= (Cstruct.len t.buf)) then (
             let page = Io_page.get () in
             lwt len = Lwt_bytes.read t.dev page 0 t.buf_sz in
-           let _ = t.buf <- Cstruct.sub (Io_page.to_cstruct page) 0 len in 
+           let _ = t.buf <- Cstruct.sub (Io_page.to_cstruct page) 0 len in
 (*             let _ = printf "fetched new data %d\n%!" (len) in *)
               return ()
           ) else  return ()
@@ -161,16 +163,16 @@ let rec input t =
         let bh_hdrlen = get_bpf_hdr_bh_hdrlen t.buf in
         (* Equivalent of the BPFWORDALIGN macro *)
         let bpf_wordalign = (caplen + bh_hdrlen + 3) land 0x7ffffffc in
-(*        let _ = Cstruct.hexdump (Cstruct.sub t.buf 0 18) in 
+(*        let _ = Cstruct.hexdump (Cstruct.sub t.buf 0 18) in
          let _ = printf "caplen:%d, bh_hdrlen: %d, len:%d bpf_wordalig=%d, ndata:%d\n%!" caplen
          bh_hdrlen (caplen + bh_hdrlen) bpf_wordalign (Cstruct.len t.buf) in  *)
         let ret = Cstruct.sub t.buf bh_hdrlen caplen in
-        
-        let _ = 
+
+        let _ =
           if (bpf_wordalign < (Cstruct.len t.buf)) then
-            t.buf <- Cstruct.shift t.buf bpf_wordalign 
+            t.buf <- Cstruct.shift t.buf bpf_wordalign
           else
-            t.buf <- Cstruct.create 0  
+            t.buf <- Cstruct.create 0
         in
          return ret
     end
@@ -188,26 +190,26 @@ let rec listen t fn =
       try_lwt
         lwt frame = input t in
           Lwt.ignore_result (
-            try_lwt 
+            try_lwt
               fn frame
             with exn ->
             return (printf "EXN: %s bt: %s\n%!" (Printexc.to_string exn) (Printexc.get_backtrace()))
           );
           listen t fn
-      with 
-      |  Unix.Unix_error(Unix.ENXIO, _, _) -> 
-          let _ = printf "[netif-input] device %s is down\n%!" t.id in 
+      with
+      |  Unix.Unix_error(Unix.ENXIO, _, _) ->
+          let _ = printf "[netif-input] device %s is down\n%!" t.id in
             raise (Device_down t.id)
-      | exn -> 
+      | exn ->
         let _ = eprintf "[netif-input] error : %s\n%!" (Printexc.to_string exn ) in
-        let _ = t.buf <- (Cstruct.create 0) in 
-          listen t fn 
+        let _ = t.buf <- (Cstruct.create 0) in
+          listen t fn
   end
   |false -> return ()
 
 (* Shutdown a netfront *)
 let destroy nf =
-  let _ = unplug nf.id in 
+  let _ = unplug nf.id in
   return (printf "tap_destroy\n%!")
 
 (* Transmit a packet from an Io_page *)
@@ -235,10 +237,9 @@ let writev t pages =
     ) pages;
     let v = Cstruct.sub page 0 !off in
     write t v
-  
-let ethid t = 
+
+let ethid t =
   t.id
 
 let mac t =
-  t.mac 
-
+  t.mac
