@@ -65,6 +65,8 @@ setnonblock(int fd)
 CAMLprim value
 tap_opendev(value v_str)
 {
+  CAMLparam1(v_str);
+
   char dev[IFNAMSIZ];
   char buf[4096];
   int fd;
@@ -87,16 +89,23 @@ tap_opendev(value v_str)
   system(buf);
   if (system(buf) < 0) err(1, "system");
   fprintf(stderr, "tap_opendev: %s\n", dev);
-  return Val_int(fd);
+
+  CAMLreturn(Val_int(fd));
 }
 
 CAMLprim value
-pcap_opendev(value v_name) {
-  CAMLparam1(v_name);
-  
-  err(1, "pcap_opendev unimplemented");
+pcap_opendev(value v_str) {
+  CAMLparam1(v_str);
 
-  CAMLreturn(Val_int(-1));
+  char dev[IFNAMSIZ];
+  int fd;
+
+  bzero(dev, sizeof dev);
+  memcpy(dev, String_val(v_str), caml_string_length(v_str));
+  fd = tun_alloc(dev);
+  setnonblock(fd);
+
+  CAMLreturn(Val_int(fd));
 }
 
 CAMLprim value
