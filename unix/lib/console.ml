@@ -15,6 +15,7 @@
  *)
 
 open Lwt
+open Printf
 
 (* TODO management service for logging *)
 type t = unit
