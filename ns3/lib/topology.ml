@@ -71,7 +71,7 @@ let get_link_utilization () =
   let utilisation = List.fold_right (
     fun (node_a, node_b, rate) r -> 
       let utilization_a_b = 
-        float_of_int ((ns3_get_dev_byte_counter node_a node_b) lsl 11) in
+        (float_of_int ((ns3_get_dev_byte_counter node_a node_b) lsl 11)) *. 2.0 in
       let res = r @ (
         if (utilization_a_b < 0.0) then
           []
@@ -99,7 +99,7 @@ let get_link_utilization () =
 let monitor_links () =                                                
   let _ = printf "starting link monitoring\n%!" in               
   while_lwt true do                                         
-    lwt _ = Time.sleep 1.0 in            
+    lwt _ = Time.sleep 0.5 in            
     let res = get_link_utilization () in                                
 (*    let msg = Json.to_string (
       Json.Object [
