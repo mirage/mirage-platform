@@ -16,12 +16,25 @@
 
 (** Event channels handlers. *)
 
+type event
+(** identifies the an event notification received from xen *)
+
+val program_start: event
+(** represents an event which 'fired' when the program started *)
+
+val after: Eventchn.t -> event -> event Lwt.t
+(** [next channel event] blocks until the system receives an event
+    newer than [event] on channel [channel]. If an event is received
+    while we aren't looking then this will be remembered and the
+    next call to [after] will immediately unblock. *)
+
+(** {2 Low level interface} *)
+
 val wait : Eventchn.t -> unit Lwt.t
 (** [wait evtchn] is a cancellable thread that will wake up when
     [evtchn] is notified. Cancel it if you are no longer interested in
-    waiting on [evtchn]. *)
-
-(** {2 Low level interface} *)
+    waiting on [evtchn]. Note that if the notification is sent before
+    [wait] is called then the notification is lost. *)
 
 val run : Eventchn.handle -> unit
 (** [run ()] goes through the event mask and activate any events,
