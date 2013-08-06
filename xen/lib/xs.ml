@@ -36,7 +36,7 @@ let t = ref None
 
 let h = Eventchn.init ()
 
-module Client = Xs_client.Client(struct
+module Client = Xs_client_lwt.Client(struct
         type 'a t = 'a Lwt.t
         type channel = chan
 	let return = Lwt.return
@@ -86,11 +86,11 @@ let client = make ()
 
 let immediate f =
 	lwt client = client in
-	with_xs client f
+	immediate client f
 
 let transaction f =
 	lwt client = client in
-	with_xst client f
+	transaction client f
 
 let wait f =
 	lwt client = client in
