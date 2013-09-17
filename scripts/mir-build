@@ -37,8 +37,8 @@ link_ns3_native() {
 
   if [ -e "/usr/local/lib/libns3.16-core-optimized.dylib" ]; then
     NS3_LIB="-L/usr/local/lib/ -lns3.16-core-optimized -lns3.16-network-optimized -lns3.16-point-to-point-optimized -lns3.16-mpi-optimized "
-  elif [ -e "/usr/local/lib/libns3.16-core-optimized.so" ]; then
-    NS3_LIB="-L/usr/local/lib/ -lns3.16-core-optimized -lns3.16-network-optimized -lns3.16-point-to-point-optimized -lns3.16-tap-bridge-optimized -lns3.16-mpi-optimized "
+  elif [ -e "/usr/lib/libns3.15-core.so" ]; then
+    NS3_LIB="-L/usr/lib/ -lns3.15-core -lns3.15-network -lns3.15-point-to-point -lns3.15-tap-bridge -lns3.15-mpi"
   elif [ -e "/usr/lib/libns3-core.so" ]; then
     NS3_LIB="-lns3-core -lns3-network -lns3-point-to-point -lns3-tap-bridge -lns3-mpi"
   else
@@ -74,12 +74,12 @@ link_ns3_native() {
     ${LIB}/../ocaml/libasmrun.a \
     ${LIB}/../cstruct/libcstruct_stubs.a \
     ${LIB}/../ocaml/libbigarray.a \
-    -L/usr/local/lib/ \
-    -lns3.16-core-optimized \
-    -lns3.16-network-optimized \
-    -lns3.16-point-to-point-optimized \
-    -lns3.16-tap-bridge-optimized \
-    -lns3.16-mpi-optimized \
+    -L/usr/lib/ \
+    -lns3.15-core \
+    -lns3.15-network \
+    -lns3.15-point-to-point \
+    -lns3.15-tap-bridge \
+    -lns3.15-mpi \
     -o ${OUTPUT}
     ;;
   esac
