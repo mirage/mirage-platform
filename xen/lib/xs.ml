@@ -41,6 +41,7 @@ module IO = struct
         let page = Io_page.to_cstruct Start_info.(xenstore_start_page ()) in
         Xenstore_ring.Ring.init page;
         let evtchn = Eventchn.of_int Start_info.((get ()).store_evtchn) in
+        Eventchn.unmask h evtchn;
         let c = { page; evtchn } in
         singleton_client := Some c;
         Lwt.return c
@@ -51,6 +52,7 @@ module IO = struct
         x.page <- Io_page.to_cstruct Start_info.(xenstore_start_page ());
         Xenstore_ring.Ring.init x.page;
         x.evtchn <- Eventchn.of_int Start_info.((get ()).store_evtchn);
+        Eventchn.unmask h x.evtchn
       | None -> ()
 
     let destroy t =
