@@ -24,7 +24,9 @@
 #include <caml/memory.h>
 #include <caml/bigarray.h>
 #include <caml/alloc.h>
+#include <caml/fail.h>
 
+/* For printk() */
 #include <log.h>
 
 static grant_entry_t *gnttab_table;
@@ -33,16 +35,14 @@ static grant_entry_t *gnttab_table;
 CAMLprim value
 caml_gnttab_nr_entries(value unit)
 {
-    CAMLparam1(unit);
-    CAMLreturn(Val_int(NR_GRANT_ENTRIES));
+    return Val_int(NR_GRANT_ENTRIES);
 }
 
 /* Return the number of reserved grant entries at the start */
 CAMLprim value
 caml_gnttab_reserved(value unit)
 {
-    CAMLparam1(unit);
-    CAMLreturn(Val_int(NR_RESERVED_ENTRIES));
+    return Val_int(NR_RESERVED_ENTRIES);
 }
 
 static void
@@ -69,7 +69,7 @@ static unsigned long
 gnttab_end_transfer(grant_ref_t ref)
 {
     unsigned long frame;
-	uint16_t flags;
+    uint16_t flags;
     uint16_t *pflags = &gnttab_table[ref].flags;
 
     /*
@@ -85,11 +85,11 @@ gnttab_end_transfer(grant_ref_t ref)
     while (!(flags & GTF_transfer_completed)) {
       flags = *pflags;
     }
- 
+
     rmb();  /* Read the frame number /after/ reading completion status. */
     frame = gnttab_table[ref].frame;
     BUG_ON(frame == 0);
-	
+
     return frame;
 }
 
@@ -112,14 +112,10 @@ CAMLprim value
 caml_gnttab_map(value v_ref, value v_iopage, value v_domid, value v_readonly)
 {
     CAMLparam4(v_ref, v_iopage, v_domid, v_readonly);
-    CAMLlocal1(ret);
-
-	ret = Val_int(0); /* None */
-
     void *page = base_page_of(v_iopage);
 
     struct gnttab_map_grant_ref op;
-    op.ref = Int32_val(v_ref);
+    op.ref = Int_val(v_ref);
     op.dom = Int_val(v_domid);
     op.host_addr = (unsigned long) page;
     op.flags = GNTMAP_host_map;
@@ -128,52 +124,46 @@ caml_gnttab_map(value v_ref, value v_iopage, value v_domid, value v_readonly)
     HYPERVISOR_grant_table_op(GNTTABOP_map_grant_ref, &op, 1);
     if (op.status != GNTST_okay) {
       printk("GNTTABOP_map_grant_ref ref = %d domid = %d failed with status = %d\n", op.ref, op.dom, op.status);
-	  goto out;
+      caml_failwith("caml_gnttab_map");
     }
-	printk("GNTTABOP_map_grant_ref mapped to %x\n", op.host_addr);
-    ret = caml_alloc_tuple(1);
-	Store_field(ret, 0, Val_int(op.handle));
- out:
-    CAMLreturn(ret);
+
+    printk("GNTTABOP_map_grant_ref mapped to %x\n", op.host_addr);
+    CAMLreturn(Val_int(op.handle));
 }
 
 CAMLprim value
 caml_gnttab_unmap(value v_handle)
 {
   CAMLparam1(v_handle);
-  CAMLlocal1(ret);
-
   struct gnttab_unmap_grant_ref op;
   /* There's no need to resupply these values. 0 means "ignore" */
   op.host_addr = 0;
   op.dev_bus_addr = 0;
   op.handle = Int_val(v_handle);
-  HYPERVISOR_grant_table_op(GNTTABOP_unmap_grant_ref, &op, 1);
-  
-  if (op.status != GNTST_okay) {
-	printk("GNTTABOP_unmap_grant_ref handle = %x failed", op.handle);
-	ret = Val_false;
-  }
-  ret = Val_true;
 
-  CAMLreturn(ret);
+  HYPERVISOR_grant_table_op(GNTTABOP_unmap_grant_ref, &op, 1);
+
+  if (op.status != GNTST_okay) {
+    printk("GNTTABOP_unmap_grant_ref handle = %x failed", op.handle);
+    caml_failwith("Failed to unmap grant.");
+  }
+
+  CAMLreturn(Val_unit);
 }
 
 CAMLprim value
 caml_gnttab_grant_access(value v_ref, value v_iopage, value v_domid, value v_readonly)
 {
-    CAMLparam4(v_ref, v_iopage, v_domid, v_readonly);
-    grant_ref_t ref = Int32_val(v_ref);
-	void *page = base_page_of(v_iopage);
+    grant_ref_t ref = Int_val(v_ref);
+    void *page = base_page_of(v_iopage);
     gnttab_grant_access(ref, page, Int_val(v_domid), Bool_val(v_readonly));
-    CAMLreturn(Val_unit);
+    return Val_unit;
 }
 
 CAMLprim value
 caml_gnttab_end_access(value v_ref)
 {
-    CAMLparam1(v_ref);
-    grant_ref_t ref = Int32_val(v_ref);
+    grant_ref_t ref = Int_val(v_ref);
     uint16_t flags, nflags;
 
     BUG_ON(ref >= NR_GRANT_ENTRIES || ref < NR_RESERVED_ENTRIES);
@@ -182,12 +172,12 @@ caml_gnttab_end_access(value v_ref)
     do {
         if ((flags = nflags) & (GTF_reading|GTF_writing)) {
             printk("WARNING: g.e. %d still in use! (%x)\n", ref, flags);
-            CAMLreturn(Val_unit);
+            return Val_unit;
         }
     } while ((nflags = synch_cmpxchg(&gnttab_table[ref].flags, flags, 0)) !=
             flags);
 
-    CAMLreturn(Val_unit);
+    return Val_unit;
 }
 
 
@@ -195,7 +185,6 @@ caml_gnttab_end_access(value v_ref)
 CAMLprim value
 caml_gnttab_init(value unit)
 {
-    CAMLparam1(unit);
     struct gnttab_setup_table setup;
     unsigned long frames[NR_GRANT_FRAMES];
 
@@ -207,14 +196,13 @@ caml_gnttab_init(value unit)
     gnttab_table = map_frames(frames, NR_GRANT_FRAMES);
     printk("gnttab_table mapped at %p\n", gnttab_table);
 
-    CAMLreturn(Val_unit); 
+    return Val_unit;
 }
 
 /* Disable grant tables */
 CAMLprim value
 caml_gnttab_fini(value unit)
 {
-    CAMLparam1(unit);
     struct gnttab_setup_table setup;
 
     setup.dom = DOMID_SELF;
@@ -222,8 +210,8 @@ caml_gnttab_fini(value unit)
 
     HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
 
-    unmap_frames(gnttab_table, NR_GRANT_FRAMES);
+    unmap_frames((unsigned long)gnttab_table, NR_GRANT_FRAMES);
 
-    CAMLreturn(Val_unit);
+    return Val_unit;
 }
 

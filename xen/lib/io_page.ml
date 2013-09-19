@@ -18,47 +18,42 @@
 
 type t = (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-external alloc_pages: int -> t option = "caml_alloc_pages"
-
-let get ?(pages_per_block=1) () =
-	match alloc_pages pages_per_block with
-	| Some block -> block
-	| None ->
-		Gc.compact ();
-		begin match alloc_pages pages_per_block with
-		| Some block -> block
-		| None ->
-			Printf.printf "out of memory\n%!";
-			exit(1)
-		end
-
-let rec get_n ?(pages_per_block=1) n = match n with
-  | 0 -> []
-  | n -> get () :: (get_n ~pages_per_block (n - 1))
-
-let rec pow2 = function
-  | 0 -> 1
-  | n -> 2 * (pow2 (n - 1))
-
-let get_order order = get ~pages_per_block:(pow2 order) ()
-
-let to_cstruct t = Cstruct.of_bigarray t
-
-let length t = Bigarray.Array1.dim t
+external alloc_pages: int -> t = "caml_alloc_pages"
 
 let page_size = 4096
 
+let get n =
+  if n < 1
+  then raise (Invalid_argument "The number of page should be greater or equal to 1")
+  else
+    try alloc_pages n with _ ->
+      Gc.compact ();
+      try alloc_pages n with _ -> raise Out_of_memory
+
+let get_order order = get (1 lsl order)
+
+let length t = Bigarray.Array1.dim t
+
 let to_pages t =
-  assert(length t mod page_size = 0);
+  if length t mod page_size <> 0
+  then raise (Invalid_argument "Argument length should be a multiple of PAGE_SIZE");
   let rec loop off acc =
     if off < (length t)
     then loop (off + page_size) (Bigarray.Array1.sub t off page_size :: acc)
     else acc in
   List.rev (loop 0 [])
 
-let string_blit src t =
-  for i = 0 to String.length src - 1 do
-    t.{i} <- src.[i]
+let pages n =
+  let rec inner acc n = if n > 0 then inner (get 1 :: acc) (n-1) else acc
+  in inner [] n
+
+let pages_order order = pages (1 lsl order)
+
+let to_cstruct t = Cstruct.of_bigarray t
+
+let string_blit src srcoff dst dstoff len =
+  for i = srcoff to srcoff + len - 1 do
+    dst.{i+dstoff} <- src.[i]
   done
 
 let to_string t =

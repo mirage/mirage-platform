@@ -18,13 +18,13 @@ open Lwt
 open Printf
 
 let allocate_ring ~domid =
-	let page = Io_page.get () in
+	let page = Io_page.get 1 in
 	let x = Io_page.to_cstruct page in
+	lwt gnt = Gnt.Gntshr.get () in
 	for i = 0 to Cstruct.len x - 1 do
-		Cstruct.set_uint8 x i 0
+	  Cstruct.set_uint8 x i 0
 	done;
-	lwt gnt = Gnttab.get () in
-	Gnttab.grant_access ~domid ~perm:Gnttab.RW gnt page;
+	Gnt.Gntshr.grant_access ~domid ~writeable:true gnt page;
 	return (gnt, x)
 
 module RX = struct
@@ -57,12 +57,12 @@ module RX = struct
 
   type response = int * int * int
 
-  let create (id,domid) =
-    let name = sprintf "Netif.RX.%s" id in
-	lwt rx_gnt, buf = allocate_ring ~domid in
+  let create (id, domid) =
+    let name = sprintf "Netif.RX.%d" id in
+    lwt rx_gnt, buf = allocate_ring ~domid in
     let sring = Ring.Rpc.of_buf ~buf ~idx_size:Proto_64.total_size ~name in
     let fring = Ring.Rpc.Front.init ~sring in
-    let client = Lwt_ring.Front.init fring in
+    let client = Lwt_ring.Front.init string_of_int fring in
     return (rx_gnt, fring, client)
 
 end
@@ -108,12 +108,12 @@ module TX = struct
     let _ = assert(total_size = 12)
   end
 
-  let create (id,domid) =
-    let name = sprintf "Netif.TX.%s" id in
-	lwt rx_gnt, buf = allocate_ring ~domid in
+  let create (id, domid) =
+    let name = sprintf "Netif.TX.%d" id in
+    lwt rx_gnt, buf = allocate_ring ~domid in
     let sring = Ring.Rpc.of_buf ~buf ~idx_size:Proto_64.total_size ~name in
     let fring = Ring.Rpc.Front.init ~sring in
-	let client = Lwt_ring.Front.init fring in
+    let client = Lwt_ring.Front.init string_of_int fring in
     return (rx_gnt, fring, client)
 end
 
@@ -126,18 +126,19 @@ type features = {
 }
 
 type transport = {
+  id: int;
   backend_id: int;
   backend: string;
-  mac: string;
+  mac: Macaddr.t;
   tx_fring: (TX.response,int) Ring.Rpc.Front.t;
   tx_client: (TX.response,int) Lwt_ring.Front.t;
-  tx_gnt: Gnttab.r;
+  tx_gnt: Gnt.gntref;
   tx_mutex: Lwt_mutex.t; (* Held to avoid signalling between fragments *)
   rx_fring: (RX.response,int) Ring.Rpc.Front.t;
   rx_client: (RX.response,int) Lwt_ring.Front.t;
-  rx_map: (int, Gnttab.r * Io_page.t) Hashtbl.t;
-  rx_gnt: Gnttab.r;
-  evtchn: Evtchn.t;
+  rx_map: (int, Gnt.gntref * Io_page.t) Hashtbl.t;
+  rx_gnt: Gnt.gntref;
+  evtchn: Eventchn.t;
   features: features;
 }
 
@@ -148,29 +149,44 @@ type t = {
   c : unit Lwt_condition.t;
 }
 
-type id = string
+type id = int
+
+let id_of_string = int_of_string
+let string_of_id = string_of_int
+
+let id t = t.t.id
+let backend_id t = t.t.backend_id
 
 let devices : (id, t) Hashtbl.t = Hashtbl.create 1
 
+let h = Eventchn.init ()
+
 (* Given a VIF ID and backend domid, construct a netfront record for it *)
 let plug_inner id =
-  lwt backend_id = Xs.(immediate (fun h -> read h (sprintf "device/vif/%s/backend-id" id))) >|= int_of_string in
-  Console.log (sprintf "Netfront.create: id=%s domid=%d\n%!" id backend_id);
+  lwt xsc = Xs.make () in
+  lwt backend_id = Xs.(immediate xsc (fun h -> read h (sprintf "device/vif/%d/backend-id" id))) >|= int_of_string in
+  Console.log (sprintf "Netfront.create: id=%d domid=%d\n%!" id backend_id);
   (* Allocate a transmit and receive ring, and event channel for them *)
   lwt (rx_gnt, rx_fring, rx_client) = RX.create (id, backend_id) in
   lwt (tx_gnt, tx_fring, tx_client) = TX.create (id, backend_id) in
   let tx_mutex = Lwt_mutex.create () in
-  let evtchn = Evtchn.alloc_unbound_port backend_id in
-  let evtchn_port = Evtchn.port evtchn in
+  let evtchn = Eventchn.bind_unbound_port h backend_id in
+  let evtchn_port = Eventchn.to_int evtchn in
   (* Read Xenstore info and set state to Connected *)
-  let node = sprintf "device/vif/%s/" id in
-  lwt backend = Xs.(immediate (fun h -> read h (node ^ "backend"))) in
-  lwt mac = Xs.(immediate (fun h -> read h (node ^ "mac"))) in
-  printf "MAC: %s\n%!" mac;
-  Xs.(transaction (fun h ->
+  let node = sprintf "device/vif/%d/" id in
+  lwt backend = Xs.(immediate xsc (fun h -> read h (node ^ "backend"))) in
+  lwt mac =
+    Xs.(immediate xsc (fun h -> read h (node ^ "mac"))) 
+    >|= Macaddr.of_string
+    >>= function
+    | None -> Lwt.fail (Failure "invalid mac")
+    | Some m -> return m 
+  in
+  printf "MAC: %s\n%!" (Macaddr.to_string mac);
+  Xs.(transaction xsc (fun h ->
     let wrfn k v = write h (node ^ k) v in
-    wrfn "tx-ring-ref" (Gnttab.to_string tx_gnt) >>
-    wrfn "rx-ring-ref" (Gnttab.to_string rx_gnt) >>
+    wrfn "tx-ring-ref" (string_of_int tx_gnt) >>
+    wrfn "rx-ring-ref" (string_of_int rx_gnt) >>
     wrfn "event-channel" (string_of_int (evtchn_port)) >>
     wrfn "request-rx-copy" "1" >>
     wrfn "feature-rx-notify" "1" >>
@@ -178,7 +194,7 @@ let plug_inner id =
     wrfn "state" Device_state.(to_string Connected)
   )) >>
   (* Read backend features *)
-  lwt features = Xs.(transaction (fun h ->
+  lwt features = Xs.(transaction xsc (fun h ->
     let rdfn k =
       try_lwt
         read h (sprintf "%s/feature-%s" backend k) >>= 
@@ -196,12 +212,12 @@ let plug_inner id =
   let rx_map = Hashtbl.create 1 in
   Console.log (sprintf " sg:%b gso_tcpv4:%b rx_copy:%b rx_flip:%b smart_poll:%b"
     features.sg features.gso_tcpv4 features.rx_copy features.rx_flip features.smart_poll);
-  Evtchn.unmask evtchn;
+  Eventchn.unmask h evtchn;
   (* Register callback activation *)
-  return { backend_id; tx_fring; tx_client; tx_gnt; tx_mutex; rx_gnt; rx_fring; rx_client; rx_map;
+  return { id; backend_id; tx_fring; tx_client; tx_gnt; tx_mutex; rx_gnt; rx_fring; rx_client; rx_map;
     evtchn; mac; backend; features }
 
-let plug id = 
+let plug id =
   lwt transport = plug_inner id in
   let t = { t=transport; resume_fns=[]; l=Lwt_mutex.create (); c=Lwt_condition.create () } in
   Hashtbl.add devices id t;
@@ -210,37 +226,37 @@ let plug id =
 (* Unplug shouldn't block, although the Xen one might need to due
    to Xenstore? XXX *)
 let unplug id =
-  Console.log (sprintf "Netif.unplug %s: not implemented yet" id);
-  ()
+  Hashtbl.remove devices id
 
 let notify nf () =
-  Evtchn.notify nf.evtchn
+  Eventchn.notify h nf.evtchn
 
 let refill_requests nf =
   let num = Ring.Rpc.Front.get_free_requests nf.rx_fring in
-  lwt gnts = Gnttab.get_n num in
-  let pages = Io_page.get_n num in
-  List.iter
-    (fun (gnt, page) ->
-      Gnttab.grant_access ~domid:nf.backend_id ~perm:Gnttab.RW gnt page;
-      let gref = Gnttab.to_int32 gnt in
-      let id = Int32.to_int gref in (* XXX TODO make gref an int not int32 *)
-      Hashtbl.add nf.rx_map id (gnt, page);
-      let slot_id = Ring.Rpc.Front.next_req_id nf.rx_fring in
-      let slot = Ring.Rpc.Front.slot nf.rx_fring slot_id in
-      ignore(RX.Proto_64.write ~id ~gref slot)
-    ) (List.combine gnts pages);
-  if Ring.Rpc.Front.push_requests_and_check_notify nf.rx_fring
-  then notify nf ();
-  return ()
+  if num > 0 then
+    lwt grefs = Gnt.Gntshr.get_n num in
+    let pages = Io_page.pages num in
+    List.iter
+      (fun (gref, page) ->
+         let id = gref mod (1 lsl 16) in
+         Gnt.Gntshr.grant_access ~domid:nf.backend_id ~writeable:true gref page;
+         Hashtbl.add nf.rx_map id (gref, page);
+         let slot_id = Ring.Rpc.Front.next_req_id nf.rx_fring in
+         let slot = Ring.Rpc.Front.slot nf.rx_fring slot_id in
+         ignore(RX.Proto_64.write ~id ~gref:(Int32.of_int gref) slot)
+      ) (List.combine grefs pages);
+    if Ring.Rpc.Front.push_requests_and_check_notify nf.rx_fring
+    then notify nf ();
+    return ()
+  else return ()
 
 let rx_poll nf fn =
   Ring.Rpc.Front.ack_responses nf.rx_fring (fun slot ->
     let id,(offset,flags,status) = RX.Proto_64.read slot in
-    let gnt, page = Hashtbl.find nf.rx_map id in
+    let gref, page = Hashtbl.find nf.rx_map id in
     Hashtbl.remove nf.rx_map id;
-    Gnttab.end_access gnt;
-    Gnttab.put gnt;
+    Gnt.Gntshr.end_access gref;
+    Gnt.Gntshr.put gref;
     match status with
     |sz when status > 0 ->
       let packet = Cstruct.sub (Io_page.to_cstruct page) 0 sz in
@@ -254,30 +270,28 @@ let tx_poll nf =
 
 (* Push a single page to the ring, but no event notification *)
 let write_request ?size ~flags nf page =
-  lwt gnt = Gnttab.get () in
+  lwt gref = Gnt.Gntshr.get () in
   (* This grants access to the *base* data pointer of the page *)
   (* XXX: another place where we peek inside the cstruct *)
-  Gnttab.grant_access ~domid:nf.t.backend_id ~perm:Gnttab.RO gnt page.Cstruct.buffer;
-  let gref = Gnttab.to_int32 gnt in
-  let id = Int32.to_int gref in
+  Gnt.Gntshr.grant_access ~domid:nf.t.backend_id ~writeable:false gref page.Cstruct.buffer;
   let size = match size with |None -> Cstruct.len page |Some s -> s in
   (* XXX: another place where we peek inside the cstruct *)
   let offset = page.Cstruct.off in
   lwt replied = Lwt_ring.Front.write nf.t.tx_client
-    (TX.Proto_64.write ~id ~gref ~offset ~flags ~size) in
+    (TX.Proto_64.write ~id:gref ~gref:(Int32.of_int gref) ~offset ~flags ~size) in
   (* request has been written; when replied returns we have a reply *)
   let replied =
     try_lwt
       lwt _ = replied in
-      Gnttab.end_access gnt;
-      Gnttab.put gnt;
+      Gnt.Gntshr.end_access gref;
+      Gnt.Gntshr.put gref;
       return ()
     with Lwt_ring.Shutdown ->
-      Gnttab.put gnt;
+      Gnt.Gntshr.put gref;
       fail Lwt_ring.Shutdown
     | e ->
-      Gnttab.end_access gnt;
-      Gnttab.put gnt;
+      Gnt.Gntshr.end_access gref;
+      Gnt.Gntshr.put gref;
       fail e in
   return replied
  
@@ -301,6 +315,16 @@ let write nf page =
 let writev nf pages =
   Lwt_mutex.with_lock nf.t.tx_mutex
   (fun () ->
+  let rec wait_for_free_tx n =
+    let numfree = Ring.Rpc.Front.get_free_requests nf.t.tx_fring in 
+    if n >= numfree then 
+      Activations.wait nf.t.evtchn >> 
+      wait_for_free_tx n
+    else
+      return ()
+  in
+  let numneeded = List.length pages in
+  wait_for_free_tx numneeded >>
   match pages with
   |[] -> return ()
   |[page] ->
@@ -329,8 +353,8 @@ let writev nf pages =
 
 let wait_for_plug nf =
 	Console.log_s "Wait for plug..." >>
-	Lwt_mutex.with_lock nf.l (fun () -> 
-		while_lwt not (Evtchn.is_valid nf.t.evtchn) do
+	Lwt_mutex.with_lock nf.l (fun () ->
+		while_lwt not (Eventchn.is_valid nf.t.evtchn) do
 			Lwt_condition.wait ~mutex:nf.l nf.c
 		done)
 
@@ -341,22 +365,25 @@ let listen nf fn =
     rx_poll t fn;
     tx_poll t;
     (* Evtchn.notify nf.t.evtchn; *)
-    lwt new_t = 
+    lwt new_t =
       try_lwt
-		Activations.wait t.evtchn >> return t
+        Activations.wait t.evtchn >> return t
       with
-        | Generation.Invalid ->
-			Console.log_s "Waiting for plug in listen" >> 
-			lwt () = wait_for_plug nf in
-            Console.log_s "Done..." >> 
-            return nf.t
+      | Generation.Invalid ->
+        Console.log_s "Waiting for plug in listen" >>
+        wait_for_plug nf >>
+        Console.log_s "Done..." >>
+        return nf.t
     in poll_t new_t
   in
   poll_t nf.t
 
 (** Return a list of valid VIFs *)
 let enumerate () =
-  try_lwt Xs.(immediate (fun h -> directory h "device/vif")) with _ -> return []
+  Xs.make () >>= fun xsc ->
+  Lwt.catch
+    (fun () -> Xs.(immediate xsc (fun h -> directory h "device/vif")) >|= (List.map int_of_string) )
+    (fun _ -> Lwt.return [])
 
 let resume (id,t) =
   lwt transport = plug_inner id in
@@ -375,35 +402,24 @@ let resume () =
 let add_resume_hook t fn =
 	t.resume_fns <- fn::t.resume_fns
 
-let create ?dev fn =
-  let th,_ = Lwt.task () in
-  Lwt.on_cancel th (fun _ -> Hashtbl.iter (fun id _ -> unplug id) devices);
+(* Type of callback functions for [create]. *)
+type callback = id -> t -> unit Lwt.t
+
+let create () =
   lwt ids = enumerate () in
-  let pt = Lwt_list.iter_p (fun id ->
-    lwt t = plug id in
-    fn id t) ids in
-  th <?> pt
+  Lwt.catch
+    (fun () -> Lwt_list.map_p plug ids)
+    (fun exn  -> Hashtbl.iter (fun id _ -> unplug id) devices; Lwt.fail exn)
 
 (* The Xenstore MAC address is colon separated, very helpfully *)
-let mac nf = 
-  let s = String.create 6 in
-  Scanf.sscanf nf.t.mac "%02x:%02x:%02x:%02x:%02x:%02x"
-    (fun a b c d e f ->
-      s.[0] <- Char.chr a;
-      s.[1] <- Char.chr b;
-      s.[2] <- Char.chr c;
-      s.[3] <- Char.chr d;
-      s.[4] <- Char.chr e;
-      s.[5] <- Char.chr f;
-    );
-  s
-
-(* The Xenstore MAC address is colon separated, very helpfully *)
-let ethid t = 
-  string_of_int t.t.backend_id
+let mac nf = nf.t.mac
 
 (* Get write buffer for Netif output *)
 let get_writebuf t =
-  let page = Io_page.get () in
+  let page = Io_page.get 1 in
   (* TODO: record statistics for requesting thread here (in debug mode?) *)
   return (Cstruct.of_bigarray page)
+
+let _ =
+  printf "Netif: add resume hook\n%!";
+  Sched.add_resume_hook resume

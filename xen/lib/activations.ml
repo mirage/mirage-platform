@@ -24,17 +24,17 @@ let event_cb = Array.init nr_events (fun _ -> Lwt_sequence.create ())
 
 (* Block waiting for an event to occur on a particular port *)
 let wait evtchn =
-  if Evtchn.is_valid evtchn then begin
-	  let port = Evtchn.port evtchn in
+  if Eventchn.is_valid evtchn then begin
+	  let port = Eventchn.to_int evtchn in
 	  let th, u = Lwt.task () in
-	  let node = Lwt_sequence.add_r u event_cb.(port) in
+	  let node = Lwt_sequence.add_l u event_cb.(port) in
 	  Lwt.on_cancel th (fun _ -> Lwt_sequence.remove node);
 	  th
   end else Lwt.fail Generation.Invalid
 
 (* Go through the event mask and activate any events, potentially spawning
    new threads *)
-let run () =
+let run hdl =
   for port = 0 to nr_events - 1 do
     (* XXX workaround rare event wedge bug XXX *)
     if true || evtchn_test_and_clear port then begin

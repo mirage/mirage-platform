@@ -30,7 +30,9 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
+#if !defined(__FreeBSD__)
 #include <net/ndrv.h>
+#endif
 #include <ifaddrs.h>
 
 #include <sys/types.h>
@@ -61,33 +63,7 @@ setnonblock(int fd)
     err(1, "setnonblock, F_SETFL");
 }
 
-CAMLprim value
-tap_opendev(value v_str)
-{
-  char name[IFNAMSIZ];
-  snprintf(name, sizeof name, "/dev/%s", String_val(v_str));
-
-  int dev_id;
-
-  //small hack to create multiple interfaces
-  sscanf(name, "/dev/tap%d", &dev_id);
-  fprintf(stderr, "I should be opening 10.%d.0.1\n", dev_id);
-
-  fprintf(stderr, "opendev: %s\n", name);
-  int fd = open(name, O_RDWR);
-  if (fd < 0)
-    err(1, "tap_opendev");
-  setnonblock(fd);
-  /* Mark interface as up
-     Since MacOS doesnt have ethernet bridging built in, the
-     IP binding is temporary until someone writes a KPI filter for Darwin */
-  char buf[1024];
-  snprintf(buf, sizeof buf, "/sbin/ifconfig %s 10.%d.0.1 netmask 255.255.255.0 up", String_val(v_str), dev_id);
-  fprintf(stderr, "%s\n", buf);
-  system(buf);
-  return Val_int(fd);
-}
-
+#if !defined(__FreeBSD__)
 CAMLprim value
 eth_opendev(value v_str)
 {
@@ -111,6 +87,7 @@ eth_opendev(value v_str)
   // return the fd
   return Val_int(fd);
 }
+#endif
 
 CAMLprim value
 pcap_opendev(value v_name) {
@@ -168,37 +145,3 @@ pcap_get_buf_len(value v_fd) {
 
   CAMLreturn(Val_int(buf_len));
 }
-
-CAMLprim value
-get_mac_addr(value v_str) {
-  CAMLparam1( v_str );
-  CAMLlocal1(v_mac);
-  
-  struct ifaddrs *ifap, *p;
-  char *mac_addr[6]; 
-  int found = 0;
-  char name[IFNAMSIZ];
-  snprintf(name, sizeof name, "%s", String_val(v_str));
-
-  if (getifaddrs(&ifap) != 0) {
-    err(1, "get_mac_addr");
-  }
-
-  for(p = ifap; p != NULL; p = p->ifa_next) {
-    if((strcmp(p->ifa_name, name) == 0) &&
-      (p->ifa_addr != NULL)){
-      char *tmp = LLADDR((struct sockaddr_dl *)(p)->ifa_addr);
-      memcpy(mac_addr, tmp, 6);
-      found = 1;
-      break;
-    } 
-  }
-
-  freeifaddrs(ifap);
-  if (!found) 
-    err(1, "get_mac_addr");
-
-  v_mac = caml_alloc_string(6);
-  memcpy(String_val(v_mac), mac_addr, 6);
-  CAMLreturn (v_mac);
-} 

@@ -1,11 +1,69 @@
-0.7.2 (trunk):
+0.9.6 (27-Aug-2013):
+* [xen] adapt to new xenstore interface which allows the same code
+  to be compiled under Unix userspace and xen kernelspace
+
+0.9.5 (09-Aug-2013):
+* Add the `mir-rt` regression runner to `scripts/` (not installed).
+* Unhook `mir-run` from the build, as Mirari replaces it.
+* [xen] Port Netif to use the `Macaddr` module from `ocaml-ipaddr`.
+
+0.9.4 (07-Aug-2013):
+* [xen] add atomic load/store bindings for shared memory rings
+* [xen] add atomic operations necessary for vchan
+* [xen] expose memory barriers via Xenctrl ocamlfind package
+
+0.9.3 (18-July-2013):
+* [xen] Prevent spinning in `Activations.run` when a thread is blocked
+  and then awakened.
+* [xen] Gnt.grant_table_index is now an int, was an int32.
+* [xen] Cleaned some C stubs files, mainly page_stubs.c
+* [xen] Improved module Netif: The function create do not take a
+  callback anymore, hidden some private function from the .mli.
+* [unix] Add support for building and running on FreeBSD.
+
+0.9.2 (09-July-2013):
+* [xen] Add Netif test to wait for a fixed number of ring slots > 0
+* [xen] Add Evtchn.close to Xen backend.
+* [xen] Disable tree-loop-distribute-patterns to workaround crash with
+  gcc-4.8.  Temporary fix until we isolate the bug.
+* [xen] Improved the interface of Io_page, implement some missing bits
+  in Gnt.
+* [xen] Several modules now have an interface similar to the one in
+  the libxc bindings for OCaml. This makes it possible to write one
+  application that can be compiled for the UNIX or the Xen backend.
+
+0.9.1 (11-Jun-2013):
+* [xen] add mmap stubs to make the default Bigarray module happy.
+* OS.Netif.create no longer creates the tuntap interface.  Hotplug events
+  are generated from the mirari calling functions instead, removing the
+  policy from this library.
+
+0.9.0 (22-May-2013):
+* [xen] Add a simple 'resume hook' mechanism for xen devices
+* [xen] Update to new shared ring signature in 0.4.0
+* [xen] Allow device providers to be added later
+* [xen] Move the blkif implementation to ocaml-xen-block-driver
+* [xen] Io_page.string_blit has now an interface similar to String.blit
+* [xen] Console.write_s has been renamed Console.write_all
+* [xen] Gnttab.unmap_exn now throws an exception on failure, like the
+  xenctrl version. This makes it possible to run the same blkback code
+  in kernelspace and userspace.
+
+0.8.1 (27-Mar-2013):
+* [xen] Fix the Xen block interface to wait for init correctly.
+
+0.8.0 (12-Feb-2013):
+* Remove `mir-build` script as the Mirari builder does its job now.
+* [xen] add Str module C stubs, adapted to work in the Xen backend.
+
+0.7.2 (08-Feb-2013):
 * [xen] Fix the size of the start-of-day Xenstore and console rings.
 * Quieten the verbosity of devices sleeping in Xen, to avoid console
   overflow situations.
 * Install the packed `cmx` along with the `cmxa` to ensure that the
   compiler can do cross-module optimization (this is not a fatal error,
   but will impact performance if the `cmx` file is not present).
-  
+
 0.7.1 (20-Dec-2012):
 * [unix] Update devices API to use Cstruct 0.6.0
 
@@ -48,6 +106,6 @@
 * [xen] Add Evtchn virq interface for stub xenstored.
 * [xen] Add Evtchn.unbind.
 * [netif] fix checksum calculation code for odd-sized packets.
- 
+
 0.3.0 (04-Sep-2012):
 * Initial public release.

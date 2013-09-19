@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2013 Citrix Systems Inc
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,34 +14,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <err.h>
-
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
-#include <caml/alloc.h>
 #include <caml/fail.h>
-#include <net/if.h>
-#include <sys/ioctl.h>
+#include <caml/bigarray.h>
 
-CAMLprim value
-pcap_opendev(value v_name) {
-  CAMLparam1(v_name);
-  
-  err(1, "pcap_opendev unimplemented");
+CAMLprim value stub_atomic_or_fetch_uint8(value buf, value idx, value val)
+{
+  CAMLparam3(buf, idx, val);
+  // Finding the address of buf+idx
+  uint8_t c_val = (uint8_t)Int_val(val);
+  uint8_t *ptr = Caml_ba_data_val(buf) + Int_val(idx);
 
-  CAMLreturn(Val_int(-1));
+  if (Int_val(idx) >= Caml_ba_array_val(buf)->dim[0])
+    caml_invalid_argument("idx");
+
+  CAMLreturn(Val_int((uint8_t)__sync_or_and_fetch(ptr, c_val)));
 }
 
-CAMLprim value
-pcap_get_buf_len(value v_fd) {
-  CAMLparam1(v_fd);
-  CAMLreturn(Val_int(4096));
-}
+CAMLprim value stub_atomic_fetch_and_uint8(value buf, value idx, value val)
+{
+  CAMLparam3(buf, idx, val);
+  uint8_t c_val = (uint8_t)Int_val(val);
+  uint8_t *ptr = Caml_ba_data_val(buf) + Int_val(idx);
 
+  if (Int_val(idx) >= Caml_ba_array_val(buf)->dim[0])
+    caml_invalid_argument("idx");
+
+  CAMLreturn(Val_int((uint8_t)__sync_fetch_and_and(ptr, c_val)));
+}

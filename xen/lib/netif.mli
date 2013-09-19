@@ -14,52 +14,53 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** Xen Netfront interface for Ethernet I/O *)
+(** Xen Netfront interface for Ethernet I/O. *)
 
-(** Type of a single netfront interface *)
 type t
+(** Type of a single netfront interface. *)
 
-(** Textual id which is unique per netfront interface *)
-type id = string
+type id
+(** Textual id which is unique per netfront interface. Typically "0",
+    "1", ... *)
 
-(** Create a hotplug interface that will spawn a new thread
-    per network interface.
-    @param fn Callback function that is invoked for every new netfront interface.
-    @return Blocking thread that will unplug all the attached interfaces if cancelled.
-  *)
-val create : ?dev:string option -> (id -> t -> unit Lwt.t) -> unit Lwt.t
+val id_of_string : string -> id
+val string_of_id : id -> string
 
-(** Manually plug in a new network interface. Normally automatically invoked via Xenstore
-    watches by the create function *)
-val plug: id -> t Lwt.t
+val create : unit -> t list Lwt.t
+(** [create ()] is a thread that returns a list of initialized
+    netfront interfaces, one per detected netfront. *)
 
-(** Manually unplug a network interface. This makes an effort not to block, so
-    the unplugging is not guaranteed *)
-val unplug: id -> unit
+val id : t -> id
+(** [id nf] is the id of the netfront [nf]. *)
 
-(** Output a buffer to an interface *)
+val backend_id : t -> id
+(** [backend_id nf] is the domid of the netback connected to the
+    netfront [nf]. *)
+
 val write : t -> Cstruct.t -> unit Lwt.t
+(** [write nf buf] outputs [buf] to netfront [nf]. *)
 
-(** Output a list of buffers to an interface as a single packet *)
 val writev : t -> Cstruct.t list -> unit Lwt.t
+(** [writev nf bufs] output a list of buffers to netfront [nf] as a
+    single packet. *)
 
-(** Listen endlesses on a Netfront, and invoke the callback function as frames are
-    received. *)
 val listen : t -> (Cstruct.t -> unit Lwt.t) -> unit Lwt.t
+(** [listen nf cb] is a thread that listens endlesses on [nf], and
+    invoke the callback function as frames are received. *)
 
-(** Enumerate all the currently available Netfronts (which may or may not be attached) *)
-val enumerate : unit -> id list Lwt.t
-
-(** Return the MAC address of the Netfront *)
-val ethid : t -> string
-val mac : t -> string
+val mac : t -> Macaddr.t
+(** [mac nf] is the MAC address of [nf]. *)
 
 val get_writebuf : t -> Cstruct.t Lwt.t
 
-(** Replug all devices *)
 val resume : unit -> unit Lwt.t
+(** [resume ()] is a thread that resumes all devices when a unikernel
+    is resumed. You do not have to call this function manually as it
+    is already added as a resume hook for the [Sched.suspend]
+    function. *)
 
-(** Add a resume hook - called on resume before the service threads are restarted. Can
-	be used, for example, to send a gratuitous ARP *)
 val add_resume_hook : t -> (t -> unit Lwt.t) -> unit
+(** [add_resume_hook nf cb] adds [cb] as a resume hook for netfront
+	  [nf] - called on resume before the service threads are
+	  restarted. Can be used, for example, to send a gratuitous ARP. *)
 
