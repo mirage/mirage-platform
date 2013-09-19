@@ -182,15 +182,23 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
     return 0;
 }
 
-void update_time(void)
+/*
+ * Just a dummy 
+ */
+static void timer_handler(evtchn_port_t ev, struct pt_regs *regs, void *ign)
 {
     get_time_values_from_xen();
     update_wallclock();
 }
 
+int evtchn_bind_virq(uint32_t virq, evtchn_port_t *port);
+
+static evtchn_port_t port;
 void init_time(void)
 {
-    update_time();
+    printk("Initialising timer interface\n");
+    if (!evtchn_bind_virq(VIRQ_TIMER, &port))
+      unmask_evtchn(port);
 }
 
 void fini_time(void)
