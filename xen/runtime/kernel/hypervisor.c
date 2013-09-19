@@ -32,8 +32,15 @@
 
 void do_hypervisor_callback(struct pt_regs *regs)
 {
+  int            cpu = 0;
+  shared_info_t *s = HYPERVISOR_shared_info;
+  vcpu_info_t   *vcpu_info = &s->vcpu_info[cpu];
+
   /* We don't do any work in the callback itself, instead we rely on the
-     vcpu blocking in SCHEDOP_block being woken, and calling evtchn_poll. */
+     vcpu blocking in SCHEDOP_block being woken, and calling evtchn_poll.
+     However we do need to clear the evtchn_upcall_pending flag to acknowlege
+     this interrupt (otherwise it'll happen again immediately) */
+  vcpu_info->evtchn_upcall_pending = 0;
 }
 
 void force_evtchn_callback(void)
