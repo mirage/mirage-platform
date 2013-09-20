@@ -87,10 +87,8 @@ let wakeup_thread id =
 let _ = Callback.register "timer_wakeup" wakeup_thread
 
 let duration = ref 0
-let set_duration secs = 
-  duration := secs
-let get_duration () =
-  !duration
+let set_duration secs = duration := secs
+let get_duration () = !duration
 
 let rec restart_threads now = ()
 let select_next now = None

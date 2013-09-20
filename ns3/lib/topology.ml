@@ -24,6 +24,8 @@ external ns3_add_link : string -> string -> int -> int -> int -> bool -> unit
   * "ns3_add_net_intf" *)
 external ns3_get_dev_byte_counter : string -> string -> int = 
   "ocaml_ns3_get_dev_byte_counter"
+(* Main run thread *) 
+external ns3_run : int -> int ->  string -> int -> unit = "ocaml_ns3_run" 
 
 type node_t = {
   name: string;
@@ -35,13 +37,11 @@ type topo_t = {
   mutable links : (string * string * float) list;
 } 
 
-let topo = 
-  {nodes=(Hashtbl.create 64);links=[];}
+let topo = {nodes=(Hashtbl.create 64);links=[];}
 
-let exec fn () =
-  Lwt.ignore_result (fn ())
+let exec fn () = Lwt.ignore_result (fn ())
  
-let get_topology () =
+(*let get_topology () =
   let ix = ref 0L in 
   let names = Hashtbl.create 64 in 
   let nodes = Hashtbl.fold
@@ -65,9 +65,9 @@ let get_topology () =
       ("value",(Json.Int 1L))])] 
   ) topo.links [] in 
       Json.Object [("nodes",(Json.Array nodes));
-      ("links", (Json.Array links));]
+      ("links", (Json.Array links));] *)
 
-let get_link_utilization () = 
+(* let get_link_utilization () = 
   let utilisation = List.fold_right (
     fun (node_a, node_b, rate) r -> 
       let utilization_a_b = 
@@ -94,9 +94,9 @@ let get_link_utilization () =
               ("ts", (Json.Float (Clock.time ()) ));
               ("value", (Json.Float (utilization_b_a /. rate) ))]);]
   ) topo.links [] in 
-        Json.to_string (Json.Array utilisation) 
+        Json.to_string (Json.Array utilisation) *)
 
-let monitor_links () =                                                
+(* let monitor_links () =                                                
   let _ = printf "starting link monitoring\n%!" in               
   while_lwt true do                                         
     lwt _ = Time.sleep 0.5 in            
@@ -106,29 +106,26 @@ let monitor_links () =
         ("ts", (Json.Float (Clock.time ())));
         ("type", (Json.String "link_utilization"));
         ("data", (Json.String res));]) in *)
-     let _ = Console.broadcast "link_utilization" res in
+(*      let _ = Console.broadcast "link_utilization" res in *)
      return ()                                                      
-  done    
-
-(* Main run thread *) 
-external ns3_run : int -> string -> int ->  string -> int -> unit = "ocaml_ns3_run" 
-
+  done    *)
 
 let load ?(debug=None) t =
   let _ = t () in
-  let msg =  Json.to_string (get_topology ()) in 
+(*  let msg =  Json.to_string (get_topology ()) in 
   let msg = Json.to_string (
     Json.Object [
       ("ts", (Json.Float (Clock.time ())));
       ("type", (Json.String "topology"));
-    ("data", (Json.String msg));]) in
-  let _ =
+    ("data", (Json.String msg));]) in *)
+ (* let _ =
     if (debug <> None) then
       ignore_result (monitor_links ()) 
-  in
-  match (debug) with 
+in *)
+(*  match (debug) with 
   | None -> ns3_run (Time.get_duration ()) msg 0 "" 0 
-  | Some(srv, p) ->  ns3_run (Time.get_duration ()) msg 1 srv p 
+  | Some(srv, p) ->  ns3_run (Time.get_duration ()) msg 1 srv p *)
+ns3_run (Time.get_duration ()) 0 "" 0 
 
 let add_node name cb_init =
   let _ = ns3_add_node name in

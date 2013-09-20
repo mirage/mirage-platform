@@ -14,13 +14,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+(** Memory allocation. *)
+
 type t = (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-val get : unit -> t
-val get_n : int -> t list
+(** Type of memory blocks. *)
 
-val to_cstruct : t -> Cstruct.t
+val get : int -> t
+(** [get n] allocates and returns a zeroed memory block of [n]
+    pages. If there is not enough memory, the unikernel will
+    terminate. *)
+
+val get_order : int -> t 
+(** [get_order i] is [get (1 lsl i)]. *)
+
+val pages : int -> t list
+(** [pages n] allocates n zeroed memory pages and return them. *)
+
+(* val pages_order : int -> t list *)
+(** [pages_order i] is [pages (1 lsl i)]. *)
 
 val length : t -> int
+(** [length t] is the size of [t], in bytes. *)
 
+val to_cstruct : t -> Cstruct.t
+val to_string : t -> string
+
+val to_pages : t -> t list
+(** [to_pages t] is a list of [size] memory blocks of one page each,
+    where [size] is the size of [t] in pages. *)
+
+val string_blit : string -> int -> t -> int -> int -> unit
+(** [string_blit src srcoff dst dstoff len] copies [len] bytes from
+    string [src], starting at byte number [srcoff], to memory block
+    [dst], starting at byte number dstoff. *)
+
+val blit : t -> t -> unit
+(** [blit t1 t2] is the same as {!Bigarray.Array1.blit}. *)
+
+val round_to_page_size : int -> int
+(** [round_to_page_size n] returns the number of bytes that will be
+    allocated for storing [n] bytes in memory *)
 val round_to_page_size : int -> int 

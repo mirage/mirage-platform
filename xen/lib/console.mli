@@ -44,4 +44,3 @@ val log : string -> unit
 (** [log_s str] is a thread that writes [str ^ "\r\n"] in the default
     console [t]. *)
 val log_s : string -> unit Lwt.t
-val broadcast : string -> string -> unit

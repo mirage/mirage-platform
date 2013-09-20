@@ -20,9 +20,8 @@ type t
 
 external write: t -> string -> int -> int -> unit = "console_write"
 external create: unit -> t = "console_create"
-external ns3_log : string -> unit = "ocaml_ns3_log"
 
-let sync_write t buf off len =
+let write_all t buf off len =
   write t buf off len;
   return ()
 
@@ -38,14 +37,5 @@ let log s =
 
 let log_s s =
   let s = s ^ "\n" in
-  sync_write t s 0 (String.length s)
-
-let broadcast typ data =
-  let msg = Json.to_string (
-    Json.Object [
-      ("ts", (Json.Float (Clock.time ())));
-      ("type", (Json.String typ));
-    ("data", (Json.String data));]) in
-    ns3_log msg
-
+  write_all t s 0 (String.length s)
 

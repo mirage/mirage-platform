@@ -69,7 +69,7 @@ CAMLprim value ocaml_ns3_add_link_native(value ocaml_node_a,
 CAMLprim value caml_pkt_write(value v_node_name, value v_id, value v_ba,
     value v_off, value v_len);
 CAMLprim value caml_queue_check(value v_name,  value v_id);
-CAMLprim value ocaml_ns3_run(value, value, value, value, value);
+CAMLprim value ocaml_ns3_run(value, value, value, value);
 CAMLprim value
 caml_register_check_queue(value v_name,  value v_id);
 // CAMLprim value
@@ -602,10 +602,9 @@ ocaml_ns3_log(value v_msg) {
  
 // Main simulation run function
 CAMLprim value
-ocaml_ns3_run(value v_duration, value v_topo, value v_debug, value v_srv, value v_p) {
-  CAMLparam5(v_duration, v_topo, v_debug, v_srv, v_p);
+ocaml_ns3_run(value v_duration, value v_debug, value v_srv, value v_p) {
+  CAMLparam4(v_duration, v_debug, v_srv, v_p);
   int duration = Int_val(v_duration);
-  char *topo = String_val(v_topo);
   debug = Int_val(v_debug);
   log_server =  string(String_val(v_srv));
   log_port = (Int_val(v_p));
@@ -642,10 +641,10 @@ ocaml_ns3_run(value v_duration, value v_topo, value v_debug, value v_srv, value 
 
   map<string, struct node_state* >::iterator it;
 
-  if ((MpiInterface::GetSystemId ()) == 0) {
+/*  if ((MpiInterface::GetSystemId ()) == 0) {
     printf("sending topology to server\nXXXXXXX %s\n", topo);
     ns_log(topo); 
-  }
+  } */
 
   // on time 0 run the init code
   for (it=nodes.begin() ; it != nodes.end(); it++) {

@@ -21,6 +21,9 @@ open Gc
 type id = string
 let resolve t = Lwt.on_success t (fun _ -> ())
 
+(** Exception raised when trying to read from a DOWN interface *)
+exception Device_down of id
+
 type t = {
   id: id;
   fd_read : Cstruct.t Lwt_condition.t;
@@ -72,7 +75,7 @@ let demux_pkt node_name dev_id frame =
         let dev = 
           List.find (
             fun dev -> (dev.id = (string_of_int dev_id)) ) devs in
-        let pkt = Io_page.to_cstruct (Io_page.get ()) in 
+        let pkt = Io_page.to_cstruct (Io_page.get 1) in 
         let _ = (Cstruct.blit_from_string frame 0 pkt 0 pkt_len) in
         let pkt = Cstruct.sub pkt 0 pkt_len in 
 
@@ -105,7 +108,7 @@ let unplug node_name id =
 (*     Hashtbl.remove devices id *)
   with Not_found -> ()
 
-let create ?(dev=None) fn =
+let create () =
   let name = 
     match Lwt.get Topology.node_name with 
       | None -> failwith "thread hasn't got a name"
@@ -113,16 +116,19 @@ let create ?(dev=None) fn =
   in
     try_lwt
       let devs = Hashtbl.find devices name in
-      Lwt_list.iter_p (
-        fun t -> 
+(*      Lwt_list.fold_lefy_p (
+        fun t ret -> 
           let user = fn t.id t in
           let th,_ = Lwt.task () in
             Lwt.on_cancel th (fun _ -> unplug name t.id);
-            th <?> user) devs  
-    with exn -> return (printf "manager error %s\n%!" (Printexc.to_string exn))
+            th <?> user) devs [] *)
+      return devs
+    with exn -> 
+      let _ = printf "manager error %s\n%!" (Printexc.to_string exn) in 
+      return []
 
 let get_writebuf t =
-  let page = Io_page.to_cstruct (Io_page.get ()) in
+  let page = Io_page.to_cstruct (Io_page.get 1) in
     (* TODO: record statistics for requesting thread here (in debug mode?)
      * *)
     return page
@@ -163,8 +169,7 @@ let unblock_device name ix =
 
 (* Transmit a packet from an Io_page *)
 let write t page =
-  let Some(node_name) = Lwt.get Topology.node_name in 
-  let rec wait_for_queue t = 
+  let rec wait_for_queue t node_name = 
     match (queue_check node_name (int_of_string t.id)) with
     | true -> return ()
     | false ->
@@ -176,12 +181,17 @@ let write t page =
 (*      let _ = printf "%03.6f: traffic unblocked %s\n%!" (Clock.time ())
         node_name in  *)
 
-        wait_for_queue t
+        wait_for_queue t node_name
     in
-  lwt _ = wait_for_queue t in
-  let _ = pkt_write node_name (int_of_string t.id) page.Cstruct.buffer 
-            page.Cstruct.off page.Cstruct.len in
-    return ()
+  lwt _ = 
+    match (Lwt.get Topology.node_name) with
+    | None -> return ()
+    | Some(node_name) ->  
+      lwt _ = wait_for_queue t node_name in
+      return (pkt_write node_name (int_of_string t.id) 
+                page.Cstruct.buffer page.Cstruct.off page.Cstruct.len) 
+  in
+  return ()
 
 
 (* TODO use writev: but do a copy for now *)
@@ -190,7 +200,7 @@ let writev t pages =
   |[] -> return ()
   |[page] -> write t page
   |pages ->
-    let page = Io_page.to_cstruct (Io_page.get ()) in
+    let page = Io_page.to_cstruct (Io_page.get 1) in
     let off = ref 0 in
     let _ = List.iter (fun p ->
       let len = Cstruct.len p in
@@ -200,11 +210,10 @@ let writev t pages =
     let v = Cstruct.sub page 0 !off in
       write t v
   
-let ethid t = 
-  t.id
-
-let mac t =
-  t.mac 
+let id t = t.id
+let id_of_string id = id 
+let string_of_id id = id 
+let mac t = Macaddr.of_bytes_exn t.mac 
 
 let _ = Callback.register "plug_dev" plug
 let _ = Callback.register "get_frame" Io_page.get

@@ -14,26 +14,56 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-type id = string
+(** Create network interface values from NS3 device *)
 
-type t  = {
-  id: id;
-(*   fd: (int * Io_page.t) Lwt_stream.t; *)
-  fd_read : Cstruct.t Lwt_condition.t;
-  fd_read_ret : unit Lwt_condition.t;
-  fd_write: unit Lwt_condition.t;
-  mutable active: bool;
-  mac: string;
-} 
+(** This module handles the creation and destruction of network
+    interface values usable in Mirage from real UNIX interfaces. If
+    Mirage has to use a given network interface, the latter has to be
+    created with mirari or standard UNIX tool, and advertised to this
+    module using the [add_vif] function. This is analogous to the
+    XenStore mechanism for the Xen backend. *)
 
+(** Type representing a network interface, containing low level data
+    structures to read and write from it. *)
+type t  
+
+(** Textual id identifying a network interface, e.g. "tap0". *)
+type id
+
+val string_of_id : id -> string
+val id_of_string : string -> id
+
+(** Exception raised when trying to read from a DOWN interface *)
+exception Device_down of id
+
+(** Accessors for the t type *)
+val get_writebuf : t -> Cstruct.t Lwt.t
+val id           : t -> id
+val mac          : t -> Macaddr.t 
+
+(** [add_vif id kind fd] adds a network interface to the XenStore
+    analog of the UNIX backend. All interfaces that the unikernel
+    should handle MUST be added with [add_vif] BEFORE using
+    [create]. *)
+(* val add_vif : id -> unit *)
+
+(** [create ()] is a thread that creates a value of type t for each
+    interface added with [add_vif]. *)
+val create : unit -> (t list) Lwt.t
+
+(** [listen netif cb] listens on [netif] for incoming frames, and call
+    [cb] on them. *)
 val listen : t -> (Cstruct.t -> unit Lwt.t) -> unit Lwt.t
+
+(** [destroy netif] will destroy the interface [netif], i.e. marking
+    it as inactive, closing the underlying file descriptor, and
+    removing the corresponding t value from the Hashtbl. *)
 val destroy : t -> unit Lwt.t
 
+(** [write netif frame] write [frame] in [netif] *)
 val write : t -> Cstruct.t -> unit Lwt.t
+
+(** [writev netif frames] write [frames] in [netif] *)
 val writev : t -> Cstruct.t list -> unit Lwt.t
 
-val create : ?dev:(string option) -> (id -> t -> unit Lwt.t) -> unit Lwt.t
-val get_writebuf: t -> Cstruct.t Lwt.t
 
-val mac : t -> string 
-val ethid : t -> id
