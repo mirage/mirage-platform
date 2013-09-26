@@ -93,8 +93,12 @@ let unplug id =
 
 (* TODO: Properly unplug the created devices *)
 let rec create () =
-  lwt vif = Lwt_stream.next vifs in
-  Lwt.return [(plug vif.vif_dev_type vif.vif_id vif.vif_fd)]
+  try_lwt 
+    let devs = Lwt_stream.get_available vifs in
+    let ret = 
+      List.map (fun vif -> 
+          (plug vif.vif_dev_type vif.vif_id vif.vif_fd)) devs in 
+    return ret
 
 cstruct bpf_hdr {
   uint32 tv_sec;
