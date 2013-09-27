@@ -81,6 +81,6 @@ type stats = {
   mutable tx_pkts : int32; 
 }
 
-val get_pkt_counters : t -> stats
-val reset_pkt_counters : t -> unit
+val get_stats_counters : t -> stats
+val reset_stats_counters : t -> unit
 

@@ -236,9 +236,9 @@ let id t = t.id
 
 let mac t = t.mac
 
-let get_pkt_counters t = t.stats
+let get_stats_counters t = t.stats
 
-let reset_pkt_counters t =
+let reset_stats_counters t =
   t.stats.rx_bytes <- 0L;
   t.stats.rx_pkts  <- 0l;
   t.stats.tx_bytes <- 0L;

@@ -41,6 +41,13 @@ val get_writebuf : t -> Cstruct.t Lwt.t
 val id           : t -> id
 val mac          : t -> Macaddr.t 
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
 (** [add_vif id kind fd] adds a network interface to the XenStore
     analog of the UNIX backend. All interfaces that the unikernel
     should handle MUST be added with [add_vif] BEFORE using
@@ -66,4 +73,5 @@ val write : t -> Cstruct.t -> unit Lwt.t
 (** [writev netif frames] write [frames] in [netif] *)
 val writev : t -> Cstruct.t list -> unit Lwt.t
 
-
+val get_stats_counters : t -> stats
+val reset_stats_counters : t -> unit

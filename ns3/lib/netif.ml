@@ -24,6 +24,13 @@ let resolve t = Lwt.on_success t (fun _ -> ())
 (** Exception raised when trying to read from a DOWN interface *)
 exception Device_down of id
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
 type t = {
   id: id;
   fd_read : Cstruct.t Lwt_condition.t;
@@ -31,6 +38,7 @@ type t = {
   fd_write : unit Lwt_condition.t;
   mutable active: bool;
   mac: string;
+  stats : stats;
 }
 
 external pkt_write: string -> int -> Io_page.t -> int -> int -> unit = "caml_pkt_write"
@@ -52,7 +60,7 @@ let plug node_name id mac =
  let fd_read_ret = Lwt_condition.create  () in 
  let fd_write = Lwt_condition.create () in
  let t = { id=(string_of_int id); fd_read; fd_read_ret;
-           active; fd_write; mac } in
+           active; fd_write; mac; stats={rx_pkts=0l;rx_bytes=0L;tx_pkts=0l;tx_bytes=0L;};} in
  let _ = 
    if (Hashtbl.mem devices node_name) then (
      let devs = Hashtbl.find devices node_name in 
@@ -214,6 +222,16 @@ let id t = t.id
 let id_of_string id = id 
 let string_of_id id = id 
 let mac t = Macaddr.of_bytes_exn t.mac 
+
+let get_stats_counters t = t.stats
+
+let reset_stats_counters t =
+  t.stats.rx_bytes <- 0L;
+  t.stats.rx_pkts  <- 0l;
+  t.stats.tx_bytes <- 0L;
+  t.stats.tx_pkts  <- 0l
+
+
 
 let _ = Callback.register "plug_dev" plug
 let _ = Callback.register "get_frame" Io_page.get
