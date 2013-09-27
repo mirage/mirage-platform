@@ -74,3 +74,13 @@ val write : t -> Cstruct.t -> unit Lwt.t
 (** [writev netif frames] write [frames] in [netif] *)
 val writev : t -> Cstruct.t list -> unit Lwt.t
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
+val get_pkt_counters : t -> stats
+val reset_pkt_counters : t -> unit
+
