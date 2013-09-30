@@ -36,17 +36,15 @@ function setup_arm_chroot {
   sudo chroot $DIR $TRAVIS_BUILD_DIR/.travis-ci.sh
 } 
 
-if [ "$XARCH" = "arm" ]; then
+if [ -e "/.chroot_is_done" ]; then
+  # we are in the arm chroot
   cd $TRAVIS_BUILD_DIR
-  echo Check if we are already in the chroot
-  if [ -e "/.chroot_is_done" ]; then
-    # get environment variable for inside chroot
-    . ./envvars.sh
-  else
-    setup_arm_chroot
-  fi
+  # get environment variable for inside chroot
+  . ./envvars.sh
 else
-# not arm, so do standard ppa setup
+  if [ "$XARCH" = "arm" ]; then
+    setup_arm_chroot
+  else
 case "$OCAML_VERSION,$OPAM_VERSION" in
 3.12.1,1.0.0) ppa=avsm/ocaml312+opam10 ;;
 3.12.1,1.1.0) ppa=avsm/ocaml312+opam11 ;;
@@ -58,6 +56,7 @@ case "$OCAML_VERSION,$OPAM_VERSION" in
 esac
 echo "yes" | sudo add-apt-repository ppa:$ppa
 sudo apt-get update -qq
+fi
 fi
 
 sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
