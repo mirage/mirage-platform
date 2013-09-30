@@ -22,7 +22,10 @@ function setup_arm_chroot {
   sudo mv /tmp/opamapt $DIR/etc/apt/sources.list.d/opam.list
   sudo chroot $DIR apt-get update
   sudo mkdir -p $DIR/$TRAVIS_BUILD_DIR
-  sudo rsync -a $TRAVIS_BUILD_DIR/ $DIR/$TRAVIS_BUILD_DIR/
+  echo sync:
+  sudo rsync -av $TRAVIS_BUILD_DIR/ $DIR/$TRAVIS_BUILD_DIR/
+  echo debug:
+  ls -la $DIR/$TRAVIS_BUILD_DIR
   sudo touch $DIR/.chroot_is_done
   sudo chroot $DIR $TRAVIS_BUILD_DIR/.travis-ci.sh
 } 
