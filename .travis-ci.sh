@@ -21,9 +21,9 @@ function setup_arm_chroot {
   echo 'deb [arch=armel] http://www.recoil.org/~avsm/debian-arm wheezy main' > /tmp/opamapt
   sudo mv /tmp/opamapt $DIR/etc/apt/sources.list.d/opam.list
   sudo chroot $DIR apt-get update
-  mkdir -p $DIR/$TRAVIS_BUILD_DIR
-  rsync -a $TRAVIS_BUILD_DIR/ $DIR/$TRAVIS_BUILD_DIR/
-  touch $DIR/.chroot_is_done
+  sudo mkdir -p $DIR/$TRAVIS_BUILD_DIR
+  sudo rsync -a $TRAVIS_BUILD_DIR/ $DIR/$TRAVIS_BUILD_DIR/
+  sudo touch $DIR/.chroot_is_done
   sudo chroot $DIR $TRAVIS_BUILD_DIR/.travis-ci.sh
 } 
 
