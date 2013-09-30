@@ -22,7 +22,7 @@ function setup_arm_chroot {
   echo export TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR >> envvars.sh
   chmod a+x envvars.sh
   export LANG=c
-  sudo chroot $DIR apt-get --allow-unauthenticated install -y debian-archive-keyring build-essential m4 git curl
+  sudo chroot $DIR apt-get --allow-unauthenticated install -y debian-archive-keyring build-essential m4 git curl sudo
   # Add GPG key for anil@recoil.org which the ARM OPAM repo is signed with
   sudo chroot $DIR apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5896E99F
   echo 'deb [arch=armel] http://www.recoil.org/~avsm/debian-arm wheezy main' > /tmp/opamapt
