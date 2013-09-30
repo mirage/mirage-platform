@@ -19,6 +19,7 @@ function setup_arm_chroot {
   echo export LANG=c >> envvars.sh
   echo export OPAMYES=1 >> envvars.sh
   echo export OPAMVERBOSE=1 >> envvars.sh
+  echo export TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR >> envvars.sh
   chmod a+x envvars.sh
   export LANG=c
   sudo chroot $DIR apt-get --allow-unauthenticated install -y debian-archive-keyring build-essential m4 git curl
@@ -33,12 +34,11 @@ function setup_arm_chroot {
   echo debug:
   ls -la $DIR/$TRAVIS_BUILD_DIR
   sudo touch $DIR/.chroot_is_done
-  sudo chroot $DIR $TRAVIS_BUILD_DIR/.travis-ci.sh
+  sudo chroot $DIR bash -c "cd $TRAVIS_BUILD_DIR && ./.travis-ci.sh"
 } 
 
 if [ -e "/.chroot_is_done" ]; then
   # we are in the arm chroot
-  cd $TRAVIS_BUILD_DIR
   # get environment variable for inside chroot
   . ./envvars.sh
 else
