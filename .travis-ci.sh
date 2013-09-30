@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 # OPAM packages needed to build tests.
 OPAM_PACKAGES="shared-memory-ring lwt xenstore ipaddr tuntap"
 
@@ -13,9 +13,14 @@ function setup_arm_chroot {
   sudo cp /usr/bin/qemu-arm-static $DIR/usr/bin/
   sudo chroot $DIR ./debootstrap/debootstrap --second-stage
   sudo sbuild-createchroot --arch=armel --foreign --setup-only wheezy $DIR $MIRROR
+  echo export OCAML_VERSION=$OCAML_VERSION > envvars.sh
+  echo export OPAM_VERSION=$OPAM_VERSION >> envvars.sh
+  echo export XARCH=$XARCH >> envvars.sh
+  echo export LANG=c >> envvars.sh
+  echo export OPAMYES=1 >> envvars.sh
+  echo export OPAMVERBOSE=1 >> envvars.sh
+  chmod a+x envvars.sh
   export LANG=c
-  export OPAMYES=1
-  export OPAMVERBOSE=1
   sudo chroot $DIR apt-get --allow-unauthenticated install -y debian-archive-keyring build-essential m4 git curl
   # Add GPG key for anil@recoil.org which the ARM OPAM repo is signed with
   sudo chroot $DIR apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5896E99F
@@ -34,7 +39,10 @@ function setup_arm_chroot {
 if [ "$XARCH" = "arm" ]; then
   cd $TRAVIS_BUILD_DIR
   echo Check if we are already in the chroot
-  if [ ! -e "/.chroot_is_done" ]; then
+  if [ -e "/.chroot_is_done" ]; then
+    # get environment variable for inside chroot
+    . ./envvars.sh
+  else
     setup_arm_chroot
   fi
 else
