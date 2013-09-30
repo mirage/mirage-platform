@@ -1,3 +1,4 @@
+#!/bin/bash
 # OPAM packages needed to build tests.
 OPAM_PACKAGES="shared-memory-ring lwt xenstore ipaddr tuntap"
 
