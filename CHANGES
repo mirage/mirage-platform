@@ -1,5 +1,7 @@
 0.9.7 (trunk):
 * Add Travis continuous integration scripts.
+* [xen] zero out freshly allocated io pages.
+* [xen] correct reattach xenstore connection after resume.
 
 0.9.6 (27-Aug-2013):
 * [xen] adapt to new xenstore interface which allows the same code
