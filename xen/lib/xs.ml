@@ -32,11 +32,26 @@ module IO = struct
     type backend = [ `unix | `xen ]
     let backend = `xen
 
+    let singleton_client = ref None
+
     let create () =
-      let page = Io_page.to_cstruct Start_info.(xenstore_start_page ()) in
-      Xenstore_ring.Ring.init page;
-      let evtchn = Eventchn.of_int Start_info.((get ()).store_evtchn) in
-      return { page; evtchn }
+      match !singleton_client with 
+      | Some x -> Lwt.return x 
+      | None -> 
+        let page = Io_page.to_cstruct Start_info.(xenstore_start_page ()) in
+        Xenstore_ring.Ring.init page;
+        let evtchn = Eventchn.of_int Start_info.((get ()).store_evtchn) in
+        let c = { page; evtchn } in
+        singleton_client := Some c;
+        Lwt.return c
+
+    let refresh () =
+      match !singleton_client with
+      | Some x -> 
+        x.page <- Io_page.to_cstruct Start_info.(xenstore_start_page ());
+        Xenstore_ring.Ring.init x.page;
+        x.evtchn <- Eventchn.of_int Start_info.((get ()).store_evtchn);
+      | None -> ()
 
     let destroy t =
       Console.log "ERROR: It's not possible to destroy the default xenstore connection";
@@ -64,4 +79,8 @@ module IO = struct
 end
 
 include Xs_client_lwt.Client(IO)
+
+let resume client =
+  IO.refresh();
+  resume client
 
