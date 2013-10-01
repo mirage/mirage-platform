@@ -1,3 +1,6 @@
+0.9.7 (trunk):
+* Add Travis continuous integration scripts.
+
 0.9.6 (27-Aug-2013):
 * [xen] adapt to new xenstore interface which allows the same code
   to be compiled under Unix userspace and xen kernelspace
