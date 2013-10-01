@@ -1,13 +1,19 @@
 #!/bin/sh -x
 
+# This extra flag only needed for gcc 4.8+
+GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
+if [ $GCC_MVER2 -ge 8 ]; then
+  EXTRA_CFLAGS=-fno-tree-loop-distribute-patterns
+fi
+
 case "$1" in
 xen)
   CC=${CC:-cc}
   PWD=`pwd`
   GCC_INCLUDE=`env LANG=C ${CC} -print-search-dirs | sed -n -e 's/install: \(.*\)/\1/p'`
-  CFLAGS="-O3 -U __linux__ -U __FreeBSD__ -U __sun__ -D__MiniOS__ -D__MiniOS__ -D__x86_64__ \
+  CFLAGS="$EXTRA_CFLAGS -O3 -U __linux__ -U __FreeBSD__ -U __sun__ -D__MiniOS__ -D__MiniOS__ -D__x86_64__ \
     -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ -nostdinc -std=gnu99 \
-    -fno-tree-loop-distribute-patterns -fno-stack-protector -m64 -mno-red-zone -fno-reorder-blocks -fstrict-aliasing \
+    -fno-stack-protector -m64 -mno-red-zone -fno-reorder-blocks -fstrict-aliasing \
     -momit-leaf-frame-pointer -mfancy-math-387 -I${GCC_INCLUDE}/include \
     -isystem ${PWD}/runtime/include/ -isystem ${PWD}/runtime/include/mini-os \
     -isystem ${PWD}/runtime/include/mini-os/x86 -DCAML_NAME_SPACE -DTARGET_amd64 
