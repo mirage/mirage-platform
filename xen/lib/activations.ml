@@ -46,10 +46,12 @@ let ports = Array.init nr_events (fun _ -> { counter = program_start; c = Lwt_co
 
 let after evtchn counter =
   let port = Eventchn.to_int evtchn in
-  lwt () = while_lwt ports.(port).counter <= counter do
+  lwt () = while_lwt ports.(port).counter <= counter && (Eventchn.is_valid evtchn) do
     Lwt_condition.wait ports.(port).c
   done in
-  Lwt.return ports.(port).counter
+  if Eventchn.is_valid evtchn
+  then Lwt.return ports.(port).counter
+  else Lwt.fail Generation.Invalid
 
 (* Low-level interface *)
 
@@ -80,12 +82,13 @@ let run hdl =
     end
   done
 
-(* Note, this should be run *after* Evtchn.resume *)
+(* Note, this should be run *after* Generation.resume *)
 let resume () =
   for port = 0 to nr_events - 1 do
     Lwt_sequence.iter_node_l (fun node ->
         let u = Lwt_sequence.get node in
         Lwt_sequence.remove node;
         Lwt.wakeup_later_exn u Generation.Invalid
-      ) event_cb.(port)
+      ) event_cb.(port);
+    Lwt_condition.broadcast ports.(port).c ();
   done
