@@ -315,16 +315,16 @@ let write nf page =
 let writev nf pages =
   Lwt_mutex.with_lock nf.t.tx_mutex
   (fun () ->
-  let rec wait_for_free_tx n =
+  let rec wait_for_free_tx event n =
     let numfree = Ring.Rpc.Front.get_free_requests nf.t.tx_fring in 
     if n >= numfree then 
-      Activations.wait nf.t.evtchn >> 
-      wait_for_free_tx n
+      lwt event = Activations.after nf.t.evtchn event in
+      wait_for_free_tx event n
     else
       return ()
   in
   let numneeded = List.length pages in
-  wait_for_free_tx numneeded >>
+  wait_for_free_tx Activations.program_start numneeded >>
   match pages with
   |[] -> return ()
   |[page] ->
@@ -360,23 +360,24 @@ let wait_for_plug nf =
 
 let listen nf fn =
   (* Listen for the activation to poll the interface *)
-  let rec poll_t t =
+  let rec poll_t event t =
     lwt () = refill_requests t in
     rx_poll t fn;
     tx_poll t;
     (* Evtchn.notify nf.t.evtchn; *)
-    lwt new_t =
+    lwt (event, new_t) =
       try_lwt
-        Activations.wait t.evtchn >> return t
+        lwt event = Activations.after t.evtchn event in
+        return (event, t)
       with
       | Generation.Invalid ->
         Console.log_s "Waiting for plug in listen" >>
         wait_for_plug nf >>
         Console.log_s "Done..." >>
-        return nf.t
-    in poll_t new_t
+        return (Activations.program_start, nf.t)
+    in poll_t event new_t
   in
-  poll_t nf.t
+  poll_t Activations.program_start nf.t
 
 (** Return a list of valid VIFs *)
 let enumerate () =
