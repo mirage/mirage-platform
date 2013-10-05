@@ -44,6 +44,13 @@ type port = {
 
 let ports = Array.init nr_events (fun _ -> { counter = program_start; c = Lwt_condition.create () })
 
+let dump () =
+  Printf.printf "Number of received event channel events:\n";
+  for i = 0 to nr_events - 1 do
+    if ports.(i).counter <> program_start
+    then Printf.printf "port %d: %d\n%!" i (ports.(i).counter - program_start)
+  done
+
 let after evtchn counter =
   let port = Eventchn.to_int evtchn in
   lwt () = while_lwt ports.(port).counter <= counter && (Eventchn.is_valid evtchn) do

@@ -48,3 +48,6 @@ val resume : unit -> unit
     resumed. However, this function is automatically called by
     {!Sched.suspend}. Do NOT use it unless you know what you are
     doing. *)
+
+val dump : unit -> unit
+(** [dump ()] prints internal state to the console for debugging *)
