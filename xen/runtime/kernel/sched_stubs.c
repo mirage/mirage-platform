@@ -69,6 +69,10 @@ stub_hypervisor_suspend(value unit)
   /* Reinitialise several things */
   trap_init();
   init_events();
+
+  /* ENABLE EVENT DELIVERY. This is disabled at start of day. */
+  local_irq_enable();
+
   setup_xen_features();
   HYPERVISOR_shared_info = map_shared_info(start_info.shared_info);
 

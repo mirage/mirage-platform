@@ -41,6 +41,7 @@ module IO = struct
         let page = Io_page.to_cstruct Start_info.(xenstore_start_page ()) in
         Xenstore_ring.Ring.init page;
         let evtchn = Eventchn.of_int Start_info.((get ()).store_evtchn) in
+        Eventchn.unmask h evtchn;
         let c = { page; evtchn } in
         singleton_client := Some c;
         Lwt.return c
@@ -51,6 +52,7 @@ module IO = struct
         x.page <- Io_page.to_cstruct Start_info.(xenstore_start_page ());
         Xenstore_ring.Ring.init x.page;
         x.evtchn <- Eventchn.of_int Start_info.((get ()).store_evtchn);
+        Eventchn.unmask h x.evtchn
       | None -> ()
 
     let destroy t =
@@ -58,24 +60,28 @@ module IO = struct
       fail Cannot_destroy
 
     (* XXX: unify with ocaml-xenstore-xen/xen/lib/xs_transport_domain *)
-    let rec read t buf ofs len =
-      let n = Xenstore_ring.Ring.Front.unsafe_read t.page buf ofs len in
-      if n = 0 then begin
-        lwt () = Activations.wait t.evtchn in
-        read t buf ofs len
-      end else begin
-        Eventchn.notify h t.evtchn;
-        return n
-      end
+    let read t buf ofs len =
+      let rec loop event =
+        let n = Xenstore_ring.Ring.Front.unsafe_read t.page buf ofs len in
+        if n = 0 then begin
+          lwt event = Activations.after t.evtchn event in
+          loop event
+        end else begin
+          Eventchn.notify h t.evtchn;
+          return n
+        end in
+      loop Activations.program_start
 
     (* XXX: unify with ocaml-xenstore-xen/xen/lib/xs_transport_domain *)
-    let rec write t buf ofs len =
-      let n = Xenstore_ring.Ring.Front.unsafe_write t.page buf ofs len in
-      if n > 0 then Eventchn.notify h t.evtchn;
-      if n < len then begin
-        lwt () = Activations.wait t.evtchn in
-        write t buf (ofs + n) (len - n)
-      end else return ()
+    let write t buf ofs len =
+      let rec loop event buf ofs len =
+        let n = Xenstore_ring.Ring.Front.unsafe_write t.page buf ofs len in
+        if n > 0 then Eventchn.notify h t.evtchn;
+        if n < len then begin
+          lwt event = Activations.after t.evtchn event in
+          loop event buf (ofs + n) (len - n)
+        end else return () in
+      loop Activations.program_start buf ofs len
 end
 
 include Xs_client_lwt.Client(IO)

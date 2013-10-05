@@ -91,6 +91,9 @@ void start_kernel(start_info_t *si)
 
     /* Set up events. */
     init_events();
+
+    /* ENABLE EVENT DELIVERY. This is disabled at start of day. */
+    local_irq_enable();
     
     arch_print_info();
 
@@ -119,6 +122,9 @@ void stop_kernel(void)
 
     /* Reset memory management. */
     fini_mm();
+
+    /* Reset events. */
+    fini_events();
 
     /* Reset traps */
     trap_fini();

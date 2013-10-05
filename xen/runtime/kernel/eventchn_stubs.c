@@ -31,13 +31,15 @@ static uint8_t ev_callback_ml[NR_EVENTS];
      ~(sh)->evtchn_mask[idx])
 
 /* Walk through the ports, setting the OCaml callback
-   mask for any active ones, and clear the Xen side */
-void
-evtchn_poll(void)
+   mask for any active ones, and clear the Xen side.
+   Return true if any OCaml callbacks are needed. */
+int
+evtchn_look_for_work(void)
 {
   unsigned long  l1, l2, l1i, l2i;
   unsigned int   port;
   int            cpu = 0;
+  int            work_to_do = 0;
   shared_info_t *s = HYPERVISOR_shared_info;
   vcpu_info_t   *vcpu_info = &s->vcpu_info[cpu];
 
@@ -55,8 +57,19 @@ evtchn_poll(void)
       port = (l1i * (sizeof(unsigned long) * 8)) + l2i;
       clear_evtchn(port);
       ev_callback_ml[port] = 1;
+      work_to_do = 1;
     }
   }
+  return work_to_do;
+}
+
+CAMLprim value
+stub_evtchn_look_for_work(value v_unit)
+{
+    CAMLparam1(v_unit);
+    CAMLlocal1(work_to_do);
+    work_to_do = Val_bool(evtchn_look_for_work());
+    CAMLreturn(work_to_do);
 }
 
 /* Initialise and bind the predefined ports */

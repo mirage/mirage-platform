@@ -26,23 +26,21 @@ int errno;
 static char *argv[] = { "mirage", NULL };
 static unsigned long irqflags;
 
-/* TODO: make dynamic when binding/unbinding ports */
-static evtchn_port_t ports[] = { 1,2,3,4,5,6,7,8,9,10 };
-
-void evtchn_poll(void);
-
-static struct sched_poll sched_poll;
-static s_time_t block_secs;
-
 CAMLprim value
 caml_block_domain(value v_timeout)
 {
   CAMLparam1(v_timeout);
-  block_secs = (s_time_t)(Double_val(v_timeout) * 1000000000);
-  set_xen_guest_handle(sched_poll.ports, ports);
-  sched_poll.nr_ports = sizeof(ports) / sizeof(evtchn_port_t);
-  sched_poll.timeout = NOW() + block_secs;
-  HYPERVISOR_sched_op(SCHEDOP_poll, &sched_poll);
+  s_time_t block_nsecs = (s_time_t)(Double_val(v_timeout) * 1000000000);
+  HYPERVISOR_set_timer_op(NOW() + block_nsecs);
+  /* xen/common/schedule.c:do_block clears evtchn_upcall_mask
+     to re-enable interrupts. It blocks the domain and immediately
+     checks for pending events which otherwise may be missed. */
+  HYPERVISOR_sched_op(SCHEDOP_block, 0);
+  /* set evtchn_upcall_mask: there's no need to be interrupted
+     when we know we have outstanding work to do. When we next
+     call this function, the call to SCHEDOP_block will check
+     for pending events. */
+  local_irq_disable();
   CAMLreturn(Val_unit);
 }
 
@@ -60,7 +58,6 @@ void app_main(start_info_t *si)
 	_exit(1);
   }
   while (caml_completed == 0) {
-    evtchn_poll();
     caml_completed = Bool_val(caml_callback(*v_main, Val_unit));
   }
   _exit(0);
