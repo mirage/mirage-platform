@@ -1,3 +1,5 @@
+0.9.8 (trunk)
+
 0.9.7 (5-Oct-2013):
 * Add Travis continuous integration scripts.
 * [xen] fix suspend/resume
