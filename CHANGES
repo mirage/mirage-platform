@@ -1,5 +1,9 @@
-0.9.7 (trunk):
+0.9.7 (5-Oct-2013):
 * Add Travis continuous integration scripts.
+* [xen] fix suspend/resume
+* [xen] switch to interrupts (SCHEDOP_block) rather than polling (SCHEDOP_poll)
+  to allow more than 128 event channels
+* [xen] add Activations.after interface to help drivers avoid losing interrupts
 
 0.9.6 (27-Aug-2013):
 * [xen] adapt to new xenstore interface which allows the same code
