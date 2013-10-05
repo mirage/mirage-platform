@@ -72,7 +72,10 @@ let wait evtchn =
 	  let node = Lwt_sequence.add_l u event_cb.(port) in
 	  Lwt.on_cancel th (fun _ -> Lwt_sequence.remove node);
 	  th
-  end else Lwt.fail Generation.Invalid
+  end else begin
+          Printf.printf "Activations.wait %d: Generation.Invalid\n%!" (Eventchn.to_int evtchn);
+          Lwt.fail Generation.Invalid
+  end
 
 (* Go through the event mask and activate any events, potentially spawning
    new threads *)
