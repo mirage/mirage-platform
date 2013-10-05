@@ -47,3 +47,4 @@ let bind_dom_exc_virq () =
   let port = stub_bind_virq (stub_virq_dom_exc ()) in
   construct (fun () -> port) ()
 
+external look_for_work: unit -> bool = "stub_evtchn_look_for_work"

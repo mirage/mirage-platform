@@ -65,3 +65,7 @@ val is_valid : t -> bool
 (** [is_valid c] is true if [t] is bound. Bindings are invalidated
     after a domain resume. *)
 
+val look_for_work : unit -> bool
+(** [look_for_work ()] latches pending event channels into the activations
+    bitmap so that Activations.run will see them. Returning true means
+    some work is pending, so we should run Activations.run. *)

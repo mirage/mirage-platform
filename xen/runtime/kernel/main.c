@@ -26,8 +26,6 @@ int errno;
 static char *argv[] = { "mirage", NULL };
 static unsigned long irqflags;
 
-void evtchn_poll(void);
-
 CAMLprim value
 caml_block_domain(value v_timeout)
 {
@@ -60,7 +58,6 @@ void app_main(start_info_t *si)
 	_exit(1);
   }
   while (caml_completed == 0) {
-    evtchn_poll();
     caml_completed = Bool_val(caml_callback(*v_main, Val_unit));
   }
   _exit(0);

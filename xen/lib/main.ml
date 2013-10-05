@@ -56,16 +56,20 @@ let run t =
       | Some x ->
           true
       | None ->
-          (* If we have nothing to do, check for next timeout and
-           * and block the domain *)
-          Activations.run evtchn;
-          let timeout =
-            match Time.select_next Clock.time with
-            |None -> 86400.0 (* one day = 24 * 60 * 60 s *)
-            |Some tm -> tm
-          in
-          block_domain timeout;
-          false
+          if Eventchn.look_for_work () then begin
+            (* Some event channels have triggered, wake up threads
+             * and continue without blocking. *)
+            Activations.run evtchn;
+            false
+          end else begin
+            let timeout =
+              match Time.select_next Clock.time with
+              |None -> 86400.0 (* one day = 24 * 60 * 60 s *)
+              |Some tm -> tm
+            in
+            block_domain timeout;
+            false
+          end
     with exn ->
       (Printf.printf "Top level exception: %s\n%!" 
          (Printexc.to_string exn); true) in
