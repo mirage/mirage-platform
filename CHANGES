@@ -6,6 +6,7 @@
 * [xen] switch to interrupts (SCHEDOP_block) rather than polling (SCHEDOP_poll)
   to allow more than 128 event channels
 * [xen] add Activations.after interface to help drivers avoid losing interrupts
+* Fix build on older gcc (4.4) versions, as found in CentOS 6.4.
 
 0.9.6 (27-Aug-2013):
 * [xen] adapt to new xenstore interface which allows the same code
