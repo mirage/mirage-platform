@@ -28,6 +28,13 @@ type dev_type =
 | PCAP
 | ETH
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
 type t = {
           id: id;
           typ: dev_type;
@@ -36,6 +43,7 @@ type t = {
           dev: Lwt_unix.file_descr;
   mutable active: bool;
           mac: Macaddr.t;
+          stats : stats;
 }
 
 type vif_info = {
@@ -64,6 +72,8 @@ let plug dev_type id fd =
       printf "plugging into %s with mac %s..\n%!" id (Macaddr.to_string mac);
       let active = true in
       let t = { id; dev; active; mac; typ=ETH;buf_sz=4096;
+                stats={rx_bytes=0L;rx_pkts=0l;
+                tx_bytes=0L; tx_pkts=0l;};
                 buf=Io_page.to_cstruct (Lwt_bytes.create 0) } in
       Hashtbl.add devices id t;
       printf "Netif: plug %s\n%!" id;
@@ -76,6 +86,8 @@ let plug dev_type id fd =
       let buf_sz = pcap_get_buf_len fd in
       let active = true in
       let t = { id; dev; active; mac; typ=PCAP; buf_sz;
+                stats={rx_bytes=0L;rx_pkts=0l;
+                tx_bytes=0L; tx_pkts=0l;};
                 buf=Io_page.to_cstruct (Lwt_bytes.create 0);} in
       Hashtbl.add devices id t;
       printf "Netif: plug %s\n%!" id;
@@ -93,8 +105,12 @@ let unplug id =
 
 (* TODO: Properly unplug the created devices *)
 let rec create () =
-  lwt vif = Lwt_stream.next vifs in
-  Lwt.return [(plug vif.vif_dev_type vif.vif_id vif.vif_fd)]
+  try_lwt 
+    let devs = Lwt_stream.get_available vifs in
+    let ret = 
+      List.map (fun vif -> 
+          (plug vif.vif_dev_type vif.vif_id vif.vif_fd)) devs in 
+    return ret
 
 cstruct bpf_hdr {
   uint32 tv_sec;
@@ -116,7 +132,10 @@ let rec input t =
             |0 -> (* EOF *)
                 t.active <- false;
                 input t
-            |n -> return (Cstruct.sub (Io_page.to_cstruct page) 0 len)
+            |n -> 
+                t.stats.rx_pkts <- Int32.succ t.stats.rx_pkts; 
+                t.stats.rx_bytes <- Int64.add t.stats.rx_bytes (Int64.of_int len); 
+                return (Cstruct.sub (Io_page.to_cstruct page) 0 len)
       end
     | PCAP -> begin 
       (* very ineficient mechanism, but fine for now *)
@@ -131,6 +150,8 @@ let rec input t =
           ) else  return ()
         in
         let caplen = Int32.to_int (get_bpf_hdr_caplen t.buf) in
+        t.stats.rx_pkts <- Int32.succ t.stats.rx_pkts; 
+        t.stats.rx_bytes <- Int64.add t.stats.rx_bytes (Int64.of_int caplen); 
         let bh_hdrlen = get_bpf_hdr_bh_hdrlen t.buf in
         (* Equivalent of the BPFWORDALIGN macro *)
         let bpf_wordalign = (caplen + bh_hdrlen + 3) land 0x7ffffffc in
@@ -187,6 +208,8 @@ let destroy nf =
 let write t page =
  (* Unfortunately we peek inside the cstruct type here: *)
   lwt len' = Lwt_bytes.write t.dev page.Cstruct.buffer page.Cstruct.off page.Cstruct.len in
+  t.stats.tx_pkts <- Int32.succ t.stats.tx_pkts; 
+  t.stats.tx_bytes <- Int64.add t.stats.tx_bytes (Int64.of_int page.Cstruct.len); 
   if len' <> page.Cstruct.len then
     raise_lwt (Failure (sprintf "tap: partial write (%d, expected %d)" len' page.Cstruct.len))
   else
@@ -213,3 +236,10 @@ let id t = t.id
 
 let mac t = t.mac
 
+let get_stats_counters t = t.stats
+
+let reset_stats_counters t =
+  t.stats.rx_bytes <- 0L;
+  t.stats.rx_pkts  <- 0l;
+  t.stats.tx_bytes <- 0L;
+  t.stats.tx_pkts  <- 0l

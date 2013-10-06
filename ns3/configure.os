@@ -6,7 +6,7 @@ CFLAGS=${CFLAGS:--Wall -O3}
 
 # try to find the ns3 header files.
 # TODO this is just a random collection of dirs atm
-NS3_DIRS="/usr/local/include/ns3-dev /usr/local/include/ns3.15"
+NS3_DIRS="/usr/local/include/ns3-dev /usr/local/include/ns3.15 /usr/include/ns3.15"
 
 NS3_DIR="notfound"
 

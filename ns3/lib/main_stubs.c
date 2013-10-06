@@ -19,9 +19,19 @@
 #include <caml/callback.h>
 //#include "ev.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+int main (int, char**);
+
+#ifdef  __cplusplus
+}
+#endif
+
+
 int
-main(int argc, char **argv)
-{
+main(int argc, char *argv[]) {
   signal(SIGPIPE, SIG_IGN);
   fprintf(stderr, "Main: startup\n");
   ns3_init();

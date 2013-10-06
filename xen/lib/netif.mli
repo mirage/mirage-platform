@@ -64,3 +64,13 @@ val add_resume_hook : t -> (t -> unit Lwt.t) -> unit
 	  [nf] - called on resume before the service threads are
 	  restarted. Can be used, for example, to send a gratuitous ARP. *)
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
+val get_stats_counters : t -> stats
+val reset_stats_counters : t -> unit
+

@@ -21,7 +21,7 @@ type t
 external write: t -> string -> int -> int -> unit = "console_write"
 external create: unit -> t = "console_create"
 
-let sync_write t buf off len =
+let write_all t buf off len =
   write t buf off len;
   return ()
 
@@ -37,4 +37,5 @@ let log s =
 
 let log_s s =
   let s = s ^ "\n" in
-  sync_write t s 0 (String.length s)
+  write_all t s 0 (String.length s)
+
