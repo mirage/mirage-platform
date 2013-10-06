@@ -20,13 +20,12 @@ open Printf
 external ns3_add_node : string -> unit = "ocaml_ns3_add_node"
 external ns3_add_link : string -> string -> int -> int -> int -> bool -> unit 
 = "ocaml_ns3_add_link_bytecode" "ocaml_ns3_add_link_native"
-external ns3_add_net_intf : string -> string -> string -> string -> unit = "ns3_add_net_intf"
-external ns3_log : string -> unit = "ocaml_ns3_log"
+(* external ns3_add_net_intf : string -> string -> string -> string -> unit =
+  * "ns3_add_net_intf" *)
 external ns3_get_dev_byte_counter : string -> string -> int = 
   "ocaml_ns3_get_dev_byte_counter"
-
 (* Main run thread *) 
-external ns3_run : int -> int = "ocaml_ns3_run" 
+external ns3_run : int -> int ->  string -> int -> unit = "ocaml_ns3_run" 
 
 type node_t = {
   name: string;
@@ -38,18 +37,11 @@ type topo_t = {
   mutable links : (string * string * float) list;
 } 
 
-let topo = 
-  {nodes=(Hashtbl.create 64);links=[];}
+let topo = {nodes=(Hashtbl.create 64);links=[];}
 
-let log typ data = 
-  let msg = Json.to_string (
-    Json.Object [
-      ("ts", (Json.Float (Clock.time ())));
-      ("type", (Json.String typ)); 
-    ("data", (Json.String data));]) in
-    ns3_log msg
-
-let get_topology () =
+let exec fn () = Lwt.ignore_result (fn ())
+ 
+(*let get_topology () =
   let ix = ref 0L in 
   let names = Hashtbl.create 64 in 
   let nodes = Hashtbl.fold
@@ -73,13 +65,13 @@ let get_topology () =
       ("value",(Json.Int 1L))])] 
   ) topo.links [] in 
       Json.Object [("nodes",(Json.Array nodes));
-      ("links", (Json.Array links));]
+      ("links", (Json.Array links));] *)
 
-let get_link_utilization () = 
+(* let get_link_utilization () = 
   let utilisation = List.fold_right (
     fun (node_a, node_b, rate) r -> 
       let utilization_a_b = 
-        float_of_int ((ns3_get_dev_byte_counter node_a node_b) lsl 11) in
+        (float_of_int ((ns3_get_dev_byte_counter node_a node_b) lsl 11)) *. 2.0 in
       let res = r @ (
         if (utilization_a_b < 0.0) then
           []
@@ -102,28 +94,38 @@ let get_link_utilization () =
               ("ts", (Json.Float (Clock.time ()) ));
               ("value", (Json.Float (utilization_b_a /. rate) ))]);]
   ) topo.links [] in 
-        Json.to_string (Json.Array utilisation) 
+        Json.to_string (Json.Array utilisation) *)
 
-let monitor_links () = 
-  let _ = printf "starting link monitoring\n%!" in
-  while_lwt true do 
-    lwt _ = Time.sleep 1.0 in 
-    let _ = printf "getting link stats\n%!" in 
-    let res = get_link_utilization () in 
-    let _ = log "link_utilization" res in 
-      return ()
-  done
+(* let monitor_links () =                                                
+  let _ = printf "starting link monitoring\n%!" in               
+  while_lwt true do                                         
+    lwt _ = Time.sleep 0.5 in            
+    let res = get_link_utilization () in                                
+(*    let msg = Json.to_string (
+      Json.Object [
+        ("ts", (Json.Float (Clock.time ())));
+        ("type", (Json.String "link_utilization"));
+        ("data", (Json.String res));]) in *)
+(*      let _ = Console.broadcast "link_utilization" res in *)
+     return ()                                                      
+  done    *)
 
-let exec fn () =
-  Lwt.ignore_result (fn ())
-
-let load t =
-  Printf.printf "OS.Topology started...\n%!";
+let load ?(debug=None) t =
   let _ = t () in
-  let _ = log "topology" (Json.to_string (get_topology ())) in 
-  let _ = exec (monitor_links) () in 
-  let _ = ns3_run (Time.get_duration ()) in
-    ()
+(*  let msg =  Json.to_string (get_topology ()) in 
+  let msg = Json.to_string (
+    Json.Object [
+      ("ts", (Json.Float (Clock.time ())));
+      ("type", (Json.String "topology"));
+    ("data", (Json.String msg));]) in *)
+ (* let _ =
+    if (debug <> None) then
+      ignore_result (monitor_links ()) 
+in *)
+(*  match (debug) with 
+  | None -> ns3_run (Time.get_duration ()) msg 0 "" 0 
+  | Some(srv, p) ->  ns3_run (Time.get_duration ()) msg 1 srv p *)
+ns3_run (Time.get_duration ()) 0 "" 0 
 
 let add_node name cb_init =
   let _ = ns3_add_node name in
@@ -131,7 +133,7 @@ let add_node name cb_init =
 
 let no_act_init () =
   return ()
-
+(*
 let add_external_dev dev node ip mask =
 (*  let (ip, mask) = 
     match config with 
@@ -143,15 +145,15 @@ let add_external_dev dev node ip mask =
   in *)
   Hashtbl.replace topo.nodes dev {name=dev; cb_init=no_act_init;};
   ns3_add_net_intf dev node ip mask
-  
-  (* rate is in Mbps. *)
+*)
+
+(* rate is in Mbps. *)
 let add_link ?(rate=1000) ?(prop_delay=0) ?(queue_size=100) ?(pcap=false)
     node_a node_b =
   try 
     let _ = Hashtbl.find topo.nodes node_a in 
     let _ = Hashtbl.find topo.nodes node_b in 
-    let _ = topo.links <- topo.links @ [(node_a, node_b, 
-    (float_of_int (rate*1000000)))] in 
+    let _ = topo.links <- (node_a, node_b, (float_of_int (rate * 1048576))) :: topo.links in 
       ns3_add_link node_a node_b rate prop_delay queue_size pcap  
   with Not_found -> ()
 

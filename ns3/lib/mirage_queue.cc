@@ -23,7 +23,7 @@
 #include <ns3/uinteger.h>
 #include <mirage_queue.h>
 
-// NS_LOG_COMPONENT_DEFINE ("MirageQueue");
+NS_LOG_COMPONENT_DEFINE ("MirageQueue");
 
 namespace ns3 {
 

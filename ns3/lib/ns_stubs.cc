@@ -13,31 +13,17 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-
-#include <iostream>
-#include <fstream>
-// #include <net/if.h>
-// #include <linux/if_tun.h>
-
+ 
 #include <unistd.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <err.h>
-#include <sys/ioctl.h>
-
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 
 #include <ns3/core-module.h>
 #include <ns3/network-module.h>
 #include <ns3/point-to-point-module.h>
-#include <ns3/internet-module.h>
-#include <ns3/applications-module.h>
-#include <ns3/log.h>
-#include <ns3/tap-bridge-module.h>
+
+// #include <ns3/tap-bridge-module.h>
+
 #include <ns3/mpi-interface.h>
 
 #define TAP_CREATOR "/usr/local/bin/ns3-dev-tap-creator-debug"
@@ -59,12 +45,8 @@ using namespace std;
 using namespace ns3;
 
 #ifndef USE_MPI
-#define USE_MPI 0
+#define USE_MPI 1
 #endif
-
-NS_LOG_COMPONENT_DEFINE ("MirageExample");
-
-ns3::Time timeout = ns3::Seconds (0);
 
 #ifdef  __cplusplus
 extern "C" {
@@ -73,7 +55,7 @@ extern "C" {
 void ns3_init(void);
 
 //time event handling function
-CAMLprim value ocaml_ns3_add_timer_event(value p_ts, value p_id);
+CAMLprim value ocaml_ns3_add_timer_event(value, value);
 CAMLprim value ocaml_ns3_del_timer_event(value p_id);
 
 // topology functions
@@ -87,15 +69,16 @@ CAMLprim value ocaml_ns3_add_link_native(value ocaml_node_a,
 CAMLprim value caml_pkt_write(value v_node_name, value v_id, value v_ba,
     value v_off, value v_len);
 CAMLprim value caml_queue_check(value v_name,  value v_id);
-CAMLprim value ocaml_ns3_run(value v_duration);
+CAMLprim value ocaml_ns3_run(value, value, value, value);
 CAMLprim value
 caml_register_check_queue(value v_name,  value v_id);
-CAMLprim value
-ns3_add_net_intf(value v_intf, value v_node, value v_ip, value v_mask);
+// CAMLprim value
+// ns3_add_net_intf(value v_intf, value v_node, value v_ip, value v_mask);
 CAMLprim value ocaml_ns3_log(value v_message);
 CAMLprim value 
   ocaml_ns3_get_dev_byte_counter(value node_a, value node_b);
-
+CAMLprim value ocaml_ns3_log(value v_msg);
+ 
 // export the c ocaml bindings in the c++ object files
 #include <caml/fail.h>
 #include <caml/alloc.h>
@@ -119,7 +102,6 @@ struct node_state {
 };
 
 map<string, struct node_state* > nodes;
-
 struct caml_cb {
   value *init_cb;
   value *timer_cb;
@@ -175,7 +157,7 @@ ocaml_ns3_add_timer_event(value p_ts, value p_id) {
   double ts = (Double_val(p_ts) * 1e6);
   int id = Int_val(p_id);
   events[id] = Simulator::Schedule(MicroSeconds (ts), &TimerEventHandler, id );
-  CAMLreturn( Val_int(id) );
+  CAMLreturn( Val_unit );
 }
 
 CAMLprim value
@@ -229,12 +211,22 @@ PktDemux(Ptr<NetDevice> dev, Ptr<const Packet> pktIn, uint16_t proto,
   caml_register_global_root(&ml_data);
   Ptr<Packet> pkt = pktIn->Copy();
   int pkt_len = pkt->GetSize();
-  ml_data = caml_alloc_string(pkt_len);
-  uint8_t *data = (uint8_t *)String_val(ml_data);
-  pkt->CopyData(data, pkt_len);
+  if ((pkt_len < 10 ) || (pkt_len > 1514)) {
+    printf("MALAKIA lower %d\n\n\n\n\n", pkt_len);
+    exit(1);
+  }
 
   // find host name
   string node_name = Names::FindName(dev->GetNode());
+
+  ml_data = caml_alloc_string(pkt_len);
+  uint8_t *data = (uint8_t *)String_val(ml_data);
+  pkt->CopyData(data, pkt_len);
+//  printf("reading packet of type %x\n", *(uint16_t *)(data+12));
+  if ((caml_string_length(ml_data) < 10 ) || (caml_string_length(ml_data) > 1514)) {
+    printf("MALAKIA lower %d %d\n\n\n\n", pkt_len, caml_string_length(ml_data));
+    exit(1);
+  }
 
   // call packet handling code in caml
   caml_callback3(*ns3_cb->pkt_in_cb,
@@ -255,11 +247,11 @@ caml_pkt_write(value v_name, value v_ifIx, value v_ba,
   int len = Int_val(v_len);
 
   //TODO: this appeared invalid on the openflow switch case
-  int off =  0; //Int_val(v_off);
+  int off = Int_val(v_off);
 
   //get a pointer to the packet byte data
   uint8_t *buf = (uint8_t *) Caml_ba_data_val(v_ba);
-  Ptr< Packet> pkt = Create<Packet>(buf, len);
+  Ptr< Packet> pkt = Create<Packet>(buf + off, len);
 
   // find the right device for the node and send packet
   Ptr<Node> node = nodes[name]->node;
@@ -333,10 +325,8 @@ addNs3Node(string name) {
   NodeContainer node;
 
 #if USE_MPI 
-  printf("using mpi\n");
   node.Create(1, node_count);
 #else 
-  printf("not using mpi\n");
   node.Create(1);
 #endif
   // add in the last hashmap
@@ -378,7 +368,7 @@ ocaml_ns3_add_link_native(value ocaml_node_a, value ocaml_node_b, value v_rate,
   CAMLxparam1(v_pcap);
   string node_a = string(String_val(ocaml_node_a));
   string node_b = string(String_val(ocaml_node_b));
-  uint32_t rate = ((uint32_t)Int_val(v_rate))*1e6;
+  uint32_t rate = ((uint32_t)Int_val(v_rate)) * 1048576;
   int propagation = Int_val(v_prop_d);
   int queue_size = Int_val(v_queue_size);
   bool use_pcap = Bool_val(v_pcap);
@@ -420,28 +410,7 @@ ocaml_ns3_add_link_native(value ocaml_node_a, value ocaml_node_b, value v_rate,
   CAMLreturn ( Val_unit );
 }
 
-/* 
- * Configure a tun/tap intf, so we avoid having an internet stack
- * */
-/* bool
-tap_opendev(string intf, string ip, string mask) {
-  char dev[IFNAMSIZ];
-  char buf[4096];
-
-  snprintf(buf, sizeof buf, "tunctl -t %s", intf.c_str());
-  if (system(buf) < 0) err(1, "system");
-  snprintf(buf, sizeof buf, "ip link set %s up", intf.c_str());
-  if (system(buf) < 0) err(1, "system");
-  snprintf(buf, sizeof buf, "/sbin/ifconfig %s %s netmask %s up", 
-      intf.c_str(), ip.c_str(), mask.c_str());
-  fprintf(stderr, "%s\n", buf);
-  system(buf);
-  if (system(buf) < 0) err(1, "system");
-  fprintf(stderr, "tap_opendev: %s\n", dev);
-  // return Val_int(fd);
-  return true;
-} */
-
+/*
 CAMLprim value
 ns3_add_net_intf(value v_intf, value v_node,
     value v_ip, value v_mask) {
@@ -477,7 +446,6 @@ ns3_add_net_intf(value v_intf, value v_node,
 
   //set a packet interception callback and dump a pcap trace
   dev->SetPromiscReceiveCallback(MakeCallback(&PktDemux));
-//  p2p.EnablePcap("ns3", dev, false);
 
   // Install the tap bridge on the vitrual interface node
   tapBridge.SetAttribute ("Mode", StringValue ("UseLocal"));
@@ -485,11 +453,9 @@ ns3_add_net_intf(value v_intf, value v_node,
   Ptr< NetDevice > tapDev = tapBridge.Install (nodes[intf]->node,
       node_intf->GetDevice(0));
 
-  //create the tap/tun interface
-  //tap_opendev(intf, ip, mask );
-
   CAMLreturn ( Val_unit );
 }
+*/
 
 /*
  * Main function methods to init and run the ocaml code
@@ -497,14 +463,13 @@ ns3_add_net_intf(value v_intf, value v_node,
 // inform ocaml code initialize
 void
 ns3_init(void) {
+#if USE_MPI 
   int argc = 0;
   char *arg[] = {};
-#if USE_MPI 
   MpiInterface::Enable (&argc, (char ***)&arg);
   GlobalValue::Bind ("SimulatorImplementationType",
       StringValue ("ns3::DistributedSimulatorImpl"));
 #endif
-
 // param to run simulation in real time. Invalid with mpi simulation
 //  GlobalValue::Bind ("SimulatorImplementationType", 
 //      StringValue ("ns3::RealtimeSimulatorImpl"));  
@@ -513,7 +478,6 @@ ns3_init(void) {
 static void
 call_init_method (string name) {
   value ml_name;
-
 #if USE_MPI
   if ((MpiInterface::GetSystemId ()) !=
       nodes[name]->node_id)
@@ -526,59 +490,10 @@ call_init_method (string name) {
   caml_remove_global_root(&ml_name);
 }
 
-int log_fd = -1;
-int connect_socket (char *server, int port) {
-  int sock;                        /* Socket descriptor */
-  struct sockaddr_in echoServAddr; /* Echo server address */
 
-  /* Create a reliable, stream socket using TCP */
-  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-    perror("socket() error");
-    exit(1);
-  }
-
-  /* Construct the server address structure */
-  memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
-  echoServAddr.sin_family      = AF_INET;             /* Internet address family */
-  echoServAddr.sin_addr.s_addr = inet_addr(server);   /* Server IP address */
-  echoServAddr.sin_port        = htons(port); /* Server port */
-
-  /* Establish the connection to the echo server */
-  if (connect(sock, (struct sockaddr *) &echoServAddr, 
-        sizeof(echoServAddr)) < 0) {
-    perror("connect() failed");
-    exit(1);
-  }
-  return sock;
-}
-
-CAMLprim value
-ocaml_ns3_log(value v_message) {
-  CAMLparam1(v_message);
-  uint32_t msglen = 0;
-  uint32_t send_len = 0;
-
-  if(log_fd < 0) {
-    log_fd = connect_socket("54.243.253.206", 8124);
-  }
-
-  msglen = strlen(String_val(v_message)); /* Determine input length */
-  send_len = htonl(msglen);
-  printf("sending %s\n", String_val(v_message));
-
-  /* Send the string to the server */
-  send(log_fd, &send_len, 4, 0);
-  if (send(log_fd, String_val(v_message), 
-        msglen, 0) != msglen) {
-    perror("send() sent a different number of bytes than expected");
-    exit(1);
-  }
-
-  CAMLreturn(Val_unit);
-
-}
-
-
+/*
+ * A method to get network card counters
+ */
 CAMLprim value
 ocaml_ns3_get_dev_byte_counter(value node_a, value node_b) {
   CAMLparam2(node_a, node_b);
@@ -609,18 +524,97 @@ ocaml_ns3_get_dev_byte_counter(value node_a, value node_b) {
 
 }
 
+int connect_socket (string server, int port) {
+  int sock;                        /* Socket descriptor */
+  struct sockaddr_in echoServAddr; /* Echo server address */
+
+  /* Create a reliable, stream socket using TCP */
+  if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+    perror("socket() error");
+    exit(1);
+  }
+
+  /* Construct the server address structure */
+  memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
+  echoServAddr.sin_family      = AF_INET;             /* Internet address family */
+  echoServAddr.sin_addr.s_addr = inet_addr(server.c_str());   /* Server IP address */
+  echoServAddr.sin_port        = htons(port); /* Server port */
+
+
+//  int flag = 1;
+//  int result = setsockopt(sock,            /* socket affected */
+//      IPPROTO_TCP,     /* set option at TCP level */
+//      TCP_NODELAY,     /* name of option */
+//      (char *) &flag,  /* the cast is historical
+//                          cruft */
+//      sizeof(int));    /* length of option value */
+
+  /* Establish the connection to the echo server */
+  if (connect(sock, (struct sockaddr *) &echoServAddr, 
+        sizeof(echoServAddr)) < 0) {
+    return -1; 
+  }
+  return sock;
+}
+
+int log_fd = -1;
+int debug = 0;
+string log_server = ""; 
+int log_port = 0; 
+
+void
+ns_log(char *msg) {
+  if (!debug) 
+    return; 
+  if (log_fd == -1) {
+    int sock = connect_socket(log_server, log_port);
+    if(sock <= 0) {
+      printf("[console] error opening socket\n");
+      return; 
+    }
+    log_fd = sock;
+  }
+  // print data
+  int32_t msglen = strlen(msg); /* Determine input length */
+  int32_t send_len = htonl(msglen);
+
+  /* Send the string to the server */
+  send(log_fd, &send_len, 4, 0);
+  int sending = 0; 
+  while ( sending < msglen) {
+    int ret = send(log_fd, (msg + sending), (msglen - sending), 0);
+    if (ret < 0) { 
+      perror("ns_log err");
+      close(log_fd);
+      log_fd = -1; 
+      break;
+    }
+    sending += ret; 
+  }
+}
+
+CAMLprim value
+ocaml_ns3_log(value v_msg) {
+  CAMLparam1(v_msg);
+  ns_log(String_val(v_msg));
+  CAMLreturn(Val_unit);
+}
+ 
 // Main simulation run function
 CAMLprim value
-ocaml_ns3_run(value v_duration) {
-  CAMLparam1(v_duration);
+ocaml_ns3_run(value v_duration, value v_debug, value v_srv, value v_p) {
+  CAMLparam4(v_duration, v_debug, v_srv, v_p);
   int duration = Int_val(v_duration);
+  debug = Int_val(v_debug);
+  log_server =  string(String_val(v_srv));
+  log_port = (Int_val(v_p));
 
 #if USE_MPI
   // for each host I need a signle process 
   if (MpiInterface::GetSize() < nodes.size()) {
     char msg[2048];
-    snprintf(msg, 2048, "Insufficient number of mpi processes. Need %d processes.", 
-        (int)nodes.size());
+    snprintf(msg, 2048, "Insufficient number of mpi processes. \
+        Need %d processes.", (int)nodes.size());
     NS_FATAL_ERROR(msg);
     exit(1);
   }
@@ -628,9 +622,9 @@ ocaml_ns3_run(value v_duration) {
 
   // Configure the logging functionality
   // LogComponentEnable ("TapBridge", LOG_LEVEL_LOGIC);
-  //LogComponentEnable ("TapBridgeHelper", LOG_LEVEL_LOGIC);
-  //  LogComponentEnable ("MirageQueue", LOG_LEVEL_LOGIC);
-  //  LogComponentEnable ("PointToPointNetDevice", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("TapBridgeHelper", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("MirageQueue", LOG_LEVEL_LOGIC);
+  // LogComponentEnable ("PointToPointNetDevice", LOG_LEVEL_LOGIC);
 
   if (duration) {
     printf("Setting duration to %d seconds\n", duration);
@@ -646,14 +640,15 @@ ocaml_ns3_run(value v_duration) {
   ns3_cb->queue_unblock_cb = caml_named_value("unblock_device");
 
   map<string, struct node_state* >::iterator it;
-  printf("parse nodes\n");
-  for (it=nodes.begin(); it != nodes.end(); it++) {
-    printf("node %s found\n", it->first.c_str());
-  }
+
+/*  if ((MpiInterface::GetSystemId ()) == 0) {
+    printf("sending topology to server\nXXXXXXX %s\n", topo);
+    ns_log(topo); 
+  } */
 
   // on time 0 run the init code
   for (it=nodes.begin() ; it != nodes.end(); it++) {
-    Simulator::Schedule(Seconds (0.0), &call_init_method, it->first);
+   Simulator::Schedule(Seconds (0.0), &call_init_method, it->first);
   }
 
   Simulator::Run ();
