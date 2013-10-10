@@ -1,5 +1,17 @@
 #!/bin/sh -x
 
+# Detect OCaml version and symlink in right runtime files
+OCAML_VERSION=`ocamlc -version`
+case $OCAML_VERSION in
+4.00.1|4.01.0)
+  ln -nsf ocaml.$OCAML_VERSION runtime/ocaml
+  ln -nsf caml.$OCAML_VERSION runtime/include/caml
+  ;;
+*)
+  echo Unknown OCaml version $OCAML_VERSION
+  exit 1
+esac
+
 # This extra flag only needed for gcc 4.8+
 GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
 if [ $GCC_MVER2 -ge 8 ]; then
