@@ -1,6 +1,8 @@
 .PHONY: all _config build install uninstall doc clean
 
-EXTRA=runtime/dietlibc/libdiet.a runtime/libm/libm.a runtime/kernel/libxen.a runtime/kernel/libxencaml.a runtime/ocaml/libocaml.a runtime/kernel/x86_64.o runtime/kernel/longjmp.o runtime/kernel/mirage-x86_64.lds
+OCAML_VERSION=$(shell readlink runtime/ocaml)
+
+EXTRA=runtime/dietlibc/libdiet.a runtime/libm/libm.a runtime/kernel/libxen.a runtime/kernel/libxencaml.a runtime/$(OCAML_VERSION)/libocaml.a runtime/kernel/x86_64.o runtime/kernel/longjmp.o runtime/kernel/mirage-x86_64.lds
 
 OCAMLFIND ?= ocamlfind
 
