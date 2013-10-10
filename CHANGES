@@ -1,4 +1,5 @@
 0.9.8 (trunk):
+* Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
 * Major refresh of the NS3 simulation backend, for latest APIs.
 * Add `Netif` statistics counters per-packet.
 
