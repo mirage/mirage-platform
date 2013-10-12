@@ -93,19 +93,13 @@ gnttab_end_transfer(grant_ref_t ref)
     return frame;
 }
 
-/* An Io_page is an OCaml bigarray value with CAML_BA_MANAGED. If this has a
- * proxy set, then that points to the *base* of the data, and the array->data
- * is a pointer into a sub-view of that.
- * The grant functions always grant the base page rather than the current
- * view, since grants have to be page-aligned */
-
 static void *
 base_page_of(value v_iopage)
 {
+    /* The grant API takes page-alignted addresses. */
     struct caml_ba_array *a = (struct caml_ba_array *)Caml_ba_array_val(v_iopage);
-    void *page = (a->proxy == NULL) ? a->data : a->proxy->data;
-    ASSERT(((unsigned long)page) % PAGE_SIZE == 0);
-    return page;
+    unsigned long page_aligned_view = (unsigned long)a->data & ~(PAGE_SIZE - 1);
+    return (void*) page_aligned_view;
 }
 
 CAMLprim value
