@@ -2,6 +2,7 @@
 * Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
 * Major refresh of the NS3 simulation backend, for latest APIs.
 * Add `Netif` statistics counters per-packet.
+* [xen] Fix multi-page ring support by granting the correct data pages.
 
 0.9.7 (5-Oct-2013):
 * Add Travis continuous integration scripts.
