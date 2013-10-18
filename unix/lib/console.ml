@@ -20,19 +20,17 @@ open Printf
 (* TODO management service for logging *)
 type t = unit
 
-let write t buf off len = prerr_string (String.sub buf off len); len
+let write t buf off len = prerr_string (String.sub buf off len); flush stderr; len
 
 let create () : t = ()
 
-let write_all t buf off len = Lwt.return (write t buf off len)
+let write_all t buf off len = return (write t buf off len)
 
 let create_additional_console () = return (create ())
 
 let t =  create ()
 
-let log s =
-  let (_:int) = write t s 0 (String.length s) in
-  let (_:int) = write t "\n" 0 1 in ()
+let log s = prerr_endline s 
 
 let log_s s =
   let s = s ^ "\n" in
