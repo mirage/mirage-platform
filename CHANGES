@@ -4,6 +4,7 @@
 * Add `Netif` statistics counters per-packet.
 * [xen] Fix multi-page ring support by granting the correct data pages.
 * [unix] flush OS.Console file descriptor more often (#108). 
+* Fix regression in `Io_page.string_blit` with non-zero src offset (#71).
 
 0.9.7 (5-Oct-2013):
 * Add Travis continuous integration scripts.

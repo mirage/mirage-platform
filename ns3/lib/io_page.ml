@@ -56,7 +56,7 @@ let blit src dest = Bigarray.Array1.blit src dest
 
 let string_blit src srcoff dst dstoff len =
   for i = srcoff to srcoff + len - 1 do
-    dst.{i+dstoff} <- src.[i]
+    dst.{i+dstoff} <- src.[i+srcoff]
   done
 
 
