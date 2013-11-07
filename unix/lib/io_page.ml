@@ -54,10 +54,9 @@ let to_string t =
 
 let blit src dest = Bigarray.Array1.blit src dest
 
+(* TODO: this is extremely inefficient.  Should use a ocp-endian
+   blit rather than a byte-by-byte *)
 let string_blit src srcoff dst dstoff len =
-  for i = srcoff to srcoff + len - 1 do
+  for i = 0 to len - 1 do
     dst.{i+dstoff} <- src.[i+srcoff]
   done
-
-
-
