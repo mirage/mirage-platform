@@ -1,5 +1,5 @@
 NAME=mirage
-VERSION=0.9.8
+VERSION=0.9.9
 DEPS="ipaddr cstruct lwt lwt.unix"
 SYNTAX_DEPS="cstruct.syntax lwt.syntax"
 RUNTIME="ns3run"
