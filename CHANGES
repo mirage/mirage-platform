@@ -1,7 +1,20 @@
-0.9.7 (trunk):
+0.9.8 (07-Nov-2013):
+* Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
+* Major refresh of the NS3 simulation backend, for latest APIs.
+* Add `Netif` statistics counters per-packet.
+* [xen] Fix multi-page ring support by granting the correct data pages.
+* [unix] flush OS.Console file descriptor more often (#108). 
+* Fix regression in `Io_page.string_blit` with non-zero src offset (#71).
+
+0.9.7 (05-Oct-2013):
 * Add Travis continuous integration scripts.
 * [xen] zero out freshly allocated io pages.
 * [xen] correct reattach xenstore connection after resume.
+* [xen] fix suspend/resume
+* [xen] switch to interrupts (SCHEDOP_block) rather than polling (SCHEDOP_poll)
+  to allow more than 128 event channels
+* [xen] add Activations.after interface to help drivers avoid losing interrupts
+* Fix build on older gcc (4.4) versions, as found in CentOS 6.4.
 
 0.9.6 (27-Aug-2013):
 * [xen] adapt to new xenstore interface which allows the same code

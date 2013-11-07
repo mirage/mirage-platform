@@ -52,8 +52,8 @@ let pages_order order = pages (1 lsl order)
 let to_cstruct t = Cstruct.of_bigarray t
 
 let string_blit src srcoff dst dstoff len =
-  for i = srcoff to srcoff + len - 1 do
-    dst.{i+dstoff} <- src.[i]
+  for i = 0 to len - 1 do
+    dst.{i+dstoff} <- src.[i+srcoff]
   done
 
 let to_string t =

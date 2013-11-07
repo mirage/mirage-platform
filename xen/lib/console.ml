@@ -29,9 +29,6 @@ type t = {
 
 exception Internal_error of string
 
-(** Called by a console thread that wishes to sleep (or be cancelled) *)
-let wait cons = Activations.wait cons.evtchn
-
 let h = Eventchn.init ()
 
 let create () =
@@ -47,7 +44,7 @@ let create () =
   Eventchn.notify h evtchn;
   cons
 
-let rec write_all cons buf off len =
+let rec write_all event cons buf off len =
   if len > String.length buf - off
   then Lwt.fail (Invalid_argument "len")
   else
@@ -56,7 +53,9 @@ let rec write_all cons buf off len =
     let left = len - w in
     assert (left >= 0);
     if left = 0 then return ()
-    else wait cons >> write_all cons buf (off+w) left
+    else
+      lwt event = Activations.after cons.evtchn event in
+      write_all event cons buf (off+w) left
 
 let write cons buf off len =
   if len > String.length buf - off then raise (Invalid_argument "len");
@@ -72,4 +71,4 @@ let log s =
 
 let log_s s =
   let s = s ^ "\r\n" in
-  write_all t s 0 (String.length s)
+  write_all Activations.program_start t s 0 (String.length s)

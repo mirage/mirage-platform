@@ -125,6 +125,13 @@ type features = {
   smart_poll: bool;
 }
 
+type stats = {
+  mutable rx_bytes : int64;
+  mutable rx_pkts : int32;
+  mutable tx_bytes : int64;
+  mutable tx_pkts : int32; 
+}
+
 type transport = {
   id: int;
   backend_id: int;
@@ -140,6 +147,7 @@ type transport = {
   rx_gnt: Gnt.gntref;
   evtchn: Eventchn.t;
   features: features;
+  stats : stats;
 }
 
 type t = {
@@ -215,11 +223,11 @@ let plug_inner id =
   Eventchn.unmask h evtchn;
   (* Register callback activation *)
   return { id; backend_id; tx_fring; tx_client; tx_gnt; tx_mutex; rx_gnt; rx_fring; rx_client; rx_map;
-    evtchn; mac; backend; features }
+    evtchn; mac; backend; features; stats={rx_pkts=0l;rx_bytes=0L;tx_pkts=0l;tx_bytes=0L;};}
 
 let plug id =
   lwt transport = plug_inner id in
-  let t = { t=transport; resume_fns=[]; l=Lwt_mutex.create (); c=Lwt_condition.create () } in
+let t = {t=transport; resume_fns=[]; l=Lwt_mutex.create (); c=Lwt_condition.create () } in
   Hashtbl.add devices id t;
   return t
 
@@ -260,6 +268,8 @@ let rx_poll nf fn =
     match status with
     |sz when status > 0 ->
       let packet = Cstruct.sub (Io_page.to_cstruct page) 0 sz in
+      nf.stats.rx_pkts <- Int32.succ nf.stats.rx_pkts;
+      nf.stats.rx_bytes <- Int64.add nf.stats.rx_bytes (Int64.of_int sz);
       ignore_result (try_lwt fn packet
         with exn -> return (printf "RX exn %s\n%!" (Printexc.to_string exn)))
     |err -> printf "RX error %d\n%!" err
@@ -276,6 +286,8 @@ let write_request ?size ~flags nf page =
   Gnt.Gntshr.grant_access ~domid:nf.t.backend_id ~writeable:false gref page.Cstruct.buffer;
   let size = match size with |None -> Cstruct.len page |Some s -> s in
   (* XXX: another place where we peek inside the cstruct *)
+  nf.t.stats.tx_pkts <- Int32.succ nf.t.stats.tx_pkts;
+  nf.t.stats.tx_bytes <- Int64.add nf.t.stats.tx_bytes (Int64.of_int size);
   let offset = page.Cstruct.off in
   lwt replied = Lwt_ring.Front.write nf.t.tx_client
     (TX.Proto_64.write ~id:gref ~gref:(Int32.of_int gref) ~offset ~flags ~size) in
@@ -315,16 +327,16 @@ let write nf page =
 let writev nf pages =
   Lwt_mutex.with_lock nf.t.tx_mutex
   (fun () ->
-  let rec wait_for_free_tx n =
+  let rec wait_for_free_tx event n =
     let numfree = Ring.Rpc.Front.get_free_requests nf.t.tx_fring in 
     if n >= numfree then 
-      Activations.wait nf.t.evtchn >> 
-      wait_for_free_tx n
+      lwt event = Activations.after nf.t.evtchn event in
+      wait_for_free_tx event n
     else
       return ()
   in
   let numneeded = List.length pages in
-  wait_for_free_tx numneeded >>
+  wait_for_free_tx Activations.program_start numneeded >>
   match pages with
   |[] -> return ()
   |[page] ->
@@ -360,23 +372,24 @@ let wait_for_plug nf =
 
 let listen nf fn =
   (* Listen for the activation to poll the interface *)
-  let rec poll_t t =
+  let rec poll_t event t =
     lwt () = refill_requests t in
     rx_poll t fn;
     tx_poll t;
     (* Evtchn.notify nf.t.evtchn; *)
-    lwt new_t =
+    lwt (event, new_t) =
       try_lwt
-        Activations.wait t.evtchn >> return t
+        lwt event = Activations.after t.evtchn event in
+        return (event, t)
       with
       | Generation.Invalid ->
         Console.log_s "Waiting for plug in listen" >>
         wait_for_plug nf >>
         Console.log_s "Done..." >>
-        return nf.t
-    in poll_t new_t
+        return (Activations.program_start, nf.t)
+    in poll_t event new_t
   in
-  poll_t nf.t
+  poll_t Activations.program_start nf.t
 
 (** Return a list of valid VIFs *)
 let enumerate () =
@@ -419,6 +432,14 @@ let get_writebuf t =
   let page = Io_page.get 1 in
   (* TODO: record statistics for requesting thread here (in debug mode?) *)
   return (Cstruct.of_bigarray page)
+
+let get_stats_counters t = t.t.stats
+
+let reset_stats_counters t =
+  t.t.stats.rx_bytes <- 0L;
+  t.t.stats.rx_pkts  <- 0l;
+  t.t.stats.tx_bytes <- 0L;
+  t.t.stats.tx_pkts  <- 0l
 
 let _ =
   printf "Netif: add resume hook\n%!";
