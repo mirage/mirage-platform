@@ -8,6 +8,8 @@
 
 0.9.7 (05-Oct-2013):
 * Add Travis continuous integration scripts.
+* [xen] zero out freshly allocated io pages.
+* [xen] correct reattach xenstore connection after resume.
 * [xen] fix suspend/resume
 * [xen] switch to interrupts (SCHEDOP_block) rather than polling (SCHEDOP_poll)
   to allow more than 128 event channels
