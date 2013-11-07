@@ -1,4 +1,4 @@
-0.9.8 (trunk):
+0.9.8 (07-Nov-2013):
 * Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
 * Major refresh of the NS3 simulation backend, for latest APIs.
 * Add `Netif` statistics counters per-packet.
@@ -6,7 +6,7 @@
 * [unix] flush OS.Console file descriptor more often (#108). 
 * Fix regression in `Io_page.string_blit` with non-zero src offset (#71).
 
-0.9.7 (5-Oct-2013):
+0.9.7 (05-Oct-2013):
 * Add Travis continuous integration scripts.
 * [xen] fix suspend/resume
 * [xen] switch to interrupts (SCHEDOP_block) rather than polling (SCHEDOP_poll)
