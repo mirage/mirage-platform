@@ -1,3 +1,7 @@
+0.9.9 (trunk):
+* Move `OS.Clock` out to a toplevel `Clock` module (the `mirage-clock` package).
+* Move `OS.Io_page` out to a toplevel `Io_page` module (the `io-page` package).
+
 0.9.8 (07-Nov-2013):
 * Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
 * Major refresh of the NS3 simulation backend, for latest APIs.
