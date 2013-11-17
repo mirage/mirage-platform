@@ -19,13 +19,14 @@ open Lwt
 type name = string
 
 module type S = V1.BLOCK_DEVICE
-  with type page_aligned_buffer := Io_page.t
+  with type page_aligned_buffer := Cstruct.t
   and type 'a io := 'a Lwt.t
 
 let table = Hashtbl.create 16
 let waiters = Hashtbl.create 16
 
 let register id m =
+  Printf.printf "Registering block driver %s\n" id;
   Hashtbl.replace table id m;
   if Hashtbl.mem waiters id
   then

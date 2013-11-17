@@ -18,7 +18,7 @@ type name = string
 (** Used to identify a block device driver *)
 
 module type S = V1.BLOCK_DEVICE
-  with type page_aligned_buffer := Io_page.t
+  with type page_aligned_buffer := Cstruct.t
   and type 'a io := 'a Lwt.t
 
 val find: name -> (module S) Lwt.t
