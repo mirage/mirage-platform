@@ -11,6 +11,9 @@ build: _config
 install:
 	./cmd install
 
+uninstall:
+	./cmd uninstall
+
 doc: _config
 	./cmd doc
 
