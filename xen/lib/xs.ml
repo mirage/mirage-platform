@@ -56,7 +56,7 @@ module IO = struct
       | None -> ()
 
     let destroy t =
-      Console.log "ERROR: It's not possible to destroy the default xenstore connection";
+      Printf.printf "ERROR: It's not possible to destroy the default xenstore connection\n%!";
       fail Cannot_destroy
 
     (* XXX: unify with ocaml-xenstore-xen/xen/lib/xs_transport_domain *)
