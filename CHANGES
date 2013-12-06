@@ -1,4 +1,5 @@
 0.9.9 (trunk):
+* Remove `tuntap` stubs from Unix module; they are in `ocaml-tuntap` now.
 * Move `OS.Clock` out to a toplevel `Clock` module (the `mirage-clock` package).
 * Move `OS.Io_page` out to a toplevel `Io_page` module (the `io-page` package).
 
