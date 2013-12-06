@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+SRC=$1
+OUT=$2
+
+function usage {
+  echo "Usage: $0 <src-file> <output-file>"
+  exit 1
+}
+
+if [ "$SRC" = "" ]; then usage; fi
+if [ "$OUT" = "" ]; then usage; fi
+
+OCAMLFIND_PATH=`ocamlfind printconf path`
+X=${OCAMLFIND_PATH}/mirage-xen
+
+ld -d -nostdlib -m elf_x86_64 -T $X/mirage-x86_64.lds $X/x86_64.o $SRC $X/libocaml.a $X/libxen.a $X/libxencaml.a $X/libdiet.a $X/libm.a $X/longjmp.o -o $OUT
