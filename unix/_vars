@@ -1,6 +1,6 @@
 NAME=mirage
 VERSION=0.9.9
-DEPS="cstruct lwt lwt.unix tuntap ipaddr io-page mirage-clock"
+DEPS="cstruct lwt lwt.unix io-page-unix mirage-clock-unix"
 SYNTAX_DEPS="cstruct.syntax lwt.syntax"
 RUNTIME="unixrun"
 LIB="oS"
