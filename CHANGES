@@ -5,6 +5,7 @@
 * Move `OS.Io_page` out to a toplevel `Io_page` module (the `io-page` package).
 * Update library dependencies to reduce them based on new functionality.
 * Install library as `mirage-xen` or `mirage-unix` that can coexist.
+* Suppress dietlibc linker warnings for sscanf/sprintf.
 
 0.9.8 (07-Nov-2013):
 * Add support for OCaml 4.01.0 in addition to the existing 4.00.1 runtime.
