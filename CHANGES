@@ -1,4 +1,4 @@
-0.9.9 (trunk):
+0.9.9 (07-Dec-2013):
 * Fix uninstall target for Unix.
 * Remove `tuntap` stubs from Unix module; they are in `ocaml-tuntap` now.
 * Move `OS.Clock` out to a toplevel `Clock` module (the `mirage-clock` package).
