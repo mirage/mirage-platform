@@ -1,17 +1,11 @@
-Io_page
 Gnt
 Activations
 Eventchn
-Console
-Clock
 Time
 Main
-Block
-Devices
 Device_state
 Xs
 Env
-Netif
 Start_info
 Sched
 Xenctrl
