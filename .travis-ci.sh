@@ -73,7 +73,7 @@ echo OPAM versions
 opam --version
 opam --git-version
 
-opam init 
+opam init git://github.com/ocaml/opam-repository
 
 opam install ${OPAM_PACKAGES}
 
