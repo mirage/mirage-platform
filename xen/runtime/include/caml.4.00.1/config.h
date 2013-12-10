@@ -28,7 +28,7 @@
 #undef ARCH_ALIGN_DOUBLE
 #undef ARCH_ALIGN_INT64
 #undef NONSTANDARD_DIV_MOD
-#define OCAML_OS_TYPE "xen"
+#define OCAML_OS_TYPE "Unix"
 #define OCAML_STDLIB_DIR "/usr/local/lib/ocaml"
 #define POSIX_SIGNALS
 //#define HAS_GETRUSAGE
