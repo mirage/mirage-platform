@@ -1,3 +1,6 @@
+1.0.0 (10-Dec-2013):
+* Set `Sys.os_type` to Unix in the Xen backend to help compatibility (#78).
+
 0.9.9 (07-Dec-2013):
 * Fix uninstall target for Unix.
 * Remove `tuntap` stubs from Unix module; they are in `ocaml-tuntap` now.
