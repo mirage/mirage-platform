@@ -30,7 +30,7 @@ xen)
     -isystem ${PWD}/runtime/include/ -isystem ${PWD}/runtime/include/mini-os \
     -isystem ${PWD}/runtime/include/mini-os/x86 -DCAML_NAME_SPACE -DTARGET_amd64 
     -DSYS_xen -I${PWD}/runtime/ocaml -I${PWD}/runtime/libm \
-    -Wextra -Wchar-subscripts -Wmissing-prototypes -Wmissing-declarations -Wno-switch \
+    -Wextra -Wchar-subscripts -Wno-switch \
     -Wno-unused -Wredundant-decls -D__dietlibc__ -I${PWD}/runtime/dietlibc \
     -DNATIVE_CODE"
   ;;
