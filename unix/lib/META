@@ -1,0 +1,13 @@
+# OASIS_START
+# DO NOT EDIT (digest: 64928b6d83ed75588285da9a9af31794)
+version = "1.0.0"
+description =
+"Core platform libraries for Mirage (UNIX and Xen). This provides the `OS` library which handles timers, device setup and the main loop, as well as the runtime for the Xen microkernel.Page-aligned memory allocator."
+requires = "lwt.unix lwt.syntax"
+archive(byte) = "OS.cma"
+archive(byte, plugin) = "OS.cma"
+archive(native) = "OS.cmxa"
+archive(native, plugin) = "OS.cmxs"
+exists_if = "OS.cma"
+# OASIS_STOP
+
