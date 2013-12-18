@@ -17,7 +17,7 @@ Library OS
   Findlibname:        mirage-unix
   Modules:            Env, Main, Time
   CSources:           checksum_stubs.c
-  BuildDepends:       lwt.unix, lwt.syntax
+  BuildDepends:       lwt.unix, lwt.syntax, camlp4
 
 Document "mirage-unix"
   Title:                Mirage unix docs
