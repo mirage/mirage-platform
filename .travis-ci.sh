@@ -8,7 +8,7 @@
 # from within Travis.
 
 # OPAM packages needed to build tests.
-OPAM_PACKAGES="shared-memory-ring lwt xenstore cstruct lwt io-page-xen mirage-clock-xen io-page-unix mirage-clock-unix"
+OPAM_PACKAGES="shared-memory-ring lwt xenstore cstruct lwt mirage-clock-xen io-page mirage-clock-unix"
 
 function setup_arm_chroot {
   echo Setting up qemu chroot for ARM
