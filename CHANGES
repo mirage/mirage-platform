@@ -1,3 +1,6 @@
+trunk (unreleased):
+* Update to new io-page{,.unix} ocamlfind packages
+
 1.0.0 (10-Dec-2013):
 * Set `Sys.os_type` to Unix in the Xen backend to help compatibility (#78).
 * Suppress another dietlibc linker warning for vprintf in Xen.
