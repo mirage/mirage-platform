@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009 Citrix Systems Inc.
+ * Copyright (C) 2006-2009,2013-2014 Citrix Systems Inc.
  * Copyright (C) 2010 Anil Madhavapeddy <anil@recoil.org>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,12 +72,17 @@ stub_evtchn_look_for_work(value v_unit)
     CAMLreturn(work_to_do);
 }
 
-/* Initialise and bind the predefined ports */
 CAMLprim value
 caml_evtchn_init(value v_unit)
 {
     CAMLparam1(v_unit);
-    CAMLlocal1(v_arr);
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim value
+caml_evtchn_close(value v_unit)
+{
+    CAMLparam1(v_unit);
     CAMLreturn(Val_unit);
 }
 
@@ -99,9 +104,9 @@ caml_evtchn_test_and_clear(value v_idx)
 }
 
 CAMLprim value
-stub_evtchn_alloc_unbound(value v_domid)
+stub_evtchn_alloc_unbound(value v_unit, value v_domid)
 {
-    CAMLparam1(v_domid);
+    CAMLparam2(v_unit, v_domid);
     domid_t domid = Int_val(v_domid);
     int rc;
     evtchn_port_t port;
@@ -114,9 +119,9 @@ stub_evtchn_alloc_unbound(value v_domid)
 }
 
 CAMLprim value
-stub_evtchn_bind_interdomain(value v_domid, evtchn_port_t v_remote_port)
+stub_evtchn_bind_interdomain(value v_unit, value v_domid, value v_remote_port)
 {
-    CAMLparam2(v_domid, v_remote_port);
+    CAMLparam3(v_unit, v_domid, v_remote_port);
     domid_t domid = Int_val(v_domid);
     evtchn_port_t remote_port = Int_val(v_remote_port);
     evtchn_port_t local_port;
@@ -130,25 +135,25 @@ stub_evtchn_bind_interdomain(value v_domid, evtchn_port_t v_remote_port)
 }
 
 CAMLprim value
-stub_evtchn_unmask(value v_port)
+stub_evtchn_unmask(value v_unit, value v_port)
 {
-    CAMLparam1(v_port);
+    CAMLparam2(v_unit, v_port);
     unmask_evtchn(Int_val(v_port));
     CAMLreturn(Val_unit);
 }
 
 CAMLprim value
-stub_evtchn_notify(value v_port)
+stub_evtchn_notify(value v_unit, value v_port)
 {
-        CAMLparam1(v_port);
+        CAMLparam2(v_unit, v_port);
         notify_remote_via_evtchn(Int_val(v_port));
         CAMLreturn(Val_unit);
 }
 
 CAMLprim value
-stub_bind_virq(value virq)
+stub_bind_virq(value v_unit, value virq)
 {
-	CAMLparam1(virq);
+	CAMLparam2(v_unit, virq);
 	int rc;
 	evtchn_port_t port;
 	rc = evtchn_bind_virq(Int_val(virq), &port);
@@ -167,9 +172,9 @@ stub_virq_dom_exc(value unit)
 }
 
 CAMLprim value
-stub_evtchn_unbind(value v_port)
+stub_evtchn_unbind(value v_unit, value v_port)
 {
-	CAMLparam1(v_port);
+	CAMLparam2(v_unit, v_port);
 	unbind_evtchn(Int_val(v_port));
 	CAMLreturn(Val_unit);
 }

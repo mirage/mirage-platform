@@ -45,6 +45,8 @@ let rec call_hooks hooks  =
         in
         call_hooks hooks
 
+external look_for_work: unit -> bool = "stub_evtchn_look_for_work"
+
 (* Execute one iteration and register a callback function *)
 let run t =
   let t = call_hooks enter_hooks <&> t in
@@ -56,7 +58,7 @@ let run t =
       | Some x ->
           true
       | None ->
-          if Eventchn.look_for_work () then begin
+          if look_for_work () then begin
             (* Some event channels have triggered, wake up threads
              * and continue without blocking. *)
             Activations.run evtchn;
