@@ -1,5 +1,5 @@
 NAME=mirage
 VERSION=1.0.0
-DEPS="lwt cstruct xen-event xenstore shared-memory-ring shared-memory-ring.lwt shared-memory-ring.xenstore shared-memory-ring.console mirage-types mirage-clock-xen io-page"
+DEPS="lwt cstruct xen-event xen-grant xenstore shared-memory-ring shared-memory-ring.lwt shared-memory-ring.xenstore shared-memory-ring.console mirage-types mirage-clock-xen io-page"
 SYNTAX_DEPS="lwt.syntax cstruct.syntax"
 LIB="oS"
