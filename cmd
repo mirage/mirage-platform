@@ -60,25 +60,15 @@ compile() {
 # generate META file and invoke ${OCAMLFIND} installation
 install()  {
   sed -e "s/@VERSION@/${VERSION}/g" < META.in > _config/META
-  if [ -e META.xenctrl.in ]; then
-    sed -e "s/@VERSION@/${VERSION}/g" < META.xenctrl.in > _config/META.xenctrl
-  fi
   ${OCAMLFIND} remove ${NAME}-${MIRAGE_OS} || true
   t=`sed -e 's,^,_build/,g' < _build/${NAME}.all`
   if [ ! -z "${DESTDIR}" ]; then
     OCAMLFIND_FLAGS="${OCAMLFIND_FLAGS} -destdir ${DESTDIR}"
   fi
   ${OCAMLFIND} install ${OCAMLFIND_FLAGS} ${NAME}-${MIRAGE_OS} _config/META ${t}
-  if [ -e _config/META.xenctrl ]; then
-    ${OCAMLFIND} remove xenctrl || true
-    ${OCAMLFIND} install ${OCAMLFIND_FLAGS} xenctrl _config/META.xenctrl
-  fi
 }
 
 uninstall() {
-  if [ -e META.xenctrl.in ]; then
-    ${OCAMLFIND} remove xenctrl
-  fi
   if [ -e META.in ]; then
     ${OCAMLFIND} remove mirage-${MIRAGE_OS}
   fi

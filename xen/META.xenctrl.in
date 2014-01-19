@@ -1,3 +1,0 @@
-version = "@VERSION@"
-description = "Mirage Xen control interface"
-requires = "mirage-xen"
