@@ -73,27 +73,27 @@ stub_evtchn_look_for_work(value v_unit)
 }
 
 CAMLprim value
-caml_evtchn_init(value v_unit)
+stub_evtchn_init(value v_unit)
 {
     CAMLparam1(v_unit);
     CAMLreturn(Val_unit);
 }
 
 CAMLprim value
-caml_evtchn_close(value v_unit)
+stub_evtchn_close(value v_unit)
 {
     CAMLparam1(v_unit);
     CAMLreturn(Val_unit);
 }
 
 CAMLprim value
-caml_nr_events(value v_unit)
+stub_nr_events(value v_unit)
 {
    return Val_int(NR_EVENTS);
 }
 
 CAMLprim value
-caml_evtchn_test_and_clear(value v_idx)
+stub_evtchn_test_and_clear(value v_idx)
 {
    int idx = Int_val(v_idx) % NR_EVENTS;
    if (ev_callback_ml[idx] > 0) {
@@ -151,7 +151,7 @@ stub_evtchn_notify(value v_unit, value v_port)
 }
 
 CAMLprim value
-stub_bind_virq(value v_unit, value virq)
+stub_evtchn_bind_virq(value v_unit, value virq)
 {
 	CAMLparam2(v_unit, virq);
 	int rc;
@@ -165,7 +165,7 @@ stub_bind_virq(value v_unit, value virq)
 }
 
 CAMLprim value
-stub_virq_dom_exc(value unit)
+stub_evtchn_virq_dom_exc(value unit)
 {
 	CAMLparam1(unit);
 	CAMLreturn(Val_int(VIRQ_DOM_EXC));

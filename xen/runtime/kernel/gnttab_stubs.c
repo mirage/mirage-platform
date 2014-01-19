@@ -31,7 +31,7 @@
 
 static grant_entry_t *gnttab_table;
 
-CAMLprim value stub_gnttab_open(value unit)
+CAMLprim value stub_gnttab_interface_open(value unit)
 {
 	CAMLparam1(unit);
 	CAMLlocal1(result);
@@ -39,7 +39,7 @@ CAMLprim value stub_gnttab_open(value unit)
 	CAMLreturn(result);
 }
 
-CAMLprim value stub_gnttab_close(value unit)
+CAMLprim value stub_gnttab_interface_close(value unit)
 {
 	CAMLparam1(unit);
 	CAMLlocal1(result);
@@ -54,7 +54,7 @@ CAMLprim value stub_gnttab_allocates(void)
 }
 
 CAMLprim value
-caml_gnttab_unmap(value i, value v_handle)
+stub_gnttab_unmap(value i, value v_handle)
 {
   CAMLparam2(i, v_handle);
   struct gnttab_unmap_grant_ref op;
@@ -92,7 +92,7 @@ base_page_of(value v_iopage)
 }
 
 CAMLprim value
-caml_gnttab_map_onto(value i, value v_ref, value v_iopage, value v_domid, value v_writable)
+stub_gnttab_map_onto(value i, value v_ref, value v_iopage, value v_domid, value v_writable)
 {
     CAMLparam5(i, v_ref, v_iopage, v_domid, v_writable);
     void *page = base_page_of(v_iopage);
@@ -133,7 +133,7 @@ CAMLprim value stub_gnttab_mapv_batched(value xgh, value array, value writable)
 
 /* Disable grant tables */
 CAMLprim value
-caml_gnttab_fini(value unit)
+stub_gnttab_fini(value unit)
 {
     struct gnttab_setup_table setup;
 
@@ -149,7 +149,7 @@ caml_gnttab_fini(value unit)
 
 /* Initialise grant tables and map machine frames to a VA */
 CAMLprim value
-caml_gnttab_init(value unit)
+stub_gnttab_init(value unit)
 {
     struct gnttab_setup_table setup;
     unsigned long frames[NR_GRANT_FRAMES];
@@ -167,13 +167,13 @@ caml_gnttab_init(value unit)
 
 /* Return the number of reserved grant entries at the start */
 CAMLprim value
-caml_gnttab_reserved(value unit)
+stub_gnttab_reserved(value unit)
 {
     return Val_int(NR_RESERVED_ENTRIES);
 }
 
 CAMLprim value
-caml_gnttab_nr_entries(value unit)
+stub_gnttab_nr_entries(value unit)
 {
     return Val_int(NR_GRANT_ENTRIES);
 }
@@ -284,7 +284,7 @@ gntshr_end_transfer(grant_ref_t ref)
 }
 
 CAMLprim value
-caml_gntshr_grant_access(value i, value v_ref, value v_iopage, value v_domid, value v_writable)
+stub_gntshr_grant_access(value i, value v_ref, value v_iopage, value v_domid, value v_writable)
 {
     grant_ref_t ref = Int_val(v_ref);
     void *page = base_page_of(v_iopage);
@@ -293,7 +293,7 @@ caml_gntshr_grant_access(value i, value v_ref, value v_iopage, value v_domid, va
 }
 
 CAMLprim value
-caml_gnttab_end_access(value i, value v_ref)
+stub_gntshr_end_access(value i, value v_ref)
 {
     grant_ref_t ref = Int_val(v_ref);
     uint16_t flags, nflags;
