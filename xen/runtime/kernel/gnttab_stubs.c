@@ -19,7 +19,6 @@
 #include <mini-os/x86/os.h>
 #include <mini-os/mm.h>
 #include <mini-os/gnttab.h>
-
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
 #include <caml/bigarray.h>
@@ -29,7 +28,45 @@
 /* For printk() */
 #include <log.h>
 
-static grant_entry_t *gnttab_table;
+static grant_entry_t *the_grant_table = NULL;
+
+static void map_grant_table(void)
+{
+	struct gnttab_setup_table setup;
+	unsigned long frames[NR_GRANT_FRAMES];
+
+	setup.dom = DOMID_SELF;
+	setup.nr_frames = NR_GRANT_FRAMES;
+	set_xen_guest_handle(setup.frame_list, frames);
+
+	HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
+	the_grant_table = map_frames(frames, NR_GRANT_FRAMES);
+	printk("gnttab_table mapped at %p\n", the_grant_table);
+}
+
+static void unmap_grant_table(void)
+{
+    struct gnttab_setup_table setup;
+
+    if (the_grant_table == NULL) return;
+
+    setup.dom = DOMID_SELF;
+    setup.nr_frames = 0;
+
+    HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
+
+    unmap_frames((unsigned long)the_grant_table, NR_GRANT_FRAMES);
+    the_grant_table = NULL;
+}
+
+/* Map the grant table on first use. This avoids relying on a side-effect
+   of a top-level binding which can be re-ordered. */
+static grant_entry_t *get_grant_table(void)
+{
+	if (the_grant_table == NULL)
+		map_grant_table();
+	return the_grant_table;
+}
 
 CAMLprim value stub_gnttab_interface_open(value unit)
 {
@@ -71,15 +108,6 @@ stub_gnttab_unmap(value i, value v_handle)
   }
 
   CAMLreturn(Val_unit);
-}
-
-static void
-gnttab_grant_access(grant_ref_t ref, void *page, int domid, int ro)
-{
-    gnttab_table[ref].frame = virt_to_mfn(page);
-    gnttab_table[ref].domid = domid;
-    wmb();
-    gnttab_table[ref].flags = GTF_permit_access | (ro * GTF_readonly);
 }
 
 static void *
@@ -135,33 +163,13 @@ CAMLprim value stub_gnttab_mapv_batched(value xgh, value array, value writable)
 CAMLprim value
 stub_gnttab_fini(value unit)
 {
-    struct gnttab_setup_table setup;
-
-    setup.dom = DOMID_SELF;
-    setup.nr_frames = 0;
-
-    HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
-
-    unmap_frames((unsigned long)gnttab_table, NR_GRANT_FRAMES);
-
+    unmap_grant_table();
     return Val_unit;
 }
 
-/* Initialise grant tables and map machine frames to a VA */
 CAMLprim value
 stub_gnttab_init(value unit)
 {
-    struct gnttab_setup_table setup;
-    unsigned long frames[NR_GRANT_FRAMES];
-
-    setup.dom = DOMID_SELF;
-    setup.nr_frames = NR_GRANT_FRAMES;
-    set_xen_guest_handle(setup.frame_list, frames);
-
-    HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
-    gnttab_table = map_frames(frames, NR_GRANT_FRAMES);
-    printk("gnttab_table mapped at %p\n", gnttab_table);
-
     return Val_unit;
 }
 
@@ -199,6 +207,7 @@ CAMLprim value stub_gntshr_close(value unit)
 static void
 gnttab_grant_transfer(grant_ref_t ref, void *page, int domid)
 {
+    grant_entry_t *gnttab_table = get_grant_table ();
     gnttab_table[ref].frame = virt_to_mfn(page);
     gnttab_table[ref].domid = domid;
     wmb();
@@ -212,6 +221,7 @@ gnttab_end_transfer(grant_ref_t ref)
 {
     unsigned long frame;
     uint16_t flags;
+    grant_entry_t *gnttab_table = get_grant_table ();
     uint16_t *pflags = &gnttab_table[ref].flags;
 
     /*
@@ -238,6 +248,7 @@ gnttab_end_transfer(grant_ref_t ref)
 static void
 gntshr_grant_access(grant_ref_t ref, void *page, int domid, int ro)
 {
+    grant_entry_t *gnttab_table = get_grant_table();
     gnttab_table[ref].frame = virt_to_mfn(page);
     gnttab_table[ref].domid = domid;
     wmb();
@@ -247,6 +258,7 @@ gntshr_grant_access(grant_ref_t ref, void *page, int domid, int ro)
 static void
 gntshr_grant_transfer(grant_ref_t ref, void *page, int domid)
 {
+    grant_entry_t *gnttab_table = get_grant_table();
     gnttab_table[ref].frame = virt_to_mfn(page);
     gnttab_table[ref].domid = domid;
     wmb();
@@ -260,6 +272,7 @@ gntshr_end_transfer(grant_ref_t ref)
 {
     unsigned long frame;
     uint16_t flags;
+    grant_entry_t *gnttab_table = get_grant_table();
     uint16_t *pflags = &gnttab_table[ref].flags;
 
     /*
@@ -284,19 +297,21 @@ gntshr_end_transfer(grant_ref_t ref)
 }
 
 CAMLprim value
-stub_gntshr_grant_access(value i, value v_ref, value v_iopage, value v_domid, value v_writable)
+stub_gntshr_grant_access(value v_ref, value v_iopage, value v_domid, value v_writable)
 {
     grant_ref_t ref = Int_val(v_ref);
     void *page = base_page_of(v_iopage);
-    gnttab_grant_access(ref, page, Int_val(v_domid), !Bool_val(v_writable));
+    gntshr_grant_access(ref, page, Int_val(v_domid), !Bool_val(v_writable));
     return Val_unit;
 }
 
 CAMLprim value
-stub_gntshr_end_access(value i, value v_ref)
+stub_gntshr_end_access(value v_ref)
 {
     grant_ref_t ref = Int_val(v_ref);
     uint16_t flags, nflags;
+
+    grant_entry_t *gnttab_table = get_grant_table();
 
     BUG_ON(ref >= NR_GRANT_ENTRIES || ref < NR_RESERVED_ENTRIES);
 
