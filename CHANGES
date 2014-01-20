@@ -1,4 +1,4 @@
-trunk (unreleased):
+1.0.1 (unreleased):
 * Update to new io-page{,.unix} ocamlfind packages
 
 1.0.0 (10-Dec-2013):
