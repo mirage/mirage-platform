@@ -1,6 +1,7 @@
 1.0.1 (unreleased):
 * Update to new io-page{,.unix} ocamlfind packages.
 * Remove unused Netif module from Unix backend.
+* Xen now depends on `xen-{evtchn,gnt}` packages.
 
 1.0.0 (10-Dec-2013):
 * Set `Sys.os_type` to Unix in the Xen backend to help compatibility (#78).
