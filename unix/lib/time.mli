@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+type +'a io = 'a Lwt.t
+
 (** Timeout operations. *)
 
 val sleep : float -> unit Lwt.t
