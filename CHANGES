@@ -2,6 +2,7 @@
 * Update to new io-page{,.unix} ocamlfind packages.
 * Remove unused Netif module from Unix backend.
 * Xen now depends on `xen-{evtchn,gnt}` packages.
+* Add a `type 'a io` to make it easier to include with the Mirage sigs.
 
 1.0.0 (10-Dec-2013):
 * Set `Sys.os_type` to Unix in the Xen backend to help compatibility (#78).
