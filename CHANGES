@@ -1,4 +1,4 @@
-1.0.1 (unreleased):
+1.1.0 (01-Feb-2013):
 * Update to new io-page{,.unix} ocamlfind packages.
 * Remove unused Netif module from Unix backend.
 * Xen now depends on `xen-{evtchn,gnt}` packages.
