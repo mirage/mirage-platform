@@ -23,7 +23,7 @@
 #include <caml/callback.h>
 #include <caml/bigarray.h>
 
-#define NR_EVENTS 8
+#define NR_EVENTS 4096 /* max for x86_64 using old ABI */
 static uint8_t ev_callback_ml[NR_EVENTS];
 
 #define active_evtchns(cpu,sh,idx)              \
