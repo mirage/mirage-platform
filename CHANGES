@@ -1,3 +1,7 @@
+trunk (unreleased)
+* xen: support 4096 event channels (up from 8). Each device typically
+  uses one event channel.
+
 1.1.0 (01-Feb-2013):
 * Update to new io-page{,.unix} ocamlfind packages.
 * Remove unused Netif module from Unix backend.
