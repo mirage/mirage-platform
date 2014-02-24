@@ -1,4 +1,4 @@
-trunk (unreleased)
+1.1.1 (24-Feb-2013)
 * xen: support 4096 event channels (up from 8). Each device typically
   uses one event channel.
 
