@@ -36,7 +36,7 @@ caml_alloc_pages(value n_pages)
   /* If the allocation fails, return None. The ocaml layer will
      be able to trigger a full GC which just might run finalizers
      of unused bigarrays which will free some memory. */
-  void* block = memalign(PAGE_SIZE, len);
+  void* block = _xmalloc(len, PAGE_SIZE);
 
   if (block == NULL) {
     printk("memalign(%d, %d) failed.\n", PAGE_SIZE, len);

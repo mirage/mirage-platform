@@ -9,3 +9,4 @@ checksum_stubs.o
 sched_stubs.o
 start_info_stubs.o
 atomic_stubs.o
+mini_libc.o
