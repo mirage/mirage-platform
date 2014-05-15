@@ -355,7 +355,8 @@ caml_raise_exn:
     /* Test if backtrace is active */
         ldr     r1, =caml_backtrace_active
         ldr     r1, [r1]
-        cbz     r1, 1f
+        cmp     r1, #0
+        beq     1f
     /* Preserve exception bucket in callee-save register r4 */
         mov     r4, r0
     /* Stash the backtrace */
@@ -390,7 +391,8 @@ caml_raise_exception:
     /* Test if backtrace is active */
         ldr     r1, =caml_backtrace_active
         ldr     r1, [r1]
-        cbz     r1, 1f
+        cmp     r1, #0
+        beq     1f
     /* Preserve exception bucket in callee-save register r4 */
         mov     r4, r0
         ldr     r1, =caml_last_return_address   /* arg2: pc of raise */
