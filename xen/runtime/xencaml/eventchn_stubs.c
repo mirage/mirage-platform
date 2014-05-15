@@ -13,7 +13,7 @@
  * GNU Lesser General Public License for more details.
  */
 
-#include <mini-os/x86/os.h>
+#include <mini-os/os.h>
 #include <mini-os/time.h>
 #include <mini-os/events.h>
 
@@ -30,6 +30,18 @@ static uint8_t ev_callback_ml[NR_EVENTS];
     ((sh)->evtchn_pending[idx] &                \
      ~(sh)->evtchn_mask[idx])
 
+/* Override the default Mini-OS implementation. We don't want to call the event
+   handlers here (from within the interrupt handler). Instead, we'll call
+   evtchn_look_for_work later. */
+void do_hypervisor_callback(struct pt_regs *regs)
+{
+    int            cpu = 0;
+    shared_info_t *s = HYPERVISOR_shared_info;
+    vcpu_info_t   *vcpu_info = &s->vcpu_info[cpu];
+
+    vcpu_info->evtchn_upcall_pending = 0;
+}
+
 /* Walk through the ports, setting the OCaml callback
    mask for any active ones, and clear the Xen side.
    Return true if any OCaml callbacks are needed. */
@@ -45,12 +57,15 @@ evtchn_look_for_work(void)
 
   vcpu_info->evtchn_upcall_pending = 0;
   /* NB x86. No need for a barrier here -- XCHG is a barrier on x86. */
+#if !defined(__i386__) && !defined(__x86_64__)
+    wmb();
+#endif
   l1 = xchg(&vcpu_info->evtchn_pending_sel, 0);
   while ( l1 != 0 ) {
     l1i = __ffs(l1);
     l1 &= ~(1UL << l1i);
 
-   while ( (l2 = active_evtchns(cpu, s, l1i)) != 0 ) {
+    while ( (l2 = active_evtchns(cpu, s, l1i)) != 0 ) {
       l2i = __ffs(l2);
       l2 &= ~(1UL << l2i);
 
@@ -111,7 +126,7 @@ stub_evtchn_alloc_unbound(value v_unit, value v_domid)
     int rc;
     evtchn_port_t port;
 
-    rc = evtchn_alloc_unbound(domid, &port);
+    rc = evtchn_alloc_unbound(domid, NULL, NULL, &port);
     if (rc)
        CAMLreturn(Val_int(-1));
     else
@@ -127,7 +142,7 @@ stub_evtchn_bind_interdomain(value v_unit, value v_domid, value v_remote_port)
     evtchn_port_t local_port;
     int rc;
 
-    rc = evtchn_bind_interdomain(domid, remote_port, &local_port);
+    rc = evtchn_bind_interdomain(domid, remote_port, NULL, NULL, &local_port);
     if (rc)
        CAMLreturn(Val_int(-1));
     else
@@ -154,14 +169,9 @@ CAMLprim value
 stub_evtchn_bind_virq(value v_unit, value virq)
 {
 	CAMLparam2(v_unit, virq);
-	int rc;
 	evtchn_port_t port;
-	rc = evtchn_bind_virq(Int_val(virq), &port);
-	if (rc)
-		CAMLreturn(Val_int(-1));
-	else
+	port = bind_virq(Int_val(virq), NULL, NULL);
     	CAMLreturn(Val_int(port)); 
-
 }
 
 CAMLprim value

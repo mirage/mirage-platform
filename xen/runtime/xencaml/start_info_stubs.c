@@ -23,7 +23,7 @@
 #include <caml/bigarray.h>
 
 #include <xen/xen.h>
-#include <mini-os/x86/os.h>
+#include <mini-os/os.h>
 
 CAMLprim value
 stub_start_info_get(value unit)

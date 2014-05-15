@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <mini-os/x86/os.h>
+#include <mini-os/os.h>
 #include <mini-os/mm.h>
 #include <mini-os/gnttab.h>
 #include <caml/mlvalues.h>
@@ -28,45 +28,7 @@
 /* For printk() */
 #include <log.h>
 
-static grant_entry_t *the_grant_table = NULL;
-
-static void map_grant_table(void)
-{
-	struct gnttab_setup_table setup;
-	unsigned long frames[NR_GRANT_FRAMES];
-
-	setup.dom = DOMID_SELF;
-	setup.nr_frames = NR_GRANT_FRAMES;
-	set_xen_guest_handle(setup.frame_list, frames);
-
-	HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
-	the_grant_table = map_frames(frames, NR_GRANT_FRAMES);
-	printk("gnttab_table mapped at %p\n", the_grant_table);
-}
-
-static void unmap_grant_table(void)
-{
-    struct gnttab_setup_table setup;
-
-    if (the_grant_table == NULL) return;
-
-    setup.dom = DOMID_SELF;
-    setup.nr_frames = 0;
-
-    HYPERVISOR_grant_table_op(GNTTABOP_setup_table, &setup, 1);
-
-    unmap_frames((unsigned long)the_grant_table, NR_GRANT_FRAMES);
-    the_grant_table = NULL;
-}
-
-/* Map the grant table on first use. This avoids relying on a side-effect
-   of a top-level binding which can be re-ordered. */
-static grant_entry_t *get_grant_table(void)
-{
-	if (the_grant_table == NULL)
-		map_grant_table();
-	return the_grant_table;
-}
+extern grant_entry_t *gnttab_table;
 
 CAMLprim value stub_gnttab_interface_open(value unit)
 {
@@ -158,15 +120,14 @@ CAMLprim value stub_gnttab_mapv_batched(value xgh, value array, value writable)
     caml_failwith("stub_gnttab_mapv_batched");
 }
 
-
-/* Disable grant tables */
+/* No longer needed: stop_kernel now handles this automatically. */
 CAMLprim value
 stub_gnttab_fini(value unit)
 {
-    unmap_grant_table();
     return Val_unit;
 }
 
+/* No longer needed: start_kernel now handles this automatically. */
 CAMLprim value
 stub_gnttab_init(value unit)
 {
@@ -205,95 +166,12 @@ CAMLprim value stub_gntshr_close(value unit)
 }
 
 static void
-gnttab_grant_transfer(grant_ref_t ref, void *page, int domid)
-{
-    grant_entry_t *gnttab_table = get_grant_table ();
-    gnttab_table[ref].frame = virt_to_mfn(page);
-    gnttab_table[ref].domid = domid;
-    wmb();
-    gnttab_table[ref].flags = GTF_accept_transfer;
-}
-
-/* From the reference implementation
-   http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=blob;f=drivers/xen/grant-table.c;hb=HEAD */
-static unsigned long
-gnttab_end_transfer(grant_ref_t ref)
-{
-    unsigned long frame;
-    uint16_t flags;
-    grant_entry_t *gnttab_table = get_grant_table ();
-    uint16_t *pflags = &gnttab_table[ref].flags;
-
-    /*
-     * If a transfer is not even yet started, try to reclaim the grant
-     * reference and return failure (== 0).
-     */
-    while (!((flags = *pflags) & GTF_transfer_committed)) {
-      if (synch_cmpxchg(pflags, flags, 0) == flags)
-        return 0;
-    }
-
-    /* If a transfer is in progress then wait until it is completed. */
-    while (!(flags & GTF_transfer_completed)) {
-      flags = *pflags;
-    }
-
-    rmb();  /* Read the frame number /after/ reading completion status. */
-    frame = gnttab_table[ref].frame;
-    BUG_ON(frame == 0);
-
-    return frame;
-}
-
-static void
 gntshr_grant_access(grant_ref_t ref, void *page, int domid, int ro)
 {
-    grant_entry_t *gnttab_table = get_grant_table();
     gnttab_table[ref].frame = virt_to_mfn(page);
     gnttab_table[ref].domid = domid;
     wmb();
     gnttab_table[ref].flags = GTF_permit_access | (ro * GTF_readonly);
-}
-
-static void
-gntshr_grant_transfer(grant_ref_t ref, void *page, int domid)
-{
-    grant_entry_t *gnttab_table = get_grant_table();
-    gnttab_table[ref].frame = virt_to_mfn(page);
-    gnttab_table[ref].domid = domid;
-    wmb();
-    gnttab_table[ref].flags = GTF_accept_transfer;
-}
-
-/* From the reference implementation
-   http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=blob;f=drivers/xen/grant-table.c;hb=HEAD */
-static unsigned long
-gntshr_end_transfer(grant_ref_t ref)
-{
-    unsigned long frame;
-    uint16_t flags;
-    grant_entry_t *gnttab_table = get_grant_table();
-    uint16_t *pflags = &gnttab_table[ref].flags;
-
-    /*
-     * If a transfer is not even yet started, try to reclaim the grant
-     * reference and return failure (== 0).
-     */
-    while (!((flags = *pflags) & GTF_transfer_committed)) {
-      if (synch_cmpxchg(pflags, flags, 0) == flags)
-        return 0;
-    }
-
-    /* If a transfer is in progress then wait until it is completed. */
-    while (!(flags & GTF_transfer_completed)) {
-      flags = *pflags;
-    }
-
-    rmb();  /* Read the frame number /after/ reading completion status. */
-    frame = gnttab_table[ref].frame;
-    BUG_ON(frame == 0);
-
-    return frame;
 }
 
 CAMLprim value
@@ -302,6 +180,7 @@ stub_gntshr_grant_access(value v_ref, value v_iopage, value v_domid, value v_wri
     grant_ref_t ref = Int_val(v_ref);
     void *page = base_page_of(v_iopage);
     gntshr_grant_access(ref, page, Int_val(v_domid), !Bool_val(v_writable));
+
     return Val_unit;
 }
 
@@ -310,8 +189,6 @@ stub_gntshr_end_access(value v_ref)
 {
     grant_ref_t ref = Int_val(v_ref);
     uint16_t flags, nflags;
-
-    grant_entry_t *gnttab_table = get_grant_table();
 
     BUG_ON(ref >= NR_GRANT_ENTRIES || ref < NR_RESERVED_ENTRIES);
 

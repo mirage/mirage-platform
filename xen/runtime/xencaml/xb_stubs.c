@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  */
-#include <os.h>
+#include <mini-os/os.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>

@@ -12,7 +12,7 @@
  * GNU Lesser General Public License for more details.
  */
 
-#include <mini-os/x86/os.h>
+#include <mini-os/os.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
@@ -50,20 +50,23 @@ stub_hypervisor_suspend(value unit)
   CAMLparam0();
   int cancelled;
 
+  printk("WARNING: stub_hypervisor_suspend not yet implemented\n");
+  cancelled = 1;
+#if 0
   /* Turn the store and console mfns to pfns - required because xc_domain_restore uses these values */
-  xen_info->store_mfn = mfn_to_pfn(xen_info->store_mfn);
-  xen_info->console.domU.mfn = mfn_to_pfn(xen_info->console.domU.mfn);
+  start_info.store_mfn = mfn_to_pfn(start_info.store_mfn);
+  start_info.console.domU.mfn = mfn_to_pfn(start_info.console.domU.mfn);
 
   /* canonicalize_pagetables can't cope with pagetable entries that are outside of the guest's mfns,
      so we must unmap anything outside of our space */
   unmap_shared_info();
 
   /* Actually do the suspend. When this function returns 0, we've been resumed */
-  cancelled = HYPERVISOR_suspend(virt_to_mfn(xen_info));
+  cancelled = HYPERVISOR_suspend(virt_to_mfn(&start_info));
 
   if(cancelled) {
-    xen_info->store_mfn = pfn_to_mfn(xen_info->store_mfn);
-    xen_info->console.domU.mfn = pfn_to_mfn(xen_info->console.domU.mfn);
+    start_info.store_mfn = pfn_to_mfn(start_info.store_mfn);
+    start_info.console.domU.mfn = pfn_to_mfn(start_info.console.domU.mfn);
   }
 
   /* Reinitialise several things */
@@ -86,6 +89,6 @@ stub_hypervisor_suspend(value unit)
 
   unmask_evtchn(start_info.console.domU.evtchn);
   unmask_evtchn(start_info.store_evtchn);
-
+#endif
   CAMLreturn(Val_int(cancelled));
 }

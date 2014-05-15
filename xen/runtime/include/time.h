@@ -1,9 +1,11 @@
 #ifndef _TIME_H
 #define _TIME_H
 
+#include_next <time.h>
+
 #include <sys/cdefs.h>
 #include <sys/time.h>
-#include <signal.h>
+//#include <signal.h>
 #include <unistd.h>
 
 __BEGIN_DECLS

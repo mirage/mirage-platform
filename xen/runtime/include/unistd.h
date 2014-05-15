@@ -4,7 +4,7 @@
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <endian.h>
-#include <sys/fsuid.h>
+//#include <sys/fsuid.h>
 #include <sys/select.h>
 
 __BEGIN_DECLS

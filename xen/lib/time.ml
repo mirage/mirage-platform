@@ -103,22 +103,22 @@ let min_timeout a b = match a, b with
   | a, None -> a
   | Some a, Some b -> Some(min a b)
 
-let rec get_next_timeout now =
+let rec get_next_timeout () =
   match SleepQueue.lookup_min !sleep_queue with
     | Some{ canceled = true } ->
         sleep_queue := SleepQueue.remove_min !sleep_queue;
-        get_next_timeout now 
+        get_next_timeout ()
     | Some{ time = time } ->
-        Some (if time = 0. then 0. else max 0. (time -. (now ())))
+        Some time
     | None ->
         None
 
-let select_next now =
+let select_next _now =
   (* Transfer all sleepers added since the last iteration to the main
      sleep queue: *)
   sleep_queue :=
     List.fold_left
       (fun q e -> SleepQueue.add e q) !sleep_queue !new_sleeps;
   new_sleeps := [];
-  get_next_timeout now 
+  get_next_timeout ()
 

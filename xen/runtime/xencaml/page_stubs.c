@@ -15,7 +15,7 @@
  */
 
 #include <string.h>
-#include <mini-os/x86/os.h>
+#include <mini-os/os.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
