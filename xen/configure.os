@@ -12,6 +12,8 @@ case $OCAML_VERSION in
   exit 1
 esac
 
+PKG_CONFIG_DEPS=openlibm
+
 # This extra flag only needed for gcc 4.8+
 GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
 if [ $GCC_MVER2 -ge 8 ]; then
@@ -28,8 +30,8 @@ xen)
     -fno-stack-protector -m64 -mno-red-zone -fno-reorder-blocks -fstrict-aliasing \
     -momit-leaf-frame-pointer -mfancy-math-387 -I${GCC_INCLUDE}/include \
     -isystem ${PWD}/runtime/include/ -isystem ${PWD}/runtime/include/mini-os \
-    -isystem ${PWD}/runtime/include/mini-os/x86 -DCAML_NAME_SPACE -DTARGET_amd64 
-    -DSYS_xen -I${PWD}/runtime/ocaml -I${PWD}/runtime/libm \
+    -isystem ${PWD}/runtime/include/mini-os/x86 -DCAML_NAME_SPACE -DTARGET_amd64 \
+    -DSYS_xen -I${PWD}/runtime/ocaml $(pkg-config --cflags $PKG_CONFIG_DEPS) \
     -Wextra -Wchar-subscripts -Wno-switch \
     -Wno-unused -Wredundant-decls -D__dietlibc__ -I${PWD}/runtime/dietlibc \
     -DNATIVE_CODE"
