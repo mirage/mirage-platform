@@ -13,8 +13,10 @@
  */
 
 #include <mini-os/os.h>
+#include <mini-os/lib.h>
 #include <errno.h>
 #include <limits.h>
+#include "fmt_fp.h"
 #define HUGE_VAL	(__builtin_huge_val())
 
 #define     ENOSYS          38      /* Function not implemented */
@@ -92,6 +94,47 @@ int open64(const char *pathname, int flags)
 {
   printk("Attempt to open(%s)!\n", pathname);
   return -1;
+}
+
+struct _buffer {
+    char *buf;
+    char *end;
+};
+
+void out(buffer_t *f, const char *s, size_t l)
+{
+    while (l > 0) {
+        if (f->buf <= f->end)
+            *(f->buf++) = *(s++);
+        --l;
+    }
+}
+
+#define ZEROPAD 1               /* pad with zero */
+#define SIGN    2               /* unsigned/signed long */
+#define PLUS    4               /* show plus */
+#define SPACE   8               /* space if plus */
+#define LEFT    16              /* left justified */
+#define SPECIAL 32              /* 0x */
+#define LARGE   64              /* use 'ABCDEF' instead of 'abcdef' */
+
+char *minios_printf_render_float(char *buf, char *end, long double y, char fmt, char qualifier, int size, int precision, int type)
+{
+    buffer_t buffer = {
+        .buf = buf,
+        .end = end
+    };
+    int fl = 0;
+
+    if (type & ZEROPAD) fl |= ZERO_PAD;
+    if (type & PLUS) fl |= MARK_POS;
+    if (type & SPACE) fl |= PAD_POS;
+    if (type & LEFT) fl |= LEFT_ADJ;
+    if (type & SPECIAL) fl |= ALT_FORM;
+
+    fmt_fp(&buffer, y, size, precision, fl, fmt);
+
+    return buffer.buf;
 }
 
 /* Not supported by FS yet.  */
