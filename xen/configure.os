@@ -3,9 +3,11 @@
 # Detect OCaml version and symlink in right runtime files
 OCAML_VERSION=`ocamlc -version`
 case $OCAML_VERSION in
-4.00.1|4.01.0)
-  ln -nsf ocaml.$OCAML_VERSION runtime/ocaml
-  ln -nsf caml.$OCAML_VERSION runtime/include/caml
+4.00.1)
+  echo Only OCaml 4.01.0 is supported
+  exit 1
+  ;;
+4.01.0)
   ;;
 *)
   echo Unknown OCaml version $OCAML_VERSION
