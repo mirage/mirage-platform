@@ -3,6 +3,7 @@
 
 #include <sys/cdefs.h>
 #include <endian.h>
+#include <types.h>
 
 __BEGIN_DECLS
 
@@ -251,9 +252,6 @@ typedef unsigned int uint32_t __attribute__((__mode__(__SI__)));
 #else
 typedef unsigned int uint32_t;
 #endif
-
-typedef signed long int intptr_t;
-typedef unsigned long int uintptr_t;
 
 #if __WORDSIZE == 64
 typedef signed long int64_t;

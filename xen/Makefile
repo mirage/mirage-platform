@@ -1,8 +1,9 @@
 .PHONY: all _config build install uninstall doc clean
 
-OCAML_VERSION=$(shell readlink runtime/ocaml)
+PKG_CONFIG_PATH = $(shell opam config var prefix)/lib/pkgconfig
+export PKG_CONFIG_PATH
 
-EXTRA=runtime/dietlibc/libdiet.a runtime/libm/libm.a runtime/kernel/libxen.a runtime/kernel/libxencaml.a runtime/$(OCAML_VERSION)/libocaml.a runtime/kernel/x86_64.o runtime/kernel/longjmp.o runtime/kernel/mirage-x86_64.lds
+EXTRA=runtime/xencaml/libxencaml.a runtime/ocaml/libocaml.a
 
 OCAMLFIND ?= ocamlfind
 

@@ -2,5 +2,4 @@ _build/
 _config/
 tap_stubs_os.c
 .*.swp
-xen/runtime/ocaml
-xen/runtime/include/caml
+xen/runtime/ocaml/libocaml.cclib

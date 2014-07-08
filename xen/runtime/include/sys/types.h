@@ -90,12 +90,8 @@ typedef signed long useconds_t;		/* Used for time in microseconds. */
 /* non-susv2 types: */
 __extension__ typedef signed long long loff_t;	/* 64-bit offset */
 
-__extension__ typedef signed long long off64_t;
-#if defined _FILE_OFFSET_BITS && _FILE_OFFSET_BITS == 64
+__extension__ typedef int64_t off64_t;
 typedef off64_t off_t;
-#else
-typedef signed long off_t;             /* Used for file sizes. */
-#endif
 
 __extension__ typedef unsigned long long ino64_t;
 __extension__ typedef signed long long blkcnt64_t;
