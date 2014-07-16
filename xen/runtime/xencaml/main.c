@@ -34,8 +34,6 @@ caml_block_domain(value v_until)
   CAMLreturn(Val_unit);
 }
 
-#define CAML_ENTRYPOINT "OS.Main.run"
-
 void app_main_thread(void *unused)
 {
   value *v_main;
@@ -43,14 +41,6 @@ void app_main_thread(void *unused)
   printk("xencaml: app_main_thread\n");
   local_irq_save(irqflags);
   caml_startup(argv);
-  v_main = caml_named_value(CAML_ENTRYPOINT);
-  if (v_main == NULL){
-	printk("ERROR: CAML_ENTRYPOINT %s is NULL\n", CAML_ENTRYPOINT);
-	_exit(1);
-  }
-  while (caml_completed == 0) {
-    caml_completed = Bool_val(caml_callback(*v_main, Val_unit));
-  }
   _exit(0);
 }
 

@@ -53,29 +53,29 @@ let run t =
   let rec aux () =
     Lwt.wakeup_paused ();
     Time.restart_threads Clock.time;
-    try
-      match Lwt.poll t with
-      | Some x ->
-          true
-      | None ->
-          if look_for_work () then begin
-            (* Some event channels have triggered, wake up threads
-             * and continue without blocking. *)
-            Activations.run evtchn;
-            false
-          end else begin
-            let timeout =
-              match Time.select_next Clock.time with
-              |None -> 86400.0 (* one day = 24 * 60 * 60 s *)
-              |Some tm -> tm
-            in
-            block_domain timeout;
-            false
-          end
-    with exn ->
-      (Printf.printf "Top level exception: %s\n%!" 
-         (Printexc.to_string exn); true) in
-  ignore(Callback.register "OS.Main.run" aux)
+    match Lwt.poll t with
+    | Some () ->
+        ()
+    | None ->
+        if look_for_work () then begin
+          (* Some event channels have triggered, wake up threads
+           * and continue without blocking. *)
+          Activations.run evtchn;
+          aux ()
+        end else begin
+          let timeout =
+            match Time.select_next Clock.time with
+            |None -> 86400.0 (* one day = 24 * 60 * 60 s *)
+            |Some tm -> tm
+          in
+          block_domain timeout;
+          aux ()
+        end in
+  try
+    aux ()
+  with exn ->
+    Printf.printf "Top level exception: %s\n%!"
+      (Printexc.to_string exn)
 
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)
