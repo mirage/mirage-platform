@@ -27,7 +27,8 @@ esac
 
 echo $ARCH_OBJ | cat - runtime/ocaml/libocaml.cclib.in > runtime/ocaml/libocaml.cclib
 
-PKG_CONFIG_DEPS="openlibm libminios"
+PKG_CONFIG_DEPS="openlibm libminios-xen"
+pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
 
 # This extra flag only needed for gcc 4.8+
 GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
