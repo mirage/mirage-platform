@@ -19,6 +19,7 @@
 #include <mini-os/os.h>
 #include <mini-os/mm.h>
 #include <mini-os/gnttab.h>
+#include <mini-os/lib.h>
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
 #include <caml/bigarray.h>
