@@ -8,7 +8,7 @@
 # from within Travis.
 
 # OPAM packages needed to build tests.
-OPAM_PACKAGES="shared-memory-ring lwt xenstore cstruct lwt mirage-clock-xen io-page mirage-clock-unix xen-evtchn xen-gnt"
+OPAM_PACKAGES="shared-memory-ring lwt xenstore cstruct lwt mirage-clock-xen io-page mirage-clock-unix xen-evtchn xen-gnt mirage-xen-minios"
 
 function setup_arm_chroot {
   echo Setting up qemu chroot for ARM
@@ -26,7 +26,6 @@ function setup_arm_chroot {
   echo export XARCH=$XARCH >> envvars.sh
   echo export LANG=c >> envvars.sh
   echo export OPAMYES=1 >> envvars.sh
-  echo export OPAMVERBOSE=1 >> envvars.sh
   echo export TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR >> envvars.sh
   chmod a+x envvars.sh
   export LANG=c
@@ -66,7 +65,6 @@ fi
 
 sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
 export OPAMYES=1
-export OPAMVERBOSE=1
 echo OCaml version
 ocaml -version
 echo OPAM versions
