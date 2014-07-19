@@ -26,7 +26,6 @@ function setup_arm_chroot {
   echo export XARCH=$XARCH >> envvars.sh
   echo export LANG=c >> envvars.sh
   echo export OPAMYES=1 >> envvars.sh
-  echo export OPAMVERBOSE=1 >> envvars.sh
   echo export TRAVIS_BUILD_DIR=$TRAVIS_BUILD_DIR >> envvars.sh
   chmod a+x envvars.sh
   export LANG=c
@@ -66,7 +65,6 @@ fi
 
 sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
 export OPAMYES=1
-export OPAMVERBOSE=1
 echo OCaml version
 ocaml -version
 echo OPAM versions
