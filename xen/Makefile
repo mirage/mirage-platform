@@ -7,7 +7,7 @@ EXTRA=runtime/xencaml/libxencaml.a runtime/ocaml/libocaml.a
 
 OCAMLFIND ?= ocamlfind
 
-XEN_LIB = $(shell ocamlfind printconf path)/mirage-xen
+XEN_LIB = $(shell ocamlfind printconf destdir)/mirage-xen
 
 all: build
 
