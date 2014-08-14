@@ -3,7 +3,9 @@
   external dependencies on Mini-OS and openlibm.
 * Introduce Xen/ARM support that works with both Xen 4.4 and the 4.5dev
   hypervisor ABI.  Testing on Cubieboard2 and Cubietruck devices.
-* [xen] Move the Xen main Lwt loop into OCaml code to simplify it.
+* [xen] Move the Xen main Lwt loop into OCaml code to simplify it (#99).
+* Build fixes to work with multiple findlib directories in a single
+  installation (#101 from Petter Urkedal).
 
 1.1.1 (24-Feb-2013):
 * xen: support 4096 event channels (up from 8). Each device typically
