@@ -119,9 +119,29 @@ CAMLprim value stub_gnttab_map_fresh(value i, value r, value d, value w)
 CAMLprim value stub_gnttab_mapv_batched(value xgh, value array, value writable)
 {
     CAMLparam3(xgh, array, writable);
-    /* The OCaml code will never call this because gnttab_allocates is false */
-    printk("FATAL ERROR: stub_gnttab_mapv_batched called\n");
-    caml_failwith("stub_gnttab_mapv_batched");
+    CAMLlocal3(contents, pair, handle);
+    int count = Wosize_val(array) / 2;
+    uint32_t domids[count];
+    uint32_t refs[count];
+    int i;
+
+    for (i = 0; i < count; i++){
+            domids[i] = Int_val(Field(array, i * 2 + 0));
+            refs[i] = Int_val(Field(array, i * 2 + 1));
+    }
+    void *mapping = gntmap_map_grant_refs(map, count, domids, 1, refs, Bool_val(writable));
+    if(mapping==NULL) {
+            caml_failwith("Failed to map grant ref");
+    }
+    handle = caml_alloc_tuple(2);
+    Store_field(handle, 0, Val_int(mapping)); /* FIXME: this is an unsigned long */
+    Store_field(handle, 1, Val_int(count));
+
+    contents = caml_ba_alloc_dims(XC_GNTTAB_BIGARRAY, 1, mapping, count * PAGE_SIZE);
+    pair = caml_alloc_tuple(2);
+    Store_field(pair, 0, handle); /* grant_handle */
+    Store_field(pair, 1, contents); /* Io_page.t */
+    CAMLreturn(pair);
 }
 
 /* No longer needed: stop_kernel now handles this automatically. */
