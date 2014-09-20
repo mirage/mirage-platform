@@ -71,6 +71,13 @@ CAMLprim value stub_gnttab_allocates(void)
 	CAMLreturn(Val_bool(1));
 }
 
+CAMLprim value stub_gntshr_allocates(void)
+{
+	CAMLparam0();
+	/* We still manage our grant references from the OCaml code */
+	CAMLreturn(Val_bool(0));
+}
+
 static void *
 base_page_of(value v_iopage)
 {
