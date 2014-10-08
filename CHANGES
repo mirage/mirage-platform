@@ -1,5 +1,6 @@
 trunk (unreleased):
 * [xen] Use monotonic time for timing events, not wall-clock time.
+* [xen] Report trace events for GC, block_domain, XenStore and event channels.
 
 2.0.0 (04-Nov-2014):
 * Remove dietlibc, libm and most of the include files, replacing them with

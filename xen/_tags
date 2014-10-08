@@ -4,4 +4,4 @@
 true: camlp4o
 <*/*>: annot
 <lib>: include
-<**/*.{mli,ml}>: package(lwt), package(cstruct)
+<**/*.{mli,ml}>: package(lwt), package(cstruct), package(mirage-profile)
