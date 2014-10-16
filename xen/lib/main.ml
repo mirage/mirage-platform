@@ -65,7 +65,7 @@ let run t =
         end else begin
           let timeout =
             match Time.select_next Clock.time with
-            |None -> 86400.0 (* one day = 24 * 60 * 60 s *)
+            |None -> Clock.time () +. 86400.0 (* one day = 24 * 60 * 60 s *)
             |Some tm -> tm
           in
           block_domain timeout;
