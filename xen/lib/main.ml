@@ -23,7 +23,7 @@
 
 open Lwt
 
-external block_domain : float -> unit = "caml_block_domain"
+external block_domain : [`Time] Time.Monotonic.t -> unit = "caml_block_domain"
 
 let evtchn = Eventchn.init ()
 
@@ -52,7 +52,7 @@ let run t =
   let t = call_hooks enter_hooks <&> t in
   let rec aux () =
     Lwt.wakeup_paused ();
-    Time.restart_threads Clock.time;
+    Time.restart_threads Time.Monotonic.time;
     match Lwt.poll t with
     | Some () ->
         ()
@@ -64,8 +64,8 @@ let run t =
           aux ()
         end else begin
           let timeout =
-            match Time.select_next Clock.time with
-            |None -> Clock.time () +. 86400.0 (* one day = 24 * 60 * 60 s *)
+            match Time.select_next () with
+            |None -> Time.Monotonic.(time () + of_seconds 86400.0) (* one day = 24 * 60 * 60 s *)
             |Some tm -> tm
           in
           block_domain timeout;

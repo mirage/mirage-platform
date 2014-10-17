@@ -27,12 +27,26 @@ open Lwt
 
 type +'a io = 'a Lwt.t
 
+module Monotonic = struct
+  type time_kind = [`Time | `Interval]
+  type 'a t = int64 constraint 'a = [< time_kind]
+
+  external time : unit -> int64 = "caml_get_monotonic_time"
+
+  let of_seconds x = Int64.of_float (x *. 1_000_000_000.)
+  let to_seconds x = Int64.to_float x /.  1_000_000_000.
+
+  let ( + ) = ( Int64.add )
+  let ( - ) = ( Int64.sub )
+  let interval = ( Int64.sub )
+end
+
 (* +-----------------------------------------------------------------+
    | Sleepers                                                        |
    +-----------------------------------------------------------------+ *)
 
 type sleep = {
-  time : float;
+  time : [`Time] Monotonic.t;
   mutable canceled : bool;
   thread : unit Lwt.u;
 }
@@ -55,23 +69,11 @@ let new_sleeps = ref []
 
 let sleep d =
   let (res, w) = Lwt.task () in
-  let t = if d <= 0. then 0. else Clock.time () +. d in
+  let t = if d <= 0. then 0L else Monotonic.(time () + of_seconds d) in
   let sleeper = { time = t; canceled = false; thread = w } in
   new_sleeps := sleeper :: !new_sleeps;
   Lwt.on_cancel res (fun _ -> sleeper.canceled <- true);
   res
-
-let yield () = sleep 0.
-
-let auto_yield timeout =
-  let limit = ref (Clock.time () +. timeout) in
-  fun () ->
-    let current = Clock.time () in
-    if current >= !limit then begin
-      limit := current +. timeout;
-      yield ();
-    end else
-      return ()
 
 exception Timeout
 
@@ -80,7 +82,7 @@ let timeout d = sleep d >> Lwt.fail Timeout
 let with_timeout d f = Lwt.pick [timeout d; Lwt.apply f ()]
 
 let in_the_past now t =
-  t = 0. || t <= now ()
+  t = 0L || t <= now ()
 
 let rec restart_threads now =
   match SleepQueue.lookup_min !sleep_queue with
@@ -113,7 +115,7 @@ let rec get_next_timeout () =
     | None ->
         None
 
-let select_next _now =
+let select_next () =
   (* Transfer all sleepers added since the last iteration to the main
      sleep queue: *)
   sleep_queue :=
@@ -121,4 +123,3 @@ let select_next _now =
       (fun q e -> SleepQueue.add e q) !sleep_queue !new_sleeps;
   new_sleeps := [];
   get_next_timeout ()
-
