@@ -1,4 +1,4 @@
-2.0.0 (trunk):
+2.0.0 (04-Nov-2014):
 * Remove dietlibc, libm and most of the include files, replacing them with
   external dependencies on Mini-OS and openlibm.
 * Introduce Xen/ARM support that works with both Xen 4.4 and the 4.5dev
