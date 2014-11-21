@@ -81,7 +81,7 @@ CAMLprim value stub_gntshr_allocates(void)
 static void *
 base_page_of(value v_iopage)
 {
-    /* The grant API takes page-alignted addresses. */
+    /* The grant API takes page-aligned addresses. */
     struct caml_ba_array *a = (struct caml_ba_array *)Caml_ba_array_val(v_iopage);
     unsigned long page_aligned_view = (unsigned long)a->data & ~(PAGE_SIZE - 1);
     return (void*) page_aligned_view;
@@ -212,6 +212,8 @@ stub_gntshr_grant_access(value v_ref, value v_iopage, value v_domid, value v_wri
 {
     grant_ref_t ref = Int_val(v_ref);
     void *page = base_page_of(v_iopage);
+    if (Caml_ba_data_val(v_iopage) != page)
+       caml_failwith("gntshr_grant_access: shared page not page-aligned");
     gntshr_grant_access(ref, page, Int_val(v_domid), !Bool_val(v_writable));
 
     return Val_unit;
