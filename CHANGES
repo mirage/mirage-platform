@@ -2,6 +2,7 @@
 * [xen] Assert that pages passed to the grant share API are page-aligned.
   This always happens if they are created via `Io_page.create`, and
   probably not true if made by `Cstruct.create`.
+* [xen] Use monotonic time for timing events, not wall-clock time.
 
 2.0.0 (04-Nov-2014):
 * Remove dietlibc, libm and most of the include files, replacing them with

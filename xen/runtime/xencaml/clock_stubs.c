@@ -32,6 +32,13 @@ unix_gettimeofday(value v_unit)
   CAMLreturn(caml_copy_double((double) tp.tv_sec + (double) tp.tv_usec / 1e6));
 }
 
+CAMLprim value
+caml_get_monotonic_time(value v_unit)
+{
+  CAMLparam1(v_unit);
+  CAMLreturn(caml_copy_int64(NOW()));
+}
+
 static value alloc_tm(struct tm *tm)
 {
   value res;

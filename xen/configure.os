@@ -7,7 +7,7 @@ case $OCAML_VERSION in
   echo Only OCaml 4.01.0 is supported
   exit 1
   ;;
-4.01.0)
+4.01.0 | 4.02.*)
   ;;
 *)
   echo Unknown OCaml version $OCAML_VERSION

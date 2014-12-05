@@ -30,7 +30,7 @@ CAMLprim value
 caml_block_domain(value v_until)
 {
   CAMLparam1(v_until);
-  block_domain((s_time_t)(Double_val(v_until) * 1000000000));
+  block_domain((s_time_t)(Int64_val(v_until)));
   CAMLreturn(Val_unit);
 }
 

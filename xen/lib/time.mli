@@ -18,12 +18,33 @@ type +'a io = 'a Lwt.t
 
 (** Timeout operations. *)
 
-val restart_threads: (unit -> float) -> unit
+module Monotonic : sig
+  (** Monotonic time is time since boot (dom0 or domU, depending on platform).
+   * Unlike Clock.time, it does not go backwards when the system clock is
+   * adjusted. *)
+
+  type time_kind = [`Time | `Interval]
+  type 'a t constraint 'a = [< time_kind]
+
+  val time : unit -> [`Time] t
+  (** Read the current monotonic time. *)
+
+  val ( + ) : 'a t -> [`Interval] t -> 'a t
+  val ( - ) : 'a t -> [`Interval] t -> 'a t
+  val interval : [`Time] t -> [`Time] t -> [`Interval] t
+
+  (** Conversions. Note: these floats are still seconds since boot. *)
+
+  val of_seconds : float -> _ t
+  val to_seconds : _ t -> float
+end
+
+val restart_threads: (unit -> [`Time] Monotonic.t) -> unit
 (** [restart_threads time_fun] restarts threads that are sleeping and
     whose wakeup time is before [time_fun ()]. *)
 
-val select_next : (unit -> float) -> float option
-(** [select_next time_fun] is [Some t] where [t] is the earliest time
+val select_next : unit -> [`Time] Monotonic.t option
+(** [select_next ()] is [Some t] where [t] is the earliest time
     when one sleeping thread will wake up, or [None] if there is no
     sleeping threads. *)
 
@@ -41,4 +62,3 @@ val with_timeout : float -> (unit -> 'a Lwt.t) -> 'a Lwt.t
     Lwt.pick [Lwt_unix.timeout d; f ()]
     ]}
 *)
-
