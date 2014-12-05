@@ -1,14 +1,14 @@
+2.1.0 (trunk):
+* [xen] Report trace events for GC, block_domain, XenStore and event channels.
+  This introduces a new dependency on the `mirage-profile` package.
+
 2.0.1 (05-Dec-2014):
 * [xen] Assert that pages passed to the grant share API are page-aligned.
   This always happens if they are created via `Io_page.create`, and
   probably not true if made by `Cstruct.create`.
 * [xen] Use monotonic time for timing events, not wall-clock time.
-<<<<<<< HEAD
 * [xen] Provide functions that C code often uses for asserts (`abort`,
   `printf`, etc).
-=======
-* [xen] Report trace events for GC, block_domain, XenStore and event channels.
->>>>>>> c0a6a322c3ac4d37042c651eaaff82199b8cad0e
 
 2.0.0 (04-Nov-2014):
 * Remove dietlibc, libm and most of the include files, replacing them with
