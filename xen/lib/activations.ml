@@ -42,7 +42,10 @@ type port = {
   c: unit Lwt_condition.t;
 }
 
-let ports = Array.init nr_events (fun _ -> { counter = program_start; c = Lwt_condition.create () })
+let ports = Array.init nr_events (fun port -> {
+  counter = program_start;
+  c = MProf.Trace.named_condition ("port-" ^ string_of_int port)
+})
 
 let dump () =
   Printf.printf "Number of received event channel events:\n";
@@ -68,7 +71,7 @@ let after evtchn counter =
 let wait evtchn =
   if Eventchn.is_valid evtchn then begin
 	  let port = Eventchn.to_int evtchn in
-	  let th, u = Lwt.task () in
+	  let th, u = MProf.Trace.named_task ("wait-on-port-" ^ string_of_int port) in
 	  let node = Lwt_sequence.add_l u event_cb.(port) in
 	  Lwt.on_cancel th (fun _ -> Lwt_sequence.remove node);
 	  th

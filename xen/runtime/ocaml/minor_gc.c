@@ -25,6 +25,11 @@
 #include "roots.h"
 #include "signals.h"
 #include "weak.h"
+#include "callback.h"
+#include "mlvalues.h"
+#include "alloc.h"
+#include <time.h>
+#include <mini-os/console.h>
 
 asize_t caml_minor_heap_size;
 static void *caml_young_base = NULL;
@@ -271,6 +276,13 @@ void caml_empty_minor_heap (void)
 */
 CAMLexport void caml_minor_collection (void)
 {
+  value *note_gc;
+  uint64_t start_time;
+
+  note_gc = caml_named_value("MProf.Trace.note_gc");
+  if (note_gc)
+    start_time = NOW();
+
   intnat prev_alloc_words = caml_allocated_words;
 
   caml_empty_minor_heap ();
@@ -281,6 +293,13 @@ CAMLexport void caml_minor_collection (void)
   caml_force_major_slice = 0;
 
   caml_final_do_calls ();
+
+  if (note_gc){
+    double duration_ns = (double) (NOW () - start_time);
+    value result = caml_callback_exn(*note_gc, caml_copy_double(duration_ns / 1000000000));
+    if (Is_exception_result(result))
+      printk("warning: note_gc threw an exception!\n");
+  }
 
   caml_empty_minor_heap ();
 }
