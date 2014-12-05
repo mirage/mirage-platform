@@ -52,6 +52,10 @@
 	return ret; \
     }
 
+void *stderr = NULL;
+void *stdout = NULL;
+void * __stack_chk_guard = NULL;
+
 char *getenv(const char *name)
 {
   printk("getenv(%s) -> null\n", name);
@@ -108,6 +112,44 @@ void out(buffer_t *f, const char *s, size_t l)
             *(f->buf++) = *(s++);
         --l;
     }
+}
+
+int fprintf(void *stream, const char *fmt, ...)
+{
+  va_list  args;
+  va_start(args, fmt);
+  print(0, fmt, args);
+  va_end(args);
+  return 1;
+}
+
+int printf(const char *fmt, ...)
+{
+  va_list args;
+  va_start(args, fmt);
+  print(0, fmt, args);
+  va_end(args);
+  return 1;
+}
+
+int fflush (void * stream)
+{
+  return 0;
+}
+
+void abort(void)
+{
+  printk("Abort called!\n");
+  do_exit();
+}
+
+void __assert_fail(const char *assertion,
+		   const char *file,
+		   unsigned int line,
+		   const char *function)
+{
+  printk("%s:%d: %s: Assertion %s failed\n", file, line, function, assertion);
+  abort();
 }
 
 #define ZEROPAD 1               /* pad with zero */
