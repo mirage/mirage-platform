@@ -1,4 +1,4 @@
-2.0.1 (trunk):
+2.0.1 (05-Dec-2014):
 * [xen] Assert that pages passed to the grant share API are page-aligned.
   This always happens if they are created via `Io_page.create`, and
   probably not true if made by `Cstruct.create`.
