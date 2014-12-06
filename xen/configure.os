@@ -38,6 +38,9 @@ fi
 
 case "$1" in
 xen)
+  [ -d "${PWD}/runtime/include/caml" ] || mkdir "${PWD}/runtime/include/caml"
+  cp "${PWD}/runtime/ocaml"/*.h "${PWD}/runtime/include/caml/"
+
   CC=${CC:-cc}
   PWD=`pwd`
   GCC_INCLUDE=`env LANG=C ${CC} -print-search-dirs | sed -n -e 's/install: \(.*\)/\1/p'`
