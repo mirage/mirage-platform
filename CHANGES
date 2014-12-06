@@ -1,6 +1,8 @@
 2.1.0 (trunk):
 * [xen] Report trace events for GC, block_domain, XenStore and event channels.
   This introduces a new dependency on the `mirage-profile` package.
+* [xen] Install a pkg-config file to allow other projects to compile C stubs
+  against mirage-xen.
 
 2.0.1 (05-Dec-2014):
 * [xen] Assert that pages passed to the grant share API are page-aligned.

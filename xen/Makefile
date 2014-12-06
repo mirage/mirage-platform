@@ -27,6 +27,7 @@ install:
 	mkdir -p $(XEN_LIB) $(XEN_INCLUDE)
 	for l in $(EXTRA); do cp _build/$$l $(XEN_LIB); done
 	cp -r $(EXTRA_HEADERS) $(XEN_INCLUDE)
+	cp mirage-xen.pc $(OPAM_PREFIX)/lib/pkgconfig/
 
 uninstall:
 	./cmd uninstall
