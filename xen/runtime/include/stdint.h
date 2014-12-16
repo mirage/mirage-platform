@@ -32,17 +32,25 @@ typedef uint64_t uint_fast64_t;
 #if !defined __cplusplus || defined __STDC_LIMIT_MACROS
 
 /* FIXME: missing are
-     INTx_MIN, INTx_MAX, UINTx_MAX
+     INTx_MIN, INTx_MAX,
      INT_LEASTx_MIN, INT_LEASTx_MAX, UINT_LEASTx_MAX
      INT_FASTx_MIN, INT_FASTx_MAX, UINT_FASTx_MAX
      INTMAX_MIN, INTMAX_MAX, UINTMAX_MAX
      INTPTR_MIN, INTPTR_MAX, UINTPTR_MAX
      PTRDIFF_MIN, PTRDIFF_MAX
      SIG_ATOMIC_MIN, SIG_ATOMIC_MAX
-     SIZE_MAX
      WCHAR_MIN, WCHAR_MAX
      WINT_MIN, WINT_MAX
 */
+#define UINT8_MAX 0xff
+#define UINT16_MAX 0xffff
+#define UINT32_MAX 0xffffffff
+#define UINT64_MAX 0xffffffffffffffff
+#if __WORDSIZE == 64
+# define SIZE_MAX UINT64_MAX
+#else
+# define SIZE_MAX UINT32_MAX
+#endif
 
 #endif	/* C++ && limit macros */
 

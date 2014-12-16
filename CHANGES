@@ -1,3 +1,5 @@
+* [xen] Define UINTx_MAX and SIZE_MAX in stdint.h
+
 2.1.0 (07-Dec-2014):
 * [xen] Report trace events for GC, block_domain, XenStore and event channels.
   This introduces a new dependency on the `mirage-profile` package.
