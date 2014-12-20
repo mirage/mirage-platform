@@ -46,7 +46,6 @@ int fchdir(int fd) __THROW;
 int rmdir(const char *pathname) __THROW;
 char *getcwd(char *buf, size_t size) __THROW;
 
-int open(const char* pathname,int flags, ...) __THROW;
 int open64(const char* pathname,int flags, ...) __THROW;
 int creat(const char* pathname,mode_t mode) __THROW;
 int creat64(const char* pathname,mode_t mode) __THROW;

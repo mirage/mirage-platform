@@ -143,15 +143,6 @@ void abort(void)
   do_exit();
 }
 
-void __assert_fail(const char *assertion,
-		   const char *file,
-		   unsigned int line,
-		   const char *function)
-{
-  printk("%s:%d: %s: Assertion %s failed\n", file, line, function, assertion);
-  abort();
-}
-
 #define ZEROPAD 1               /* pad with zero */
 #define SIGN    2               /* unsigned/signed long */
 #define PLUS    4               /* show plus */

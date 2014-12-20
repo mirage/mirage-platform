@@ -27,7 +27,7 @@ esac
 
 echo $ARCH_OBJ | cat - runtime/ocaml/libocaml.cclib.in > runtime/ocaml/libocaml.cclib
 
-PKG_CONFIG_DEPS="openlibm libminios-xen"
+PKG_CONFIG_DEPS="openlibm libminios-xen >= 0.5"
 pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
 
 # This extra flag only needed for gcc 4.8+
@@ -53,6 +53,7 @@ xen)
     -DSYS_xen -I${PWD}/runtime/ocaml $(pkg-config --cflags $PKG_CONFIG_DEPS) \
     -Wextra -Wchar-subscripts -Wno-switch \
     -Wno-unused -Wredundant-decls \
+    -fno-builtin \
     -DNATIVE_CODE ${ARCH_CFLAGS}"
   ;;
 *)

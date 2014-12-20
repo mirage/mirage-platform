@@ -23,6 +23,7 @@ build: _config
 	ocamlbuild $(EXTRA)
 
 install:
+	rm -rf $(XEN_INCLUDE)
 	./cmd install
 	mkdir -p $(XEN_LIB) $(XEN_INCLUDE)
 	for l in $(EXTRA); do cp _build/$$l $(XEN_LIB); done
