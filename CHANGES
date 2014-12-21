@@ -1,4 +1,17 @@
-* [xen] Updated headers and build for Mini-OS 0.5
+2.1.2 (20-Dec-2014):
+
+[xen] Updated headers and build for Mini-OS 0.5.  This involves:
+
+* Require libminios >= 0.5
+* Remove old includes directory when installing
+* Compile with `-fno-builtin` (avoids warnings about standard functions)
+* Removed `complex.h` (now provided by Openlibm)
+* Include `cdefs.h` from `types.h` (needed for `__BEGIN_DECLS`)
+* Removed open from `unistd.h` (comes from `fcntl.h`)
+* Removed `assert.h` and `__assert_fail` (provided by Mini-OS)
+* Removed `string.h` (provided by Mini-OS)
+* Removed `cdefs.h` (provided by Mini-OS)
+* Added missing `console.h` includes (for `printk`)
 
 2.1.1 (17-Dec-2014):
 * Remove checksum stubs from Unix and Xen, as they are provided by `tcpip` now.
