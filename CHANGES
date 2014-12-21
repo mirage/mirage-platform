@@ -1,3 +1,5 @@
+* Remove mirage-xen.pc file on uninstall
+
 2.1.2 (20-Dec-2014):
 
 [xen] Updated headers and build for Mini-OS 0.5.  This involves:
