@@ -33,6 +33,7 @@ install:
 uninstall:
 	./cmd uninstall
 	rm -rf $(XEN_INCLUDE)
+	rm -f $(OPAM_PREFIX)/lib/pkgconfig/mirage-xen.pc
 
 doc: _config
 	./cmd doc
