@@ -5,8 +5,8 @@ OPAM_PREFIX := $(shell opam config var prefix)
 PKG_CONFIG_PATH = $(OPAM_PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH
 
-EXTRA=runtime/xencaml/libxencaml.a runtime/ocaml/libocaml.a
-EXTRA_HEADERS=runtime/config runtime/ocaml runtime/include
+EXTRA=runtime/xencaml/libxencaml.a
+EXTRA_HEADERS=runtime/config runtime/include
 
 OCAMLFIND ?= ocamlfind
 

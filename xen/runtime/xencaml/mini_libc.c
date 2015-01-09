@@ -16,6 +16,7 @@
 #include <mini-os/lib.h>
 #include <errno.h>
 #include <limits.h>
+#include <sys/types.h>
 #include "fmt_fp.h"
 #define HUGE_VAL	(__builtin_huge_val())
 
@@ -221,7 +222,13 @@ unsupported_function_crash(if_freenameindex);
    Log, and return an error code if possible.  If it is not possible
    to inform the application of an error, then crash instead!
 */
+
 unsupported_function_log(struct dirent *, readdir64, NULL);
+unsupported_function_log(clock_t, clock, -1);
+unsupported_function_log(char *, getwd, NULL);
+unsupported_function_log(void *, opendir, NULL);
+unsupported_function_log(struct dirent *, readdir, NULL);
+unsupported_function_log(int, closedir, -1);
 unsupported_function_log(int, getrusage, -1);
 unsupported_function_log(int, getrlimit, -1);
 unsupported_function_log(int, getrlimit64, -1);

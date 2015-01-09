@@ -1,31 +1,13 @@
 #!/bin/sh -x
 
-# Detect OCaml version and symlink in right runtime files
-OCAML_VERSION=`ocamlc -version`
-case $OCAML_VERSION in
-4.00.1)
-  echo Only OCaml 4.01.0 is supported
-  exit 1
-  ;;
-4.01.0 | 4.02.*)
-  ;;
-*)
-  echo Unknown OCaml version $OCAML_VERSION
-  exit 1
-esac
-
 case `uname -m` in
 armv*)
   ARCH_CFLAGS="-DTARGET_arm"
-  ARCH_OBJ="arm.o"
  ;;
 *)
   ARCH_CFLAGS="-DTARGET_amd64 -D__x86_64__ -m64 -mno-red-zone -momit-leaf-frame-pointer -mfancy-math-387"
-  ARCH_OBJ="amd64.o"
   ;;
 esac
-
-echo $ARCH_OBJ | cat - runtime/ocaml/libocaml.cclib.in > runtime/ocaml/libocaml.cclib
 
 PKG_CONFIG_DEPS="openlibm libminios-xen >= 0.5"
 pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
@@ -38,9 +20,6 @@ fi
 
 case "$1" in
 xen)
-  [ -d "${PWD}/runtime/include/caml" ] || mkdir "${PWD}/runtime/include/caml"
-  cp "${PWD}/runtime/ocaml"/*.h "${PWD}/runtime/include/caml/"
-
   CC=${CC:-cc}
   PWD=`pwd`
   GCC_INCLUDE=`env LANG=C ${CC} -print-search-dirs | sed -n -e 's/install: \(.*\)/\1/p'`

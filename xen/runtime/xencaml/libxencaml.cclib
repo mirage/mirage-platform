@@ -10,3 +10,5 @@ start_info_stubs.o
 atomic_stubs.o
 mini_libc.o
 fmt_fp.o
+cstruct_stubs.o
+barrier_stubs.o
