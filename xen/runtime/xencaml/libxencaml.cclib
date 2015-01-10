@@ -1,14 +1,2 @@
-main.o
-exit_stubs.o
-page_stubs.o
-eventchn_stubs.o
-xb_stubs.o
-clock_stubs.o
-gnttab_stubs.o
-sched_stubs.o
-start_info_stubs.o
-atomic_stubs.o
 mini_libc.o
 fmt_fp.o
-cstruct_stubs.o
-barrier_stubs.o
