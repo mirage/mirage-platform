@@ -1,0 +1,357 @@
+./build.sh
++ opam config var prefix
++ export PKG_CONFIG_PATH=/home/avsm/.opam/xendisk/lib/pkgconfig
++ PKG_CONFIG_DEPS=openlibm libminios-xen >= 0.5
++ pkg-config --print-errors --exists openlibm libminios-xen >= 0.5
++ uname -m
++ ARCH_CFLAGS=-DTARGET_amd64 -D__x86_64__ -momit-leaf-frame-pointer -mfancy-math-387
++ m_header=m.x86_64.h
++ gcc -dumpversion
++ cut -f2 -d.
++ GCC_MVER2=9
++ [ 9 -ge 8 ]
++ EXTRA_CFLAGS=-fno-tree-loop-distribute-patterns
++ CC=cc
++ CFLAGS=-Wall -O3
++ rm -rf ocaml-src
++ opam config var prefix
++ cp -r /home/avsm/.opam/xendisk/lib/ocaml-src ocaml-src
++ cp m.x86_64.h ocaml-src/config/m.h
++ cp Makefile.config ocaml-src/config/Makefile
++ echo #define OCAML_OS_TYPE "Unix"
++ echo #define POSIX_SIGNALS 1
++ echo #define HAS_DIRENT 1
++ echo #define HAS_GETTIMEOFDAY 1
++ cd ocaml-src
++ cd asmrun
++ make -j8 NATIVECCCOMPOPTS=-Wall -O3 NATIVECCPROFOPTS=-Wall -O3
+make[1]: Entering directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/asmrun'
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o startup.o startup.c
+ln -s ../byterun/main.c main.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o fail.o fail.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o roots.o roots.c
+ln -s ../byterun/globroots.c globroots.c
+ln -s ../byterun/signals.c signals.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o signals_asm.o signals_asm.c
+ln -s ../byterun/misc.c misc.c
+ln -s ../byterun/freelist.c freelist.c
+ln -s ../byterun/major_gc.c major_gc.c
+ln -s ../byterun/minor_gc.c minor_gc.c
+ln -s ../byterun/memory.c memory.c
+ln -s ../byterun/alloc.c alloc.c
+ln -s ../byterun/compare.c compare.c
+ln -s ../byterun/ints.c ints.c
+ln -s ../byterun/floats.c floats.c
+ln -s ../byterun/str.c str.c
+ln -s ../byterun/array.c array.c
+ln -s ../byterun/io.c io.c
+ln -s ../byterun/extern.c extern.c
+ln -s ../byterun/intern.c intern.c
+ln -s ../byterun/hash.c hash.c
+ln -s ../byterun/sys.c sys.c
+ln -s ../byterun/parsing.c parsing.c
+ln -s ../byterun/gc_ctrl.c gc_ctrl.c
+ln -s ../byterun/terminfo.c terminfo.c
+ln -s ../byterun/md5.c md5.c
+ln -s ../byterun/obj.c obj.c
+ln -s ../byterun/lexing.c lexing.c
+ln -s ../byterun/printexc.c printexc.c
+ln -s ../byterun/callback.c callback.c
+ln -s ../byterun/weak.c weak.c
+ln -s ../byterun/compact.c compact.c
+ln -s ../byterun/finalise.c finalise.c
+ln -s ../byterun/custom.c custom.c
+ln -s ../byterun/unix.c unix.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o backtrace.o backtrace.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o natdynlink.o natdynlink.c
+ln -s ../byterun/debugger.c debugger.c
+ln -s ../byterun/meta.c meta.c
+ln -s ../byterun/dynlink.c dynlink.c
+gcc -c -DSYS_linux -DMODEL_default -o amd64.o amd64.S || \
+{ echo "If your assembler produced syntax errors, it is probably";\
+          echo "unhappy with the preprocessor. Check your assembler, or";\
+          echo "try producing amd64.o by hand.";\
+          exit 2; }
+ln -s -f startup.c startup.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 startup.p.c
+ln -s -f main.c main.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 main.p.c
+ln -s -f fail.c fail.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 fail.p.c
+ln -s -f roots.c roots.p.c
+ln -s -f globroots.c globroots.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 roots.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 globroots.p.c
+rm -f main.p.c
+ln -s -f signals.c signals.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 signals.p.c
+ln -s -f signals_asm.c signals_asm.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 signals_asm.p.c
+rm -f startup.p.c
+rm -f fail.p.c
+ln -s -f misc.c misc.p.c
+ln -s -f freelist.c freelist.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 misc.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 freelist.p.c
+ln -s -f major_gc.c major_gc.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 major_gc.p.c
+rm -f signals_asm.p.c
+freelist.p.c: In function ‘caml_fl_reset’:
+freelist.p.c:363:3: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+   Next (Fl_head) = NULL;
+   ^
+ln -s -f minor_gc.c minor_gc.p.c
+ln -s -f memory.c memory.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 minor_gc.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 memory.p.c
+rm -f signals.p.c
+ln -s -f alloc.c alloc.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 alloc.p.c
+rm -f misc.p.c
+ln -s -f compare.c compare.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 compare.p.c
+rm -f globroots.p.c
+ln -s -f ints.c ints.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 ints.p.c
+rm -f roots.p.c
+ln -s -f floats.c floats.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 floats.p.c
+rm -f freelist.p.c
+ln -s -f str.c str.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 str.p.c
+rm -f major_gc.p.c
+ln -s -f array.c array.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 array.p.c
+rm -f minor_gc.p.c
+ln -s -f io.c io.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 io.p.c
+rm -f memory.p.c
+ln -s -f extern.c extern.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 extern.p.c
+rm -f compare.p.c
+ln -s -f intern.c intern.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 intern.p.c
+rm -f alloc.p.c
+ln -s -f hash.c hash.p.c
+io.p.c: In function ‘caml_open_descriptor_in’:
+io.p.c:64:3: warning: implicit declaration of function ‘lseek’ [-Wimplicit-function-declaration]
+   channel->offset = lseek(fd, 0, SEEK_CUR);
+   ^
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 hash.p.c
+io.p.c: In function ‘caml_close_channel’:
+io.p.c:105:3: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+   close(channel->fd);
+   ^
+io.p.c: In function ‘do_write’:
+io.p.c:161:3: warning: implicit declaration of function ‘write’ [-Wimplicit-function-declaration]
+   retcode = write(fd, p, n);
+   ^
+io.p.c: In function ‘caml_do_read’:
+io.p.c:279:5: warning: implicit declaration of function ‘read’ [-Wimplicit-function-declaration]
+     retcode = read(fd, p, n);
+     ^
+rm -f str.p.c
+ln -s -f sys.c sys.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 sys.p.c
+sys.p.c: In function ‘caml_sys_close’:
+sys.p.c:148:3: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+   close(Int_val(fd));
+   ^
+sys.p.c: In function ‘caml_sys_remove’:
+sys.p.c:172:3: warning: implicit declaration of function ‘unlink’ [-Wimplicit-function-declaration]
+   ret = unlink(String_val(name));
+   ^
+sys.p.c: In function ‘caml_sys_chdir’:
+sys.p.c:186:3: warning: implicit declaration of function ‘chdir’ [-Wimplicit-function-declaration]
+   if (chdir(String_val(dirname)) != 0) caml_sys_error(dirname);
+   ^
+sys.p.c: In function ‘caml_sys_getcwd’:
+sys.p.c:196:3: warning: implicit declaration of function ‘getwd’ [-Wimplicit-function-declaration]
+   if (getwd(buff) == 0) caml_sys_error(NO_ARG);
+   ^
+sys.p.c: In function ‘caml_sys_random_seed’:
+sys.p.c:309:5: warning: implicit declaration of function ‘read’ [-Wimplicit-function-declaration]
+     int nread = read(fd, buffer, 12);
+     ^
+rm -f ints.p.c
+rm -f floats.p.c
+ln -s -f parsing.c parsing.p.c
+ln -s -f gc_ctrl.c gc_ctrl.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 parsing.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 gc_ctrl.p.c
+rm -f hash.p.c
+rm -f array.p.c
+ln -s -f terminfo.c terminfo.p.c
+ln -s -f md5.c md5.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 terminfo.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 md5.p.c
+md5.p.c: In function ‘caml_MD5Final’:
+md5.p.c:210:5: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     ((uint32 *) ctx->in)[14] = ctx->bits[0];
+     ^
+md5.p.c:211:5: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     ((uint32 *) ctx->in)[15] = ctx->bits[1];
+     ^
+rm -f sys.p.c
+rm -f terminfo.p.c
+ln -s -f obj.c obj.p.c
+ln -s -f lexing.c lexing.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 obj.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 lexing.p.c
+rm -f parsing.p.c
+ln -s -f printexc.c printexc.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 printexc.p.c
+rm -f gc_ctrl.p.c
+ln -s -f callback.c callback.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 callback.p.c
+rm -f lexing.p.c
+ln -s -f weak.c weak.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 weak.p.c
+rm -f obj.p.c
+ln -s -f compact.c compact.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 compact.p.c
+rm -f md5.p.c
+ln -s -f finalise.c finalise.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 finalise.p.c
+rm -f printexc.p.c
+ln -s -f custom.c custom.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 custom.p.c
+rm -f callback.p.c
+ln -s -f unix.c unix.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 unix.p.c
+rm -f extern.p.c
+ln -s -f backtrace.c backtrace.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 backtrace.p.c
+rm -f custom.p.c
+ln -s -f natdynlink.c natdynlink.p.c
+unix.p.c: In function ‘caml_executable_name’:
+unix.p.c:314:3: warning: implicit declaration of function ‘readlink’ [-Wimplicit-function-declaration]
+   retcode = readlink("/proc/self/exe", name, name_len);
+   ^
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 natdynlink.p.c
+rm -f finalise.p.c
+ln -s -f debugger.c debugger.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 debugger.p.c
+rm -f weak.p.c
+rm -f intern.p.c
+ln -s -f meta.c meta.p.c
+ln -s -f dynlink.c dynlink.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 meta.p.c
+gcc -c -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -pg -O -DPROFILING -Wall -O3 dynlink.p.c
+rm -f io.p.c
+rm -f unix.p.c
+gcc -c -DSYS_linux -DPROFILING -o amd64.p.o amd64.S
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o main.o main.c
+rm -f debugger.p.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o globroots.o globroots.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o signals.o signals.c
+rm -f meta.p.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o misc.o misc.c
+rm -f dynlink.p.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o freelist.o freelist.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o major_gc.o major_gc.c
+rm -f compact.p.c
+rm -f natdynlink.p.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o minor_gc.o minor_gc.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o memory.o memory.c
+rm -f backtrace.p.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o alloc.o alloc.c
+freelist.c: In function ‘caml_fl_reset’:
+freelist.c:363:3: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+   Next (Fl_head) = NULL;
+   ^
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o compare.o compare.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o ints.o ints.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o floats.o floats.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o str.o str.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o array.o array.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o io.o io.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o extern.o extern.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o intern.o intern.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o hash.o hash.c
+io.c: In function ‘caml_open_descriptor_in’:
+io.c:64:3: warning: implicit declaration of function ‘lseek’ [-Wimplicit-function-declaration]
+   channel->offset = lseek(fd, 0, SEEK_CUR);
+   ^
+io.c: In function ‘caml_close_channel’:
+io.c:105:3: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+   close(channel->fd);
+   ^
+io.c: In function ‘do_write’:
+io.c:161:3: warning: implicit declaration of function ‘write’ [-Wimplicit-function-declaration]
+   retcode = write(fd, p, n);
+   ^
+io.c: In function ‘caml_do_read’:
+io.c:279:5: warning: implicit declaration of function ‘read’ [-Wimplicit-function-declaration]
+     retcode = read(fd, p, n);
+     ^
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o sys.o sys.c
+sys.c: In function ‘caml_sys_close’:
+sys.c:148:3: warning: implicit declaration of function ‘close’ [-Wimplicit-function-declaration]
+   close(Int_val(fd));
+   ^
+sys.c: In function ‘caml_sys_remove’:
+sys.c:172:3: warning: implicit declaration of function ‘unlink’ [-Wimplicit-function-declaration]
+   ret = unlink(String_val(name));
+   ^
+sys.c: In function ‘caml_sys_chdir’:
+sys.c:186:3: warning: implicit declaration of function ‘chdir’ [-Wimplicit-function-declaration]
+   if (chdir(String_val(dirname)) != 0) caml_sys_error(dirname);
+   ^
+sys.c: In function ‘caml_sys_getcwd’:
+sys.c:196:3: warning: implicit declaration of function ‘getwd’ [-Wimplicit-function-declaration]
+   if (getwd(buff) == 0) caml_sys_error(NO_ARG);
+   ^
+sys.c: In function ‘caml_sys_random_seed’:
+sys.c:309:5: warning: implicit declaration of function ‘read’ [-Wimplicit-function-declaration]
+     int nread = read(fd, buffer, 12);
+     ^
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o parsing.o parsing.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o gc_ctrl.o gc_ctrl.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o terminfo.o terminfo.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o md5.o md5.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o obj.o obj.c
+md5.c: In function ‘caml_MD5Final’:
+md5.c:210:5: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     ((uint32 *) ctx->in)[14] = ctx->bits[0];
+     ^
+md5.c:211:5: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     ((uint32 *) ctx->in)[15] = ctx->bits[1];
+     ^
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o lexing.o lexing.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o printexc.o printexc.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o callback.o callback.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o weak.o weak.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o compact.o compact.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o finalise.o finalise.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o custom.o custom.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o unix.o unix.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o debugger.o debugger.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o meta.o meta.c
+gcc -I../byterun -DCAML_NAME_SPACE -DNATIVE_CODE -DTARGET_amd64 -DSYS_linux  -O -Wall -O3   -c -o dynlink.o dynlink.c
+rm -f libasmrunp.a
+ar rc libasmrunp.a startup.p.o main.p.o fail.p.o roots.p.o globroots.p.o signals.p.o signals_asm.p.o misc.p.o freelist.p.o major_gc.p.o minor_gc.p.o memory.p.o alloc.p.o compare.p.o ints.p.o floats.p.o str.p.o array.p.o io.p.o extern.p.o intern.p.o hash.p.o sys.p.o parsing.p.o gc_ctrl.p.o terminfo.p.o md5.p.o obj.p.o lexing.p.o printexc.p.o callback.p.o weak.p.o compact.p.o finalise.p.o custom.p.o unix.p.o backtrace.p.o natdynlink.p.o debugger.p.o meta.p.o dynlink.p.o amd64.p.o
+unix.c: In function ‘caml_executable_name’:
+unix.c:314:3: warning: implicit declaration of function ‘readlink’ [-Wimplicit-function-declaration]
+   retcode = readlink("/proc/self/exe", name, name_len);
+   ^
+ranlib libasmrunp.a
+rm -f libasmrun.a
+ar rc libasmrun.a startup.o main.o fail.o roots.o globroots.o signals.o signals_asm.o misc.o freelist.o major_gc.o minor_gc.o memory.o alloc.o compare.o ints.o floats.o str.o array.o io.o extern.o intern.o hash.o sys.o parsing.o gc_ctrl.o terminfo.o md5.o obj.o lexing.o printexc.o callback.o weak.o compact.o finalise.o custom.o unix.o backtrace.o natdynlink.o debugger.o meta.o dynlink.o amd64.o
+ranlib libasmrun.a
+make[1]: Leaving directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/asmrun'
++ cd ..
++ CFLAGS=-Wall -O3 -I../../byterun
++ cd otherlibs/bigarray
++ make CFLAGS=-Wall -O3 -I../../byterun bigarray_stubs.o mmap_unix.o
+make[1]: Entering directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/otherlibs/bigarray'
+gcc -fno-defer-pop -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -Wall -O3 -I../../byterun -c bigarray_stubs.c
+gcc -fno-defer-pop -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -Wall -O3 -I../../byterun -c mmap_unix.c
+make[1]: Leaving directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/otherlibs/bigarray'
++ cd ../str
++ make CFLAGS=-Wall -O3 -I../../byterun strstubs.o
+make[1]: Entering directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/otherlibs/str'
+gcc -fno-defer-pop -Wall -D_FILE_OFFSET_BITS=64 -D_REENTRANT -Wall -O3 -I../../byterun -c strstubs.c
+make[1]: Leaving directory '/home/avsm/src/git/avsm/mirage-platform/xen-ocaml/src/core/ocaml-src/otherlibs/str'
++ cd ../..
++ ar rcs libxenotherlibs.a otherlibs/bigarray/bigarray_stubs.o otherlibs/bigarray/mmap_unix.o otherlibs/str/strstubs.o
