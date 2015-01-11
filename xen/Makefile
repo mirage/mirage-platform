@@ -43,3 +43,7 @@ configure:
 install-runtime:
 	cd ../xen-posix && $(MAKE) build && $(MAKE) install
 	cd ../xen-ocaml && $(MAKE)
+
+uninstall-runtime:
+	cd ../xen-posix && $(MAKE) uninstall
+	cd ../xen-ocaml && $(MAKE) uninstall

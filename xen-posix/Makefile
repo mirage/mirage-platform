@@ -8,3 +8,6 @@ install:
 
 clean:
 	rm -f *.o
+
+uninstall:
+	./uninstall.sh

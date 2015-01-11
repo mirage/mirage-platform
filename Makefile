@@ -33,5 +33,13 @@ doc:
 unix-%:
 	$(MAKE) OS=unix PREFIX=$(PREFIX) $*
 
-xen-%:
-	$(MAKE) OS=xen PREFIX=$(PREFIX) $*
+xen-build:
+	cd xen && $(MAKE)
+
+xen-install:
+	cd xen && $(MAKE) install
+	cd xen && $(MAKE) install-runtime
+
+xen-uninstall:
+	ocamlfind remove mirage-xen
+	cd xen && $(MAKE) uninstall-runtime
