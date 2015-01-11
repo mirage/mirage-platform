@@ -16,6 +16,7 @@
 
 #include <mini-os/os.h>
 #include <mini-os/sched.h>
+#include <mini-os/events.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
@@ -25,6 +26,11 @@ void _exit(int);
 int errno;
 static char *argv[] = { "mirage", NULL };
 static unsigned long irqflags;
+
+/* XXX TODO: keep in sync with mirage-xen-minios */
+void setup_xen_features(void);
+void init_console(void);
+void init_gnttab(void);
 
 CAMLprim value
 caml_block_domain(value v_until)
@@ -36,9 +42,6 @@ caml_block_domain(value v_until)
 
 void app_main_thread(void *unused)
 {
-  value *v_main;
-  int caml_completed = 0;
-  printk("xencaml: app_main_thread\n");
   local_irq_save(irqflags);
   caml_startup(argv);
   _exit(0);
@@ -46,8 +49,6 @@ void app_main_thread(void *unused)
 
 void start_kernel(void)
 {
-  printk("Mirage: start_kernel\n");
-
   /* Set up events. */
   init_events();
 
@@ -70,31 +71,12 @@ void start_kernel(void)
   /* Init grant tables. */
   init_gnttab();
 
-#if 1
-    /* Call our main function directly, without using Mini-OS threads. */
+  /* Call our main function directly, without using Mini-OS threads. */
   app_main_thread(NULL);
-#else
-  /* Init scheduler. */
-  /* Needed if you want to use create_thread, but we can get away without it. */
-  init_sched();
-
-  /* Init XenBus */
-  /* Using Mini-OS's XenBus support requires threads. */
-  init_xenbus();
-
-  /* Respond to "xl shutdown". Requires XenBus. */
-  create_thread("shutdown", shutdown_thread, NULL);
-
-  create_thread("ocaml", app_main_thread, NULL);
-
-  /* Everything initialised, start idle thread */
-  run_idle_thread();
-#endif
 }
 
 void _exit(int ret)
 {
-  printk("main returned %d\n", ret);
   stop_kernel();
   if (!ret) {
     /* No problem, just shutdown.  */

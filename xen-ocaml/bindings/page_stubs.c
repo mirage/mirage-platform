@@ -25,6 +25,9 @@
 #include <caml/fail.h>
 #include <caml/bigarray.h>
 
+/* XXX TODO defined in minios */
+void *_xmalloc(size_t size, size_t align);
+
 /* Allocate a page-aligned bigarray of length [n_pages] pages.
    Since CAML_BA_MANAGED is set the bigarray C finaliser will
    call free() whenever all sub-bigarrays are unreachable.
@@ -40,7 +43,7 @@ caml_alloc_pages(value n_pages)
   void* block = _xmalloc(len, PAGE_SIZE);
 
   if (block == NULL) {
-    printk("memalign(%d, %d) failed.\n", PAGE_SIZE, len);
+    printk("memalign(%lu, %lu) failed.\n", PAGE_SIZE, len);
     caml_failwith("memalign");
   }
   /* Explicitly zero the page before returning it */

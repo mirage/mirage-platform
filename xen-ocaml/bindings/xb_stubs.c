@@ -12,6 +12,7 @@
  * GNU Lesser General Public License for more details.
  */
 #include <mini-os/os.h>
+#include <mini-os/lib.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
