@@ -5,7 +5,7 @@ OPAM_PREFIX := $(shell opam config var prefix)
 PKG_CONFIG_PATH = $(OPAM_PREFIX)/lib/pkgconfig
 export PKG_CONFIG_PATH
 
-EXTRA=runtime/xencaml/libxencaml.a
+EXTRA=runtime/xencaml/libxenposix.a
 EXTRA_HEADERS=runtime/config runtime/include
 
 OCAMLFIND ?= ocamlfind
@@ -28,7 +28,9 @@ install:
 	mkdir -p $(XEN_LIB) $(XEN_INCLUDE)
 	for l in $(EXTRA); do cp _build/$$l $(XEN_LIB); done
 	cp -r $(EXTRA_HEADERS) $(XEN_INCLUDE)
+	cp mirage-xen-posix.pc $(OPAM_PREFIX)/lib/pkgconfig/
 	cp mirage-xen.pc $(OPAM_PREFIX)/lib/pkgconfig/
+	cp mirage-xen-minios.pc $(OPAM_PREFIX)/lib/pkgconfig/
 
 uninstall:
 	./cmd uninstall

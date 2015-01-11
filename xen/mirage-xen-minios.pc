@@ -3,10 +3,9 @@ exec_prefix=${prefix}
 includedir=${prefix}/include/mirage-xen/include
 libdir=${exec_prefix}/lib
 
-Name: mirage-xen
+Name: mirage-xen-minios
 Version: 2.0.1
 URL: https://github.com/mirage/mirage-platform/
-Description: Core platform libraries for Mirage on Xen
-Cflags: -I${includedir}
+Cflags: -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__
 Libs: 
-Requires: mirage-xen-ocaml-bindings
+Requires: mirage-xen-posix
