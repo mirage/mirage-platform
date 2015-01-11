@@ -4,3 +4,5 @@ tap_stubs_os.c
 .*.swp
 xen/runtime/ocaml/libocaml.cclib
 xen/runtime/include/caml/*.h
+*.o
+*.a
