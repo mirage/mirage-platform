@@ -1,34 +1,41 @@
-.PHONY: all _config build install uninstall doc clean
+# OASIS_START
+# DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
 
-OPAM_PREFIX := $(shell opam config var prefix)
+SETUP = ocaml setup.ml
 
-PKG_CONFIG_PATH = $(OPAM_PREFIX)/lib/pkgconfig
-export PKG_CONFIG_PATH
+build: setup.data
+	$(SETUP) -build $(BUILDFLAGS)
 
-OCAMLFIND ?= ocamlfind
+doc: setup.data build
+	$(SETUP) -doc $(DOCFLAGS)
 
-XEN_LIB = $(shell ocamlfind printconf destdir)/mirage-xen
-XEN_INCLUDE = $(OPAM_PREFIX)/include/mirage-xen
+test: setup.data build
+	$(SETUP) -test $(TESTFLAGS)
 
-all: build
+all:
+	$(SETUP) -all $(ALLFLAGS)
 
-_config:
-	./cmd configure xen
+install: setup.data
+	$(SETUP) -install $(INSTALLFLAGS)
 
-build: _config
-	./cmd build
-	ocamlbuild $(EXTRA)
+uninstall: setup.data
+	$(SETUP) -uninstall $(UNINSTALLFLAGS)
 
-install:
-	./cmd install
-	cp mirage-xen.pc $(OPAM_PREFIX)/lib/pkgconfig/
-
-uninstall:
-	./cmd uninstall
-	rm -f $(OPAM_PREFIX)/lib/pkgconfig/mirage-xen.pc
-
-doc: _config
-	./cmd doc
+reinstall: setup.data
+	$(SETUP) -reinstall $(REINSTALLFLAGS)
 
 clean:
-	./cmd clean
+	$(SETUP) -clean $(CLEANFLAGS)
+
+distclean:
+	$(SETUP) -distclean $(DISTCLEANFLAGS)
+
+setup.data:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+configure:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+.PHONY: build doc test all install uninstall reinstall clean distclean configure
+
+# OASIS_STOP

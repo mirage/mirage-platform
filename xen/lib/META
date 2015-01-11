@@ -1,0 +1,13 @@
+# OASIS_START
+# DO NOT EDIT (digest: 801fb1ed5faea9253d6691aa7f31db14)
+version = "2.2.0"
+description = "Library support for the Mirage/Xen backend"
+requires =
+"lwt cstruct xen-evtchn xen-gnt xenstore shared-memory-ring shared-memory-ring.lwt shared-memory-ring.xenstore shared-memory-ring.console mirage-types mirage-clock-xen io-page mirage-profile"
+archive(byte) = "OS.cma"
+archive(byte, plugin) = "OS.cma"
+archive(native) = "OS.cmxa"
+archive(native, plugin) = "OS.cmxs"
+exists_if = "OS.cma"
+# OASIS_STOP
+

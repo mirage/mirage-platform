@@ -1,0 +1,21 @@
+OASISFormat: 0.4
+Name:        mirage-xen
+Version:     2.2.0
+Synopsis:    Library support for the Mirage/Xen backend
+Authors:     Anil Madhavapeddy, Dave Scott, Thomas Gazagnaire
+License:     ISC
+Plugins:     META (0.4), DevFiles (0.4)
+BuildTools:  ocamlbuild
+
+Library "OS"
+  Path: lib
+  Findlibname: mirage-xen
+  Pack: true
+  Modules: Activations, Device_state, Env, Main, Sched, Start_info, Time, Xenctrl, Xs
+  BuildDepends:	lwt,cstruct,xen-evtchn,xen-gnt,xenstore,shared-memory-ring,shared-memory-ring.lwt,
+                shared-memory-ring.xenstore,shared-memory-ring.console,mirage-types,mirage-clock-xen,
+                io-page,mirage-profile,lwt.syntax,cstruct.syntax
+  XMetaRequires: lwt,cstruct,xen-evtchn,xen-gnt,xenstore,shared-memory-ring,shared-memory-ring.lwt,
+                shared-memory-ring.xenstore,shared-memory-ring.console,mirage-types,mirage-clock-xen,
+                io-page,mirage-profile
+
