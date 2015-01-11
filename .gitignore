@@ -6,3 +6,5 @@ xen/runtime/ocaml/libocaml.cclib
 xen/runtime/include/caml/*.h
 *.o
 *.a
+setup.data
+setup.log

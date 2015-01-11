@@ -18,4 +18,3 @@ Library "OS"
   XMetaRequires: lwt,cstruct,xen-evtchn,xen-gnt,xenstore,shared-memory-ring,shared-memory-ring.lwt,
                 shared-memory-ring.xenstore,shared-memory-ring.console,mirage-types,mirage-clock-xen,
                 io-page,mirage-profile
-
