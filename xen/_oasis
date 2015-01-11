@@ -2,7 +2,7 @@ OASISFormat: 0.4
 Name:        mirage-xen
 Version:     2.2.0
 Synopsis:    Library support for the Mirage/Xen backend
-Authors:     Anil Madhavapeddy, Dave Scott, Thomas Gazagnaire
+Authors:     Anil Madhavapeddy, Dave Scott, Thomas Gazagnaire, Thomas Leonard
 License:     ISC
 Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
