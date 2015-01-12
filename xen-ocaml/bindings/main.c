@@ -17,6 +17,8 @@
 #include <mini-os/os.h>
 #include <mini-os/sched.h>
 #include <mini-os/events.h>
+#include <mini-os/console.h>
+#include <mini-os/gnttab.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
@@ -29,8 +31,6 @@ static unsigned long irqflags;
 
 /* XXX TODO: keep in sync with mirage-xen-minios */
 void setup_xen_features(void);
-void init_console(void);
-void init_gnttab(void);
 
 CAMLprim value
 caml_block_domain(value v_until)
