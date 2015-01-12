@@ -37,9 +37,10 @@ xen-build:
 	cd xen && $(MAKE)
 
 xen-install:
+	$(MAKE) xen-uninstall
 	cd xen && $(MAKE) install
 	cd xen && $(MAKE) install-runtime
 
 xen-uninstall:
-	ocamlfind remove mirage-xen
+	ocamlfind remove mirage-xen || true
 	cd xen && $(MAKE) uninstall-runtime
