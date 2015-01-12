@@ -12,4 +12,5 @@ cp mirage-xen-minios.pc $odir/pkgconfig/mirage-xen-minios.pc
 cp mirage-xen-posix.pc $odir/pkgconfig/mirage-xen-posix.pc
 idir=$prefix/include/mirage-xen/include
 rm -rf $idir
-cp -r include $idir
+mkdir -p $idir
+cp -r include/* $idir
