@@ -17,6 +17,7 @@
 #include <string.h>
 #include <mini-os/os.h>
 #include <mini-os/console.h>
+#include <mini-os/xmalloc.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
@@ -24,9 +25,6 @@
 #include <caml/alloc.h>
 #include <caml/fail.h>
 #include <caml/bigarray.h>
-
-/* XXX TODO defined in minios */
-void *_xmalloc(size_t size, size_t align);
 
 /* Allocate a page-aligned bigarray of length [n_pages] pages.
    Since CAML_BA_MANAGED is set the bigarray C finaliser will
