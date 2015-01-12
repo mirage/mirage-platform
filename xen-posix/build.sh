@@ -20,18 +20,11 @@ fi
 
 CC=${CC:-cc}
 PWD=`pwd`
-GCC_INCLUDE=`env LANG=C ${CC} -print-search-dirs | sed -n -e 's/install: \(.*\)/\1/p'`
-CFLAGS="$EXTRA_CFLAGS -O3 -U __linux__ -U __FreeBSD__ -U __sun__ \
-    -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ -nostdinc -std=gnu99 \
-    -fno-stack-protector -fno-reorder-blocks -fstrict-aliasing \
-    -I ${GCC_INCLUDE}/include \
-    -I ${PWD}/include/ \
-    -I ${PWD}/src/ \
+CFLAGS="$EXTRA_CFLAGS -I ${PWD}/include/ -I ${PWD}/src/ \
+    -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ \
     $(pkg-config --cflags $PKG_CONFIG_DEPS) \
-    -Wextra -Wchar-subscripts -Wno-switch \
-    -Wno-unused -Wredundant-decls \
-    -fno-builtin \
-    ${ARCH_CFLAGS}"
+    -Wextra -Wchar-subscripts -Wno-switch -Wno-unused -Wredundant-decls \
+    -fno-builtin ${ARCH_CFLAGS}"
 
 ${CC} -c ${CFLAGS} src/*.c
 ar rcs libxenposix.a mini_libc.o fmt_fp.o

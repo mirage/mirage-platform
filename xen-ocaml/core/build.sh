@@ -15,17 +15,9 @@ armv*)
   ;;
 esac
 
-# This extra flag only needed for gcc 4.8+
-# TODO we only need this for minios and not applications I think
-GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
-if [ $GCC_MVER2 -ge 8 ]; then
-  EXTRA_CFLAGS=-fno-tree-loop-distribute-patterns
-fi
-
 CC=${CC:-cc}
 PWD=`pwd`
-GCC_INCLUDE=`env LANG=C ${CC} -print-search-dirs | sed -n -e 's/install: \(.*\)/\1/p'`
-CFLAGS="$EXTRA_CFLAGS -O3 -Wno-attributes \
+CFLAGS="$EXTRA_CFLAGS -Wno-attributes \
   -DSYS_xen $(pkg-config --cflags $PKG_CONFIG_DEPS) \
    -I `opam config var prefix`/include/mirage-xen/include \
    -DNATIVE_CODE -USYS_linux"  
