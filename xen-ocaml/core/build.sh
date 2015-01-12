@@ -26,7 +26,7 @@ cp config/*.h ocaml-src/config/
 cp Makefile.config ocaml-src/config/Makefile
 cd ocaml-src
 # cd byterun && make BYTECCCOMPOPTS="${CFLAGS}" BYTECCCOMPOPTS="${CFLAGS}" libcamlrun.a && cd ..
-cd asmrun && make -j${NJOBS} NATIVECCCOMPOPTS="-DNATIVE_CODE ${CFLAGS}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
+cd asmrun && make -j${NJOBS} UNIX_OR_WIN32=unix NATIVECCCOMPOPTS="-DNATIVE_CODE ${CFLAGS}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
 CFLAGS="$CFLAGS -I../../byterun" 
 cd otherlibs/bigarray && make CFLAGS="${CFLAGS}" bigarray_stubs.o mmap_unix.o
 cd ../str && make CFLAGS="${CFLAGS}" strstubs.o && cd ../..
