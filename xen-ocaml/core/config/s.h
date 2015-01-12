@@ -9,7 +9,7 @@
 //#define HAS_IPV6
 //#define HAS_UNISTD
 //#define HAS_OFF_T
-//#define HAS_DIRENT
+#define HAS_DIRENT
 //#define HAS_REWINDDIR
 //#define HAS_LOCKF
 //#define HAS_MKFIFO

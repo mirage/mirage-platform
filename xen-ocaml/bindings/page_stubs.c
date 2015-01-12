@@ -21,7 +21,6 @@
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
-#include <caml/gc.h>
 #include <caml/alloc.h>
 #include <caml/fail.h>
 #include <caml/bigarray.h>
