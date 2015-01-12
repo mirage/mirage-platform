@@ -8,7 +8,7 @@ case `uname -m` in
 armv*)
  ;;
 *)
-  ARCH_CFLAGS="-D__x86_64__ -m64 -mno-red-zone -momit-leaf-frame-pointer -mfancy-math-387"
+  ARCH_CFLAGS="-D__x86_64__ -momit-leaf-frame-pointer -mfancy-math-387"
   ;;
 esac
 
