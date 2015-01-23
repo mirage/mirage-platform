@@ -73,11 +73,7 @@ let run t =
           MProf.Trace.note_resume ();
           aux ()
         end in
-  try
-    aux ()
-  with exn ->
-    Printf.printf "Top level exception: %s\n%!"
-      (Printexc.to_string exn)
+  aux ()
 
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)

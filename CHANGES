@@ -1,4 +1,5 @@
 * Remove mirage-xen.pc file on uninstall
+* [xen] Report failure to Xen if a top-level exception escapes.
 
 2.1.2 (20-Dec-2014):
 
