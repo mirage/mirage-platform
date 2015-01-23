@@ -1,4 +1,9 @@
-* Remove mirage-xen.pc file on uninstall
+2.1.3 (23-Jan-2015):
+* [xen] Fix error handling in `OS.Main.run` to enable a top-level
+  exception to signal to the Xen toolstack that it crashed (versus a
+  clean exit). This in turn lets `on_crash="preserve"` behaviour work
+  better in Xen VM description files.
+* Remove `mirage-xen.pc` file on uninstall.
 
 2.1.2 (20-Dec-2014):
 
