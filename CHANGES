@@ -1,3 +1,31 @@
+2.2.0 (trunk):
+
+This releases adds support for OCaml 4.02+ compilation, and changes the Xen
+backend build for Mirage significantly by:
+
+* removing the OCaml compiler runtime from the mirage-platform, which makes
+  it simpler to work across multiple revisions of the compiler.  It now uses
+  the `ocaml-src` OPAM package to grab the current switch's version of the
+  OCaml runtime.
+* split the Xen runtime build into discrete `pkg-config` libraries:
+  * `mirage-xen-posix.pc` : in the `xen-posix/` directory, is the nano-posix
+     layer built with no knowledge of OCaml
+  * `mirage-xen-minios.pc`: defines the `__INSIDE_MINIOS__` macro to expose
+     internal state via the MiniOS headers (for use only by libraries that
+     know exactly what they are doing with the MiniOS)
+  * `mirage-xen-ocaml.pc`: in `xen-ocaml/core/`, this builds the OCaml asmrun,
+     Bigarray and Str bindings using the `mirage-xen-posix` layer.
+  * `mirage-xen-ocaml-bindings.pc`: in `xen-ocaml/bindings/`, these are bindings
+     required by the OCaml libraries to MiniOS.  Some of the bindings use MiniOS
+     external state and hence use `mirage-xen-minios`, whereas others
+    (`cstruct_stubs` and `barrier_stubs` are just OCaml bindings and so just
+    use `mirage-xen-posix`).
+  * `mirage-xen.pc`: depends on all the above to provide the same external
+    interface as the current `mirage-platform`.
+
+The OCaml code is now built using OASIS, since the C code is built entirely
+separately and could be moved out into a separate OPAM package entirely.
+
 2.1.3 (23-Jan-2015):
 * [xen] Fix error handling in `OS.Main.run` to enable a top-level
   exception to signal to the Xen toolstack that it crashed (versus a
