@@ -1,7 +1,44 @@
-<lib/*> and not <lib/oS*>: for-pack(OS), use_syntax
-<lib_test/*>: use_lib, custom
-<syntax/*>: build_syntax
-true: camlp4o
-<*/*>: annot
-<lib>: include
-<**/*.{mli,ml}>: package(lwt), package(cstruct), package(mirage-profile)
+# OASIS_START
+# DO NOT EDIT (digest: c56c8309de9d636d61085917efb44e21)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library OS
+"lib/OS.cmxs": use_OS
+"lib/activations.cmx": for-pack(OS)
+"lib/device_state.cmx": for-pack(OS)
+"lib/env.cmx": for-pack(OS)
+"lib/main.cmx": for-pack(OS)
+"lib/sched.cmx": for-pack(OS)
+"lib/start_info.cmx": for-pack(OS)
+"lib/time.cmx": for-pack(OS)
+"lib/xenctrl.cmx": for-pack(OS)
+"lib/xs.cmx": for-pack(OS)
+<lib/*.ml{,i,y}>: pkg_cstruct
+<lib/*.ml{,i,y}>: pkg_cstruct.syntax
+<lib/*.ml{,i,y}>: pkg_io-page
+<lib/*.ml{,i,y}>: pkg_lwt
+<lib/*.ml{,i,y}>: pkg_lwt.syntax
+<lib/*.ml{,i,y}>: pkg_mirage-clock-xen
+<lib/*.ml{,i,y}>: pkg_mirage-profile
+<lib/*.ml{,i,y}>: pkg_mirage-types
+<lib/*.ml{,i,y}>: pkg_shared-memory-ring
+<lib/*.ml{,i,y}>: pkg_shared-memory-ring.console
+<lib/*.ml{,i,y}>: pkg_shared-memory-ring.lwt
+<lib/*.ml{,i,y}>: pkg_shared-memory-ring.xenstore
+<lib/*.ml{,i,y}>: pkg_xen-evtchn
+<lib/*.ml{,i,y}>: pkg_xen-gnt
+<lib/*.ml{,i,y}>: pkg_xenstore.client
+# OASIS_STOP
+true: debug, short_paths, principal, strict_sequence
