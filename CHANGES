@@ -1,4 +1,4 @@
-2.2.0 (trunk):
+2.2.0 (23-Jan-2015):
 
 This releases adds support for OCaml 4.02+ compilation, and changes the Xen
 backend build for Mirage significantly by:
