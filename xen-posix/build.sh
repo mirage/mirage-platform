@@ -15,7 +15,7 @@ esac
 # This extra flag only needed for gcc 4.8+
 GCC_MVER2=`gcc -dumpversion | cut -f2 -d.`
 if [ $GCC_MVER2 -ge 8 ]; then
-  EXTRA_CFLAGS=-fno-tree-loop-distribute-patterns
+  EXTRA_CFLAGS="-fno-tree-loop-distribute-patterns -fno-stack-protector"
 fi
 
 CC=${CC:-cc}

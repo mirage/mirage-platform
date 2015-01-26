@@ -1,3 +1,8 @@
+2.2.1 (26-Jan-2015):
+* Fix Xen compilation with `gcc 4.8+` by disabling the stack protector
+  and `-fno-tree-loop-distribute-patterns` (not compatible with MiniOS).
+  These missing flags were a regression from 2.1.3, which did include them.
+
 2.2.0 (23-Jan-2015):
 
 This releases adds support for OCaml 4.02+ compilation, and changes the Xen

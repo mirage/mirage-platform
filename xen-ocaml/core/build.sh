@@ -6,18 +6,18 @@ PKG_CONFIG_DEPS="openlibm libminios-xen >= 0.5"
 pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
 case `uname -m` in
 armv*)
-  ARCH_CFLAGS="-DTARGET_arm"
+  ARCH_CFLAGS=""
   m_file="arm"
  ;;
 *)
-  ARCH_CFLAGS="-DTARGET_amd64 -D__x86_64__ -momit-leaf-frame-pointer -mfancy-math-387"
+  ARCH_CFLAGS="-momit-leaf-frame-pointer -mfancy-math-387 -fno-tree-loop-distribute-patterns -fno-stack-protector"
   m_file="x86_64"
   ;;
 esac
 
 CC=${CC:-cc}
 PWD=`pwd`
-CFLAGS="-Wno-attributes -DSYS_xen -USYS_linux \
+CFLAGS="-Wno-attributes ${ARCH_CFLAGS} -DSYS_xen -USYS_linux \
   $(pkg-config --cflags $PKG_CONFIG_DEPS) \
   -I `opam config var prefix`/include/mirage-xen/include"
 
