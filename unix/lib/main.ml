@@ -31,3 +31,5 @@ let run t =
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)
 let at_enter f = ignore (Lwt_sequence.add_l f enter_hooks)
+let at_exit_iter f = ignore (Lwt_sequence.add_r f Lwt_main.leave_iter_hooks)
+let at_enter_iter f = ignore (Lwt_sequence.add_r f Lwt_main.enter_iter_hooks)

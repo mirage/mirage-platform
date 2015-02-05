@@ -29,6 +29,8 @@ let evtchn = Eventchn.init ()
 
 let exit_hooks = Lwt_sequence.create ()
 let enter_hooks = Lwt_sequence.create ()
+let exit_iter_hooks = Lwt_sequence.create ()
+let enter_iter_hooks = Lwt_sequence.create ()
 
 let rec call_hooks hooks  =
   match Lwt_sequence.take_opt_l hooks with
@@ -60,7 +62,11 @@ let run t =
         if look_for_work () then begin
           (* Some event channels have triggered, wake up threads
            * and continue without blocking. *)
+          (* Call enter hooks. *)
+          Lwt_sequence.iter_l (fun f -> f ()) enter_iter_hooks;
           Activations.run evtchn;
+          (* Call leave hooks. *)
+          Lwt_sequence.iter_l (fun f -> f ()) exit_iter_hooks;
           aux ()
         end else begin
           let timeout =
@@ -78,3 +84,5 @@ let run t =
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)
 let at_enter f = ignore (Lwt_sequence.add_l f enter_hooks)
+let at_exit_iter f = ignore (Lwt_sequence.add_l f exit_iter_hooks)
+let at_enter_iter f = ignore (Lwt_sequence.add_l f enter_iter_hooks)
