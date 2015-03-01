@@ -1,3 +1,7 @@
+=======
+master:
+* remove page_stubs.c, now provided by io-page (#122)
+
 2.2.2 (04-Mar-2015):
 * Add generic hooks to mainloop to support background tasks. (#120)
 * [xen] Report trace events for GC again; this was disabled temporarily
