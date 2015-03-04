@@ -1,3 +1,5 @@
+* [xen] Report trace events for GC again (was lost in 2.2.0).
+
 2.2.1 (26-Jan-2015):
 * Fix Xen compilation with `gcc 4.8+` by disabling the stack protector
   and `-fno-tree-loop-distribute-patterns` (not compatible with MiniOS).

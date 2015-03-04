@@ -29,6 +29,7 @@ CFLAGS="-Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} -DSYS_xen -USYS_linux \
 
 rm -rf ocaml-src
 cp -r `opam config var prefix`/lib/ocaml-src ocaml-src
+patch < trace-gc.patch -p 0
 cp config/s.h ocaml-src/config/
 cp config/m.${m_file}.h ocaml-src/config/m.h
 cp config/Makefile.${m_file} ocaml-src/config/Makefile
