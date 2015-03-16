@@ -1,6 +1,6 @@
-=======
-master:
-* remove page_stubs.c, now provided by io-page (#122)
+2.2.3: (16-Mar-2015)
+* Add opam files for `mirage-xen` and `mirage-unix` OPAM packages
+* Remove page_stubs.c, now provided by io-page (#122, patch from @hannesm)
 
 2.2.2 (04-Mar-2015):
 * Add generic hooks to mainloop to support background tasks. (#120)
@@ -122,7 +122,7 @@ separately and could be moved out into a separate OPAM package entirely.
 * Major refresh of the NS3 simulation backend, for latest APIs.
 * Add `Netif` statistics counters per-packet.
 * [xen] Fix multi-page ring support by granting the correct data pages.
-* [unix] flush OS.Console file descriptor more often (#108). 
+* [unix] flush OS.Console file descriptor more often (#108).
 * Fix regression in `Io_page.string_blit` with non-zero src offset (#71).
 
 0.9.7 (05-Oct-2013):
