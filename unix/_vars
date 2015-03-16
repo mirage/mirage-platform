@@ -1,5 +1,5 @@
 NAME=mirage
-VERSION=2.2.2
+VERSION=2.2.3
 DEPS="cstruct lwt lwt.unix io-page.unix io-page mirage-clock-unix"
 SYNTAX_DEPS="cstruct.syntax lwt.syntax"
 LIB="oS"

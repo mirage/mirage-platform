@@ -44,3 +44,17 @@ xen-install:
 xen-uninstall:
 	ocamlfind remove mirage-xen || true
 	cd xen && $(MAKE) uninstall-runtime
+
+VERSION = $(shell grep 'VERSION=' unix/_vars | sed 's/VERSION=*//')
+ARCHIVE = https://github.com/mirage/mirage-platform/archive/v$(VERSION).tar.gz
+
+release:
+	git tag -a v$(VERSION) -m "Version $(VERSION)."
+	git push upstream v$(VERSION)
+	$(MAKE) pr
+
+pr:
+	opam publish prepare mirage-$(OS).$(VERSION) $(ARCHIVE)
+	OPAMPUBLISHBYPASSCHECKS=1 OPAMYES=1 \
+	  opam publish submit mirage-$(OS).$(VERSION) \
+	  && rm -rf $(NAME).$(VERSION)
