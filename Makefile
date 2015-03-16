@@ -49,8 +49,8 @@ VERSION = $(shell grep 'VERSION=' unix/_vars | sed 's/VERSION=*//')
 ARCHIVE = https://github.com/mirage/mirage-platform/archive/v$(VERSION).tar.gz
 
 release:
-	git tag -a $(VERSION) -m "Version $(VERSION)."
-	git push upstream $(VERSION)
+	git tag -a v$(VERSION) -m "Version $(VERSION)."
+	git push upstream v$(VERSION)
 	$(MAKE) pr
 
 pr:
