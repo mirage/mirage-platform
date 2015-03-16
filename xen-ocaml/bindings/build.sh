@@ -13,6 +13,6 @@ if [ $GCC_MVER2 -ge 8 ]; then
 fi
 
 CC=${CC:-cc}
-$CC -Wall -Wno-attributes ${MINIOS_CFLAGS} ${EXTRA_CFLAGS} -c barrier_stubs.c eventchn_stubs.c exit_stubs.c gnttab_stubs.c main.c page_stubs.c sched_stubs.c start_info_stubs.c xb_stubs.c
+$CC -Wall -Wno-attributes ${MINIOS_CFLAGS} ${EXTRA_CFLAGS} -c barrier_stubs.c eventchn_stubs.c exit_stubs.c gnttab_stubs.c main.c sched_stubs.c start_info_stubs.c xb_stubs.c
 $CC -Wall -Wno-attributes ${CFLAGS} ${EXTRA_CFLAGS} -c atomic_stubs.c clock_stubs.c cstruct_stubs.c
 ar rcs libxencamlbindings.a *.o
