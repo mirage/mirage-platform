@@ -22,6 +22,6 @@ depends: [
   "mirage-xen-minios" {>= "0.7.0"}
   "conf-pkg-config"
   "mirage-profile" {>= "0.3"}
-  "ocaml-src"
+  "mirage-xen-ocaml"
 ]
 available: [ ocaml-version >= "4.01.0" & os = "linux" ]

@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
 export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
-PKG_CONFIG_DEPS="mirage-xen-minios"
+PKG_CONFIG_DEPS="mirage-xen-minios mirage-xen-ocaml"
 pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
 CFLAGS=`pkg-config --cflags mirage-xen-ocaml`
 MINIOS_CFLAGS=`pkg-config --cflags mirage-xen-minios mirage-xen-ocaml`

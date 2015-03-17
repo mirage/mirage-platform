@@ -35,15 +35,34 @@ unix-%:
 
 xen-build:
 	cd xen && $(MAKE)
+	cd bindings && $(MAKE) build
 
 xen-install:
-	$(MAKE) xen-uninstall
 	cd xen && $(MAKE) install
-	cd xen && $(MAKE) install-runtime
+	cd bindings && $(MAKE) install
 
 xen-uninstall:
 	ocamlfind remove mirage-xen || true
-	cd xen && $(MAKE) uninstall-runtime
+	cd bindings && $(MAKE) uninstall
+
+xen-ocaml-build:
+	cd xen-ocaml && $(MAKE) build
+
+xen-ocaml-install:
+	cd xen-ocaml && $(MAKE) install
+
+xen-ocaml-uninstall:
+	cd xen-ocaml && $(MAKE) uninstall
+
+xen-posix-build:
+	cd xen-posix && $(MAKE) build
+
+xen-posix-install:
+	cd xen-posix && $(MAKE) install
+
+xen-posix-uninstall:
+	cd xen-posix && $(MAKE) uninstall
+
 
 VERSION = $(shell grep 'VERSION=' unix/_vars | sed 's/VERSION=*//')
 ARCHIVE = https://github.com/mirage/mirage-platform/archive/v$(VERSION).tar.gz

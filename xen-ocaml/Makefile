@@ -1,9 +1,13 @@
-.PHONY: build
+.PHONY: build clean install
 
 build:
-	cd core && $(MAKE) build && $(MAKE) install
-	cd bindings && $(MAKE) build && $(MAKE) install
+	./build.sh
+
+clean:
+	rm -rf ocaml-src
+
+install:
+	./install.sh
 
 uninstall:
-	cd bindings && $(MAKE) uninstall
-	cd core && $(MAKE) uninstall
+	./uninstall.sh

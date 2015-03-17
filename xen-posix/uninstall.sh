@@ -6,8 +6,7 @@ if [ "$prefix" = "" ]; then
 fi
 
 odir=$prefix/lib
-rm -rf $odir/mirage-xen
+rm -rf $odir/mirage-xen-posix
 rm -f $odir/pkgconfig/mirage-xen-minios.pc
 rm -f $odir/pkgconfig/mirage-xen-posix.pc
-idir=$prefix/include/mirage-xen/include
-rm -rf $idir
+rm -rf $prefix/include/mirage-xen-posix

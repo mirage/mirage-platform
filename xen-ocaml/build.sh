@@ -2,7 +2,7 @@
 
 MJOBS=${4:-NJOBS}
 export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
-PKG_CONFIG_DEPS="openlibm libminios-xen >= 0.5"
+PKG_CONFIG_DEPS="mirage-xen-posix openlibm libminios-xen >= 0.5"
 pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
 case `uname -m` in
 armv*)

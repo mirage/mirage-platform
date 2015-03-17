@@ -1,6 +1,6 @@
 prefix=${pcfiledir}/../..
 exec_prefix=${prefix}
-includedir=${prefix}/include/mirage-xen/include
+includedir=${prefix}/include/mirage-xen-ocaml/include
 libdir=${exec_prefix}/lib
 
 Name: mirage-xen-ocaml
@@ -8,6 +8,6 @@ Version: 1.0.0
 URL: https://github.com/mirage/mirage-platform/
 Description: OCaml runtime compiled for Mirage Xen
 Cflags: -I${includedir}
-Libs: ${libdir}/mirage-xen/libxenasmrun.a ${libdir}/mirage-xen/libxenotherlibs.a
+Libs: ${libdir}/mirage-xen-ocaml/libxenasmrun.a ${libdir}/mirage-xen-ocaml/libxenotherlibs.a
 Requires: mirage-xen-posix
 
