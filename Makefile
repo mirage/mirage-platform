@@ -35,21 +35,21 @@ unix-%:
 
 xen-build:
 	cd xen && $(MAKE)
+	cd bindings && $(MAKE) build
 
 xen-install:
-	$(MAKE) xen-uninstall
 	cd xen && $(MAKE) install
-	cd xen-ocaml && $(MAKE) build-bindings
+	cd bindings && $(MAKE) install
 
 xen-uninstall:
 	ocamlfind remove mirage-xen || true
-	cd xen-ocaml && $(MAKE) uninstall-bindings
+	cd bindings && $(MAKE) uninstall
 
 xen-ocaml-build:
-	echo "move along"
+	cd xen-ocaml && $(MAKE) build
 
 xen-ocaml-install:
-	cd xen-ocaml && $(MAKE) build
+	cd xen-ocaml && $(MAKE) install
 
 xen-ocaml-uninstall:
 	cd xen-ocaml && $(MAKE) uninstall
