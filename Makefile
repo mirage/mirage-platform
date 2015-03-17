@@ -50,7 +50,7 @@ xen-ocaml-build:
 
 xen-ocaml-install:
 	cd xen-posix && $(MAKE) build install
-	cd xen-ocaml && $(MAKE) build install
+	cd xen-ocaml && $(MAKE) build
 
 xen-ocaml-uninstall:
 	cd xen-posix && $(MAKE) uninstall
