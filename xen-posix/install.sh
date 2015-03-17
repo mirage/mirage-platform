@@ -6,8 +6,9 @@ if [ "$prefix" = "" ]; then
 fi
 
 odir=$prefix/lib
-mkdir -p $odir
+mkdir -p $odir/mirage-xen
 cp libxenposix.a $odir/mirage-xen/libxenposix.a
+mkdir -p $odir/pkgconfig
 cp mirage-xen-minios.pc $odir/pkgconfig/mirage-xen-minios.pc
 cp mirage-xen-posix.pc $odir/pkgconfig/mirage-xen-posix.pc
 idir=$prefix/include/mirage-xen/include
