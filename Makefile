@@ -46,12 +46,11 @@ xen-uninstall:
 	cd xen-ocaml && $(MAKE) uninstall-bindings
 
 xen-ocaml-build:
-	cd xen-posix && $(MAKE) build
-	cd xen-ocaml && $(MAKE) build
+	echo "move along"
 
 xen-ocaml-install:
-	cd xen-posix && $(MAKE) install
-	cd xen-ocaml && $(MAKE) install
+	cd xen-posix && $(MAKE) build && $(MAKE) install
+	cd xen-ocaml && $(MAKE) build && $(MAKE) install
 
 xen-ocaml-uninstall:
 	cd xen-posix && $(MAKE) uninstall
