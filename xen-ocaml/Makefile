@@ -2,8 +2,12 @@
 
 build:
 	cd core && $(MAKE) build && $(MAKE) install
-	cd bindings && $(MAKE) build && $(MAKE) install
 
 uninstall:
-	cd bindings && $(MAKE) uninstall
 	cd core && $(MAKE) uninstall
+
+build-bindings:
+	cd bindings && $(MAKE) build && $(MAKE) install
+
+uninstall-bindings:
+	cd bindings && $(MAKE) uninstall

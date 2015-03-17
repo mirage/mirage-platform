@@ -39,11 +39,3 @@ configure:
 .PHONY: build doc test all install uninstall reinstall clean distclean configure
 
 # OASIS_STOP
-
-install-runtime:
-	cd ../xen-posix && $(MAKE) build && $(MAKE) install
-	cd ../xen-ocaml && $(MAKE)
-
-uninstall-runtime:
-	cd ../xen-posix && $(MAKE) uninstall
-	cd ../xen-ocaml && $(MAKE) uninstall
