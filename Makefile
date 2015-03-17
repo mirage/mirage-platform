@@ -73,7 +73,9 @@ release:
 	$(MAKE) pr
 
 pr:
+	opam pin add mirage-$(OS) . -n
 	opam publish prepare mirage-$(OS).$(VERSION) $(ARCHIVE)
+	opam unpin mirage-$(OS) -n
 	OPAMPUBLISHBYPASSCHECKS=1 OPAMYES=1 \
 	  opam publish submit mirage-$(OS).$(VERSION) \
-	  && rm -rf $(NAME).$(VERSION)
+	  && rm -rf mirage-$(OS).$(VERSION)
