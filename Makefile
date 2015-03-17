@@ -49,8 +49,8 @@ xen-ocaml-build:
 	echo "move along"
 
 xen-ocaml-install:
-	cd xen-posix && $(MAKE) build && $(MAKE) install
-	cd xen-ocaml && $(MAKE) build && $(MAKE) install
+	cd xen-posix && $(MAKE) build install
+	cd xen-ocaml && $(MAKE) build install
 
 xen-ocaml-uninstall:
 	cd xen-posix && $(MAKE) uninstall
