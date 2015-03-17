@@ -10,7 +10,6 @@ install: [make "xen-posix-install" "PREFIX=%{prefix}%"]
 remove:  [make "xen-posix-uninstall" "PREFIX=%{prefix}%"]
 
 depends: [
-  "ocamlfind"
   "mirage-xen-minios" {>= "0.7.0"}
   "conf-pkg-config"
 ]
