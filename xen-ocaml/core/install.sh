@@ -10,12 +10,12 @@ odir=$prefix/lib
 mkdir -p $odir
 #We dont install the bytecode version yet
 #cd ocaml-src/byterun && make install LIBDIR="${pwd}/obj" BINDIR="${pwd}/obj"
-cp ocaml-src/asmrun/libasmrun.a $odir/mirage-xen/libxenasmrun.a
-cp ocaml-src/libxenotherlibs.a $odir/mirage-xen/libxenotherlibs.a
+cp ocaml-src/asmrun/libasmrun.a $odir/mirage-xen-ocaml/libxenasmrun.a
+cp ocaml-src/libxenotherlibs.a $odir/mirage-xen-ocaml/libxenotherlibs.a
 cp mirage-xen-ocaml.pc $odir/pkgconfig/mirage-xen-ocaml.pc
 
 # Install public includes
-idir=$prefix/include/mirage-xen/include
+idir=$prefix/include/mirage-xen-ocaml/include
 mkdir -p $idir/caml
 cd ocaml-src/byterun
 

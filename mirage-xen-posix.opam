@@ -5,14 +5,13 @@ homepage:     "https://github.com/mirage/mirage-platform"
 bug-reports:  "https://github.com/mirage/mirage-platform/issues/"
 dev-repo:     "https://github.com/mirage/mirage-platform.git"
 
-build:   [make "xen-ocaml-build"]
-install: [make "xen-ocaml-install" "PREFIX=%{prefix}%"]
-remove:  [make "xen-ocaml-uninstall" "PREFIX=%{prefix}%"]
+build:   [make "xen-posix-build"]
+install: [make "xen-posix-install" "PREFIX=%{prefix}%"]
+remove:  [make "xen-posix-uninstall" "PREFIX=%{prefix}%"]
 
 depends: [
   "ocamlfind"
-  "mirage-xen-posix"
+  "mirage-xen-minios" {>= "0.7.0"}
   "conf-pkg-config"
-  "ocaml-src"
 ]
 available: [ ocaml-version >= "4.01.0" & os = "linux" ]

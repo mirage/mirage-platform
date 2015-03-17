@@ -49,12 +49,20 @@ xen-ocaml-build:
 	echo "move along"
 
 xen-ocaml-install:
-	cd xen-posix && $(MAKE) build install
 	cd xen-ocaml && $(MAKE) build
 
 xen-ocaml-uninstall:
-	cd xen-posix && $(MAKE) uninstall
 	cd xen-ocaml && $(MAKE) uninstall
+
+xen-posix-build:
+	cd xen-posix && $(MAKE) build
+
+xen-posix-install:
+	cd xen-posix && $(MAKE) install
+
+xen-posix-uninstall:
+	cd xen-posix && $(MAKE) uninstall
+
 
 VERSION = $(shell grep 'VERSION=' unix/_vars | sed 's/VERSION=*//')
 ARCHIVE = https://github.com/mirage/mirage-platform/archive/v$(VERSION).tar.gz
