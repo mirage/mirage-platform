@@ -26,3 +26,18 @@ For documentation, visit <http://openmirage.org>.
 
 The older "unified" tree is also present for historical reasons into the
 `old-master` branch.
+
+### Repository Contents
+
+- `xen-posix/` contains the header files to pretend a posix
+  system (required to compile the OCaml runtime), plus minilibc and
+  float formating -- this is the home for the `mirage-xen-posix` OPAM
+  package. Installation goes into `.opam/x/lib/mirage-xen-posix` and
+  `.opam/x/include/mirage-xen-posix`
+
+- `xen-ocaml/` contains only the OCaml runtime (patches and build system),
+  installation into `.opam/x/lib/mirage-xen-ocaml` and
+  `.opam/x/include/mirage-xen-ocaml`
+
+- `bindings/` and `xen/` subdirectories form the `mirage-xen` OPAM  package --
+  this consists of various bindings and the OCaml OS module (in xen/).

@@ -1,3 +1,11 @@
+2.3.1:
+* Fix uninstall of `mirage-xen-ocaml` (#126, patch from @hannesm)
+
+2.3.0: (17-Mar-2015)
+* Split `mirage-xen` into three opam packages: `mirage-xen-posix` (includes and
+  mini-libc), `mirage-xen-ocaml` (OCaml runtime) and `mirage-xen` (bindings and
+  OCaml OS libraries) (#125, patch from @hannesm)
+
 2.2.3: (16-Mar-2015)
 * Add opam files for `mirage-xen` and `mirage-unix` OPAM packages
 * Remove page_stubs.c, now provided by io-page (#122, patch from @hannesm)

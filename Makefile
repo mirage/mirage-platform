@@ -72,8 +72,10 @@ release:
 	git push upstream v$(VERSION)
 	$(MAKE) pr
 
+export OPAMYES=1
+
 pr:
+	opam pin add mirage-$(OS) . -n
 	opam publish prepare mirage-$(OS).$(VERSION) $(ARCHIVE)
-	OPAMPUBLISHBYPASSCHECKS=1 OPAMYES=1 \
-	  opam publish submit mirage-$(OS).$(VERSION) \
-	  && rm -rf $(NAME).$(VERSION)
+	opam unpin mirage-$(OS) -n
+	opam publish submit mirage-$(OS).$(VERSION)
