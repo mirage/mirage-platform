@@ -15,9 +15,11 @@
 #include <mini-os/os.h>
 #include <mini-os/lib.h>
 #include <mini-os/xmalloc.h>
+#include <mini-os/time.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/times.h>
 #include "fmt_fp.h"
 #define HUGE_VAL	(__builtin_huge_val())
 
@@ -178,6 +180,16 @@ long sysconf(int name) {
     return -1;
 }
 
+clock_t times(struct tms *buf)
+{
+    long int now = monotonic_clock();
+    buf->tms_utime = now;			/* TODO: exclude time spent sleeping. */
+    buf->tms_stime = 0;
+    buf->tms_cutime = buf->tms_utime;
+    buf->tms_cstime = buf->tms_stime;
+    return now;
+}
+
 /* Not supported by FS yet.  */
 unsupported_function_crash(link);
 unsupported_function(int, readlink, -1);
@@ -308,5 +320,4 @@ unsupported_function_crash(read);
 unsupported_function_crash(gmtime);
 unsupported_function_crash(strtod);
 unsupported_function_crash(rename);
-unsupported_function_crash(times);
 unsupported_function_crash(strerror);
