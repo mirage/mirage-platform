@@ -14,6 +14,7 @@
 
 #include <mini-os/os.h>
 #include <mini-os/lib.h>
+#include <mini-os/xmalloc.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/types.h>
@@ -79,7 +80,7 @@ ssize_t write(int fd, const void *buf, size_t count)
   }
   else
   {
-    printk("Error: write to FD %d: '%*s'\n", fd, count, buf);
+    printk("Error: write to FD %d: '%*s'\n", fd, (int) count, (char *) buf);
   }
   return count;
 }
