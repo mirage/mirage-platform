@@ -172,6 +172,12 @@ char *minios_printf_render_float(char *buf, char *end, long double y, char fmt, 
     return buffer.buf;
 }
 
+long sysconf(int name) {
+    printk("sysconf(%d) -> EINVAL\n", name);
+    errno = EINVAL;
+    return -1;
+}
+
 /* Not supported by FS yet.  */
 unsupported_function_crash(link);
 unsupported_function(int, readlink, -1);
@@ -206,7 +212,6 @@ unsupported_function_crash(execve);
 unsupported_function_crash(waitpid);
 unsupported_function_crash(wait);
 unsupported_function_crash(lockf);
-unsupported_function_crash(sysconf);
 unsupported_function(int, tcsetattr, -1);
 unsupported_function(int, tcgetattr, 0);
 unsupported_function(int, grantpt, -1);
