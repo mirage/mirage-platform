@@ -10,6 +10,11 @@
 
 __BEGIN_DECLS
 
+/* Amount to subtract from monotonic_clock() to get the time spent running.
+ * This is initialised to the current time at start-up and increased each
+ * time we block. */
+extern s_time_t not_running_time;
+
 int __isleap(int year);
 
 #define CLOCK_REALTIME           0

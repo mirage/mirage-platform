@@ -19,6 +19,8 @@
 #include <mini-os/events.h>
 #include <mini-os/console.h>
 #include <mini-os/gnttab.h>
+#include <mini-os/time.h>
+#include <time.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
@@ -29,6 +31,8 @@ int errno;
 static char *argv[] = { "mirage", NULL };
 static unsigned long irqflags;
 
+s_time_t not_running_time = 0;
+
 /* XXX TODO: keep in sync with mirage-xen-minios */
 void setup_xen_features(void);
 
@@ -36,7 +40,11 @@ CAMLprim value
 caml_block_domain(value v_until)
 {
   CAMLparam1(v_until);
+  s_time_t t0, t1;
+  t0 = monotonic_clock();
   block_domain((s_time_t)(Int64_val(v_until)));
+  t1 = monotonic_clock();
+  not_running_time += t1 - t0;
   CAMLreturn(Val_unit);
 }
 
@@ -63,6 +71,7 @@ void start_kernel(void)
 
   /* Init time and timers. Needed for block_domain. */
   init_time();
+  not_running_time = monotonic_clock();
 
   /* Init the console driver.
    * We probably do need this if we want printk to send notifications correctly. */

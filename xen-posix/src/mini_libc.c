@@ -16,6 +16,7 @@
 #include <mini-os/lib.h>
 #include <mini-os/xmalloc.h>
 #include <mini-os/time.h>
+#include <time.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/types.h>
@@ -78,7 +79,7 @@ ssize_t write(int fd, const void *buf, size_t count)
 {
   if (fd == 1 || fd == 2)
   {
-    console_print(NULL, buf, count);
+    console_print(NULL, (char *) buf, count);
   }
   else
   {
@@ -98,7 +99,7 @@ int atoi(const char *nptr)
   return simple_strtoul(nptr, NULL, 10);
 }
 
-int open64(const char *pathname, int flags)
+int open64(const char *pathname, int flags, ...)
 {
   printk("Attempt to open(%s)!\n", pathname);
   return -1;
@@ -183,7 +184,7 @@ long sysconf(int name) {
 clock_t times(struct tms *buf)
 {
     long int now = monotonic_clock();
-    buf->tms_utime = now;			/* TODO: exclude time spent sleeping. */
+    buf->tms_utime = now - not_running_time;
     buf->tms_stime = 0;
     buf->tms_cutime = buf->tms_utime;
     buf->tms_cstime = buf->tms_stime;
