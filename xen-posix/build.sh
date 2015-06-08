@@ -18,12 +18,14 @@ if [ $GCC_MVER2 -ge 8 ]; then
   EXTRA_CFLAGS="-fno-tree-loop-distribute-patterns -fno-stack-protector"
 fi
 
+# TODO: remove -Wno-sign-compare
 CC=${CC:-cc}
 PWD=`pwd`
 CFLAGS="$EXTRA_CFLAGS -I ${PWD}/include/ -I ${PWD}/src/ \
     -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ \
     $(pkg-config --cflags $PKG_CONFIG_DEPS) \
-    -Wextra -Wchar-subscripts -Wno-switch -Wno-unused -Wredundant-decls \
+    -Wextra -Wchar-subscripts -Wno-switch -Wno-unused -Wredundant-decls -Wall \
+    -Wno-sign-compare \
     -fno-builtin ${ARCH_CFLAGS}"
 
 ${CC} -c ${CFLAGS} src/*.c

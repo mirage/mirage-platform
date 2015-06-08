@@ -10,6 +10,11 @@
 
 __BEGIN_DECLS
 
+/* Amount to subtract from monotonic_clock() to get the time spent running.
+ * This is initialised to the current time at start-up and increased each
+ * time we block. */
+extern s_time_t not_running_time;
+
 int __isleap(int year);
 
 #define CLOCK_REALTIME           0
@@ -71,7 +76,8 @@ time_t timegm(struct tm *timeptr) __THROW __attribute_dontuse__ __pure ;
 time_t timelocal(struct tm *timeptr) __THROW __attribute_dontuse__ __pure;
 #endif
 
-#define CLK_TCK ((clock_t)sysconf(_SC_CLK_TCK))
+/* Mini-OS returns times in ns */
+#define CLK_TCK 1000000000
 
 __END_DECLS
 

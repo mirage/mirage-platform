@@ -14,9 +14,13 @@
 
 #include <mini-os/os.h>
 #include <mini-os/lib.h>
+#include <mini-os/xmalloc.h>
+#include <mini-os/time.h>
+#include <time.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/types.h>
+#include <sys/times.h>
 #include "fmt_fp.h"
 #define HUGE_VAL	(__builtin_huge_val())
 
@@ -75,11 +79,11 @@ ssize_t write(int fd, const void *buf, size_t count)
 {
   if (fd == 1 || fd == 2)
   {
-    console_print(NULL, buf, count);
+    console_print(NULL, (char *) buf, count);
   }
   else
   {
-    printk("Error: write to FD %d: '%*s'\n", fd, count, buf);
+    printk("Error: write to FD %d: '%*s'\n", fd, (int) count, (char *) buf);
   }
   return count;
 }
@@ -95,7 +99,7 @@ int atoi(const char *nptr)
   return simple_strtoul(nptr, NULL, 10);
 }
 
-int open64(const char *pathname, int flags)
+int open64(const char *pathname, int flags, ...)
 {
   printk("Attempt to open(%s)!\n", pathname);
   return -1;
@@ -171,6 +175,22 @@ char *minios_printf_render_float(char *buf, char *end, long double y, char fmt, 
     return buffer.buf;
 }
 
+long sysconf(int name) {
+    printk("sysconf(%d) -> EINVAL\n", name);
+    errno = EINVAL;
+    return -1;
+}
+
+clock_t times(struct tms *buf)
+{
+    long int now = monotonic_clock();
+    buf->tms_utime = now - not_running_time;
+    buf->tms_stime = 0;
+    buf->tms_cutime = buf->tms_utime;
+    buf->tms_cstime = buf->tms_stime;
+    return now;
+}
+
 /* Not supported by FS yet.  */
 unsupported_function_crash(link);
 unsupported_function(int, readlink, -1);
@@ -205,7 +225,6 @@ unsupported_function_crash(execve);
 unsupported_function_crash(waitpid);
 unsupported_function_crash(wait);
 unsupported_function_crash(lockf);
-unsupported_function_crash(sysconf);
 unsupported_function(int, tcsetattr, -1);
 unsupported_function(int, tcgetattr, 0);
 unsupported_function(int, grantpt, -1);
@@ -302,5 +321,4 @@ unsupported_function_crash(read);
 unsupported_function_crash(gmtime);
 unsupported_function_crash(strtod);
 unsupported_function_crash(rename);
-unsupported_function_crash(times);
 unsupported_function_crash(strerror);
