@@ -1,3 +1,7 @@
+2.3.2 (21-Jul-2015)
+* [xen-posix] Enable more compiler warnings (#134, by @talex5)
+* [ocaml] Implement times and sysconf (#131, #134, by @talex5)
+
 2.3.2 (21-May-2015):
 * [xen] Synchronize Cstruct C stubs with version 1.6.0.
 
