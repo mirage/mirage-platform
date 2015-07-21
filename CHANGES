@@ -1,4 +1,4 @@
-2.3.2 (21-Jul-2015)
+2.3.3 (21-Jul-2015)
 * [xen-posix] Enable more compiler warnings (#134, by @talex5)
 * [xen] Implement times and sysconf (#131, #134, by @talex5)
 
