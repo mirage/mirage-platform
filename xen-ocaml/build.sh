@@ -23,7 +23,7 @@ fi
 
 CC=${CC:-cc}
 PWD=`pwd`
-CFLAGS="-Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} -DSYS_xen -USYS_linux \
+CFLAGS="-Wall -Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} -DSYS_xen -USYS_linux \
   $(pkg-config --cflags $PKG_CONFIG_DEPS) \
   -I `opam config var prefix`/include/mirage-xen/include"
 
