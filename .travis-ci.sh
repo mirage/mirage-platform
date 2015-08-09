@@ -72,6 +72,8 @@ opam init
 
 opam install ${OPAM_PACKAGES}
 
+export OPAMVERBOSE=1
+
 eval `opam config env`
 make unix-build
 make unix-install
