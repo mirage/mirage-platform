@@ -57,6 +57,8 @@
 	return ret; \
     }
 
+#define UNUSED __attribute__((__unused__))
+
 void *stderr = NULL;
 void *stdout = NULL;
 void * __stack_chk_guard = NULL;
@@ -99,7 +101,7 @@ int atoi(const char *nptr)
   return simple_strtoul(nptr, NULL, 10);
 }
 
-int open64(const char *pathname, int flags, ...)
+int open64(const char *pathname, int flags UNUSED, ...)
 {
   printk("Attempt to open(%s)!\n", pathname);
   return -1;
@@ -119,7 +121,7 @@ void out(buffer_t *f, const char *s, size_t l)
     }
 }
 
-int fprintf(void *stream, const char *fmt, ...)
+int fprintf(void *stream UNUSED, const char *fmt, ...)
 {
   va_list  args;
   va_start(args, fmt);
@@ -137,7 +139,7 @@ int printf(const char *fmt, ...)
   return 1;
 }
 
-int fflush (void * stream)
+int fflush (void * stream UNUSED)
 {
   return 0;
 }
@@ -156,7 +158,7 @@ void abort(void)
 #define SPECIAL 32              /* 0x */
 #define LARGE   64              /* use 'ABCDEF' instead of 'abcdef' */
 
-char *minios_printf_render_float(char *buf, char *end, long double y, char fmt, char qualifier, int size, int precision, int type)
+char *minios_printf_render_float(char *buf, char *end, long double y, char fmt, char qualifier UNUSED, int size, int precision, int type)
 {
     buffer_t buffer = {
         .buf = buf,
