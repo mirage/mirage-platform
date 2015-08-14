@@ -324,3 +324,7 @@ unsupported_function_crash(gmtime);
 unsupported_function_crash(strtod);
 unsupported_function_crash(rename);
 unsupported_function_crash(strerror);
+
+unsupported_function_log(pid_t, getpid, 2);
+unsupported_function_log(pid_t, getppid, 1);
+
