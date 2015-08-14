@@ -73,6 +73,7 @@ opam init
 opam install ${OPAM_PACKAGES}
 
 export OPAMVERBOSE=1
+export CI_CFLAGS=-Werror
 
 eval `opam config env`
 make unix-build
