@@ -21,7 +21,7 @@ fi
 # TODO: remove -Wno-sign-compare
 CC=${CC:-cc}
 PWD=`pwd`
-CFLAGS="$EXTRA_CFLAGS -I ${PWD}/include/ -I ${PWD}/src/ \
+CFLAGS="$EXTRA_CFLAGS ${CI_CFLAGS} -I ${PWD}/include/ -I ${PWD}/src/ \
     -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ \
     $(pkg-config --cflags $PKG_CONFIG_DEPS) \
     -Wextra -Wchar-subscripts -Wno-switch -Wno-unused -Wredundant-decls -Wall \
