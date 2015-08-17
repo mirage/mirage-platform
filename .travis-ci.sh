@@ -1,14 +1,11 @@
 #!/bin/bash -ex
 # This Travis script is a bit convoluted as it can also build a chroot
 # (in this instance, for an ARMel cross-arch chroot, and reexecute this
-# script from within that chroot.  The chroot discards environment
-# variables from the host, so we just dump them out into a shell script
+# script from within that chroot.  The chroot discards environment
+# variables from the host, so we just dump them out into a shell script
 # that's sourced from within the chroot too.
 # This can all be cleaned up on-demand, but it does execute successfully
-# from within Travis.
-
-# OPAM packages needed to build tests.
-OPAM_PACKAGES="shared-memory-ring lwt xenstore cstruct lwt mirage-clock-xen io-page mirage-clock-unix xen-evtchn xen-gnt mirage-xen-minios mirage-profile ocaml-src"
+# from within Travis.
 
 function setup_arm_chroot {
   echo Setting up qemu chroot for ARM
@@ -39,6 +36,8 @@ function setup_arm_chroot {
   sudo rsync -av $TRAVIS_BUILD_DIR/ $DIR/$TRAVIS_BUILD_DIR/
   sudo touch $DIR/.chroot_is_done
   sudo chroot $DIR bash -c "cd $TRAVIS_BUILD_DIR && ./.travis-ci.sh"
+  sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
+  opam init https://github.com/ocaml/opam-repository.git
 }
 
 if [ -e "/.chroot_is_done" ]; then
@@ -49,38 +48,24 @@ else
   if [ "$XARCH" = "arm" ]; then
     setup_arm_chroot
   else
-    case "$OCAML_VERSION,$OPAM_VERSION" in
-    4.00.1,1.2.0) ppa=avsm/ocaml40+opam12 ;;
-    4.01.0,1.2.0) ppa=avsm/ocaml41+opam12 ;;
-    4.02.1,1.2.0) ppa=avsm/ocaml42+opam12 ;;
-    *) echo Unknown $OCAML_VERSION,$OPAM_VERSION; exit 1 ;;
-    esac
-    echo "yes" | sudo add-apt-repository ppa:$ppa
-    sudo apt-get update -qq
+    wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-ocaml.sh
+    bash -ex .travis-ocaml.sh
   fi
 fi
 
-sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
 export OPAMYES=1
-echo OCaml version
-ocaml -version
-echo OPAM versions
-opam --version
-opam --git-version
-
-opam init
-
-opam install ${OPAM_PACKAGES}
-
 export OPAMVERBOSE=1
 export CI_CFLAGS=-Werror
 
 eval `opam config env`
-make unix-build
-make unix-install
 
 opam pin add -n mirage-xen-posix .
 opam pin add -n mirage-xen-ocaml .
-opam install mirage-xen-ocaml
-make xen-build
-make xen-install
+opam pin add -n mirage-xen .
+opam pin add -n mirage-unix .
+
+opam install mirage-unix
+opam remove -a mirage-unix
+
+opam install mirage-xen-posix mirage-xen-ocaml mirage-xen
+opam remove -a mirage-xen-posix mirage-xen-ocaml mirage-xen
