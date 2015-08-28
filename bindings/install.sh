@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-prefix=$1
+prefix=${1:-$PREFIX}
 if [ "$prefix" = "" ]; then
   prefix=`opam config var prefix`
 fi

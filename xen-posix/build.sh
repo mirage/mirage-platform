@@ -1,8 +1,15 @@
 #!/bin/sh -ex
 
-export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
 PKG_CONFIG_DEPS="openlibm libminios-xen >= 0.5"
-pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
+check_deps () {
+  pkg-config --print-errors --exists ${PKG_CONFIG_DEPS}
+}
+
+if ! check_deps 2>/dev/null; then
+  # only rely on `opam` if deps are unavailable
+  export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
+fi
+check_deps || exit 1
 
 case `uname -m` in
 armv*)
