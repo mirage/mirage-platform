@@ -63,9 +63,8 @@ void *stderr = NULL;
 void *stdout = NULL;
 void * __stack_chk_guard = NULL;
 
-char *getenv(const char *name)
+char *getenv(__attribute__((unused)) const char *name)
 {
-  printk("getenv(%s) -> null\n", name);
   return NULL;
 }
 
@@ -317,7 +316,7 @@ unsupported_function_crash(unlink);
 unsupported_function_crash(getcwd);
 unsupported_function_crash(system);
 unsupported_function_crash(close);
-unsupported_function_log(off_t, lseek, -1);
+unsupported_function(off_t, lseek, -1);
 unsupported_function_crash(fcntl);
 unsupported_function_crash(read);
 unsupported_function_crash(gmtime);
