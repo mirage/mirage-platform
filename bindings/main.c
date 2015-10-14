@@ -55,6 +55,11 @@ void app_main_thread(void *unused)
   _exit(0);
 }
 
+void minios_show_banner(void)
+{
+  printk("\x1b[32;1mMirageOS booting...\x1b[0m\n");
+}
+
 void start_kernel(void)
 {
   /* Set up events. */
