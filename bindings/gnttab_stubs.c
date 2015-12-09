@@ -111,7 +111,10 @@ CAMLprim value stub_gnttab_map_fresh(value i, value r, value d, value w)
     uint32_t refs[1];
     domids[0] = Int_val(d);
     refs[0] = Int_val(r);
-    mapping = gntmap_map_grant_refs(map, 1, domids, 1, refs, 1);
+    mapping = gntmap_map_grant_refs(map, 1, domids, 1, refs, Bool_val(w));
+    if (mapping==NULL) {
+            caml_failwith("stub_gnttab_map_fresh: failed to map grant ref");
+    }
 
     handle = caml_alloc_tuple(2);
     Store_field(handle, 0, Val_int(mapping)); /* FIXME: this is an unsigned long */
@@ -138,7 +141,7 @@ CAMLprim value stub_gnttab_mapv_batched(value xgh, value array, value writable)
     }
     void *mapping = gntmap_map_grant_refs(map, count, domids, 1, refs, Bool_val(writable));
     if(mapping==NULL) {
-            caml_failwith("Failed to map grant ref");
+            caml_failwith("stub_gnttab_mapv_batched: failed to map grant ref");
     }
     handle = caml_alloc_tuple(2);
     Store_field(handle, 0, Val_int(mapping)); /* FIXME: this is an unsigned long */
