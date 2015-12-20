@@ -97,7 +97,9 @@ stub_gnttab_unmap(value i, value v_handle)
   CAMLparam2(i, v_handle);
   unsigned long start_address = Int_val(Field(v_handle, 0));
   int count = Int_val(Field(v_handle, 1));
-  gntmap_munmap(map, start_address, count);
+  if (gntmap_munmap(map, start_address, count)) {
+    caml_failwith("gntmap_munmap failed");
+  }
 
   CAMLreturn(Val_unit);
 }
