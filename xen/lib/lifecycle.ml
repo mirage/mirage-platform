@@ -14,8 +14,21 @@
 
 open Lwt.Infix
 
-let await_shutdown_request () =
+let xen_bool = function
+  | false -> "0"
+  | true -> "1"
+
+let await_shutdown_request ?(can_poweroff=true) ?(can_reboot=false) () =
   Xs.make () >>= fun xs ->
+  Lwt.catch (fun () ->
+    Xs.immediate xs (fun h ->
+      Xs.write h "control/feature-poweroff" (xen_bool can_poweroff) >>= fun () ->
+      Xs.write h "control/feature-reboot" (xen_bool can_reboot)
+    )
+  ) (fun _ex ->
+    print_endline "Note: cannot write Xen 'control' directory";
+    Lwt.return ()
+  ) >>= fun () ->
   Xs.wait xs (fun h ->
     Xs.read h "control/shutdown" >>= function
     | "poweroff" -> Lwt.return `Poweroff
