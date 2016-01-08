@@ -1,3 +1,5 @@
+* Add OS.Lifecycle module. Allows unikernels to handle shutdown requests.
+
 2.3.4 (17-Aug-2015)
 * [xen-ocaml] Support OCaml 4.02.3 (#137, by @talex5)
 * [xen-posix] Add -Wall to `xen-ocaml-build` and fix C warnings (#141, by @lnmx)
