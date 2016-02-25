@@ -1,5 +1,0 @@
-version = "@VERSION@"
-description = "Mirage NS3 platform"
-archive(byte) = "oS.cma"
-archive(native) = "oS.cmxa"
-requires = "ipaddr cstruct cstruct.syntax lwt lwt.syntax"

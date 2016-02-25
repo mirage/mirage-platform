@@ -1,4 +1,5 @@
 * Add OS.Lifecycle module. Allows unikernels to handle shutdown requests.
+* Remove unmaintained ns3 module.
 
 2.3.4 (17-Aug-2015)
 * [xen-ocaml] Support OCaml 4.02.3 (#137, by @talex5)
