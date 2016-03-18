@@ -59,6 +59,13 @@ xen-posix-install:
 xen-posix-uninstall:
 	cd xen-posix && $(MAKE) uninstall
 
+IMAGE = mirage-xen
+
+test-xen-depends: Dockerfile build.sh
+	docker build -t $(IMAGE) .
+
+test-xen-build: test-xen-depends clean
+	docker run -v $(shell pwd):/src $(IMAGE) /build.sh
 
 VERSION = $(shell grep 'VERSION=' unix/_vars | sed 's/VERSION=*//')
 ARCHIVE = https://github.com/mirage/mirage-platform/archive/v$(VERSION).tar.gz

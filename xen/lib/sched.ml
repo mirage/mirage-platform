@@ -13,6 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
+open Lwt.Infix
 
 type reason =
   | Poweroff
@@ -30,8 +31,10 @@ let add_resume_hook hook =
   resume_hooks := hook :: !resume_hooks
 
 let suspend () =
-  lwt xs_client = Xs.make () in
-  lwt () = Xs.suspend xs_client in
+  Xs.make ()
+  >>= fun xs_client ->
+  Xs.suspend xs_client
+  >>= fun () ->
   Gnt.suspend ();
 
   let result = _suspend () in
@@ -39,7 +42,9 @@ let suspend () =
   Generation.resume ();
   Gnt.resume ();
   Activations.resume ();
-  lwt () = Xs.resume xs_client in
-  lwt () = Lwt_list.iter_p (fun f -> f ()) !resume_hooks in
+  Xs.resume xs_client
+  >>= fun () ->
+  Lwt_list.iter_p (fun f -> f ()) !resume_hooks
+  >>= fun () ->
   Lwt.return result
   
