@@ -1,5 +1,11 @@
+2.4.0 (18-Mar-2016)
+* mirage-unix now builds on win32
+* Add appveyor support
+* Add LICENSE file
+* Allow packages to be built without the `opam` command0line tool
 * Add OS.Lifecycle module. Allows unikernels to handle shutdown requests.
 * Remove unmaintained ns3 module.
+* Remove unused machine/ code
 
 2.3.4 (17-Aug-2015)
 * [xen-ocaml] Support OCaml 4.02.3 (#137, by @talex5)
