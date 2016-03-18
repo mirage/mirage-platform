@@ -13,6 +13,7 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
+open Lwt.Infix
 
 external evtchn_init: unit -> unit = "stub_evtchn_init"
 external evtchn_nr_events: unit -> int = "stub_nr_events"
@@ -56,9 +57,14 @@ let dump () =
 
 let after evtchn counter =
   let port = Eventchn.to_int evtchn in
-  lwt () = while_lwt ports.(port).counter <= counter && (Eventchn.is_valid evtchn) do
-    Lwt_condition.wait ports.(port).c
-  done in
+  let rec loop () =
+    if ports.(port).counter <= counter && (Eventchn.is_valid evtchn) then begin
+      Lwt_condition.wait ports.(port).c
+      >>= fun () ->
+      loop ()
+    end else Lwt.return () in
+  loop ()
+  >>= fun () ->
   if Eventchn.is_valid evtchn
   then Lwt.return ports.(port).counter
   else Lwt.fail Generation.Invalid

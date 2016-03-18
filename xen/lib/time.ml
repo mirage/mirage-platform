@@ -77,7 +77,7 @@ let sleep d =
 
 exception Timeout
 
-let timeout d = sleep d >> Lwt.fail Timeout
+let timeout d = sleep d >>= fun () -> Lwt.fail Timeout
 
 let with_timeout d f = Lwt.pick [timeout d; Lwt.apply f ()]
 
