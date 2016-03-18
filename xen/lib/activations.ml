@@ -62,7 +62,7 @@ let after evtchn counter =
       Lwt_condition.wait ports.(port).c
       >>= fun () ->
       loop ()
-    end else Lwt.return () in
+    end else Lwt.return_unit in
   loop ()
   >>= fun () ->
   if Eventchn.is_valid evtchn
