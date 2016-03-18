@@ -1,7 +1,30 @@
-<lib/*> and not <lib/oS.*>: for-pack(OS), use_syntax
-<lib_test/*>: use_lib, custom
-<*.c>: pic,unix_header,include_system_ocaml
-<syntax/*>: build_syntax
-true: camlp4o
-<lib>: include
-<**/*.{mli,ml}>: package(lwt), package(cstruct)
+# OASIS_START
+# DO NOT EDIT (digest: 94b013365427da81270699dab4be0151)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library OS
+"lib/OS.cmxs": use_OS
+"lib/env.cmx": for-pack(OS)
+"lib/lifecycle.cmx": for-pack(OS)
+"lib/main.cmx": for-pack(OS)
+"lib/time.cmx": for-pack(OS)
+<lib/*.ml{,i,y}>: pkg_cstruct
+<lib/*.ml{,i,y}>: pkg_io-page
+<lib/*.ml{,i,y}>: pkg_io-page.unix
+<lib/*.ml{,i,y}>: pkg_lwt
+<lib/*.ml{,i,y}>: pkg_lwt.syntax
+<lib/*.ml{,i,y}>: pkg_lwt.unix
+<lib/*.ml{,i,y}>: pkg_mirage-clock-unix
+# OASIS_STOP
