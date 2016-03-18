@@ -1,10 +1,6 @@
-OS ?= unix
+MIRAGE_OS ?= unix
 
 PREFIX ?= /usr/local
-
-ifneq "$(MIRAGE_OS)" ""
-OS := $(MIRAGE_OS)
-endif
 
 .PHONY: all build clean install test
 .DEFAULT: all
@@ -13,25 +9,25 @@ all:	build
 	@ :
 
 build:
-	cd $(OS) && $(MAKE) all MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) all MIRAGE_OS=$(MIRAGE_OS)
 
 clean:
-	cd $(OS) && $(MAKE) clean MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) clean MIRAGE_OS=$(MIRAGE_OS)
 
 install:
-	cd $(OS) && $(MAKE) install MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) install MIRAGE_OS=$(MIRAGE_OS)
 
 uninstall:
-	cd $(OS) && $(MAKE) uninstall MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) uninstall MIRAGE_OS=$(MIRAGE_OS)
 
 test:
-	cd $(OS) && $(MAKE) test MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) test MIRAGE_OS=$(MIRAGE_OS)
 
 doc:
-	cd $(OS) && $(MAKE) doc MIRAGE_OS=$(OS)
+	cd $(MIRAGE_OS) && $(MAKE) doc MIRAGE_OS=$(MIRAGE_OS)
 
 unix-%:
-	$(MAKE) OS=unix PREFIX=$(PREFIX) $*
+	$(MAKE) MIRAGE_OS=unix PREFIX=$(PREFIX) $*
 
 xen-build:
 	cd xen && $(MAKE)
@@ -75,7 +71,7 @@ release:
 export OPAMYES=1
 
 pr:
-	opam pin add mirage-$(OS) . -n
-	opam publish prepare mirage-$(OS).$(VERSION) $(ARCHIVE)
-	opam unpin mirage-$(OS) -n
-	opam publish submit mirage-$(OS).$(VERSION)
+	opam pin add mirage-$(MIRAGE_OS) . -n
+	opam publish prepare mirage-$(MIRAGE_OS).$(VERSION) $(ARCHIVE)
+	opam unpin mirage-$(MIRAGE_OS) -n
+	opam publish submit mirage-$(MIRAGE_OS).$(VERSION)

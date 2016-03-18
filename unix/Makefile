@@ -1,21 +1,43 @@
-.PHONY: all _config build install doc clean
+# OASIS_START
+# DO NOT EDIT (digest: a3c674b4239234cbbe53afe090018954)
 
-all: build
+SETUP = ocaml setup.ml
 
-_config:
-	./cmd configure unix
+build: setup.data
+	$(SETUP) -build $(BUILDFLAGS)
 
-build: _config
-	./cmd build
+doc: setup.data build
+	$(SETUP) -doc $(DOCFLAGS)
 
-install:
-	./cmd install
+test: setup.data build
+	$(SETUP) -test $(TESTFLAGS)
 
-uninstall:
-	./cmd uninstall
+all:
+	$(SETUP) -all $(ALLFLAGS)
 
-doc: _config
-	./cmd doc
+install: setup.data
+	$(SETUP) -install $(INSTALLFLAGS)
+
+uninstall: setup.data
+	$(SETUP) -uninstall $(UNINSTALLFLAGS)
+
+reinstall: setup.data
+	$(SETUP) -reinstall $(REINSTALLFLAGS)
 
 clean:
-	./cmd clean
+	$(SETUP) -clean $(CLEANFLAGS)
+
+distclean:
+	$(SETUP) -distclean $(DISTCLEANFLAGS)
+
+setup.data:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+configure:
+	$(SETUP) -configure $(CONFIGUREFLAGS)
+
+.PHONY: build doc test all install uninstall reinstall clean distclean configure
+
+# OASIS_STOP
+uninstall:
+	ocamlfind remove mirage-unix
