@@ -10,12 +10,11 @@ let rec call_hooks hooks  =
     | Some f ->
         (* Run the hooks in parallel *)
         let _ =
-          try_lwt
-            f ()
-          with exn ->
+          Lwt.catch f
+          (fun exn ->
             Printf.printf "enter_t: exn %s\n%!" (Printexc.to_string exn);
             return ()
-        in
+          ) in
         call_hooks hooks
 
 open Printf
