@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5207b6f88c72dfbead0ea8e104c0ba48)
-version = "2.3.1"
+# DO NOT EDIT (digest: b11a496d78646557a3a70e83bca3fe39)
+version = "2.4.0"
 description = "Library support for the Mirage/Unix backend"
 requires = "cstruct lwt lwt.unix io-page.unix io-page mirage-clock-unix"
 archive(byte) = "OS.cma"
