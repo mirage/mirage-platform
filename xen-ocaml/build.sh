@@ -1,9 +1,17 @@
 #!/bin/sh -ex
 
 MJOBS=${4:-NJOBS}
-export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
 PKG_CONFIG_DEPS="mirage-xen-posix openlibm libminios-xen >= 0.5"
-pkg-config --print-errors --exists ${PKG_CONFIG_DEPS} || exit 1
+check_deps () {
+  pkg-config --print-errors --exists ${PKG_CONFIG_DEPS}
+}
+
+if ! check_deps 2>/dev/null; then
+  # only rely on `opam` if deps are unavailable
+  export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
+fi
+
+check_deps || exit 1
 case `uname -m` in
 armv*)
   ARCH_CFLAGS=""
@@ -26,10 +34,11 @@ PWD=`pwd`
 CFLAGS="-Wall -Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} ${CI_CFLAGS} -DSYS_xen -USYS_linux \
   -fno-builtin-fprintf -DHAS_UNISTD \
   $(pkg-config --cflags $PKG_CONFIG_DEPS) \
-  -I `opam config var prefix`/include/mirage-xen/include"
+  "
 
 rm -rf ocaml-src
-cp -r `opam config var prefix`/lib/ocaml-src ocaml-src
+cp -r `ocamlfind query ocaml-src` ocaml-src
+chmod -R u+w ocaml-src
 
 case `ocamlopt -version` in
 4.01.* | 4.02.[01]) patch < trace-gc.patch -p 0
