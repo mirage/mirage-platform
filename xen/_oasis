@@ -14,7 +14,4 @@ Library "OS"
   Modules: Activations, Device_state, Env, Lifecycle, Main, MM, Sched, Start_info, Time, Xenctrl, Xs
   BuildDepends:	lwt,cstruct,xen-evtchn,xen-gnt,xenstore.client,shared-memory-ring,shared-memory-ring.lwt,
                 shared-memory-ring.xenstore,shared-memory-ring.console,mirage-types,mirage-clock-xen,
-                io-page,mirage-profile,cstruct.syntax
-  XMetaRequires: lwt,cstruct,xen-evtchn,xen-gnt,xenstore.client,shared-memory-ring,shared-memory-ring.lwt,
-                shared-memory-ring.xenstore,shared-memory-ring.console,mirage-types,mirage-clock-xen,
                 io-page,mirage-profile
