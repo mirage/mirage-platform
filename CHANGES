@@ -1,3 +1,6 @@
+2.4.1 (22-Mar-2016)
+* Don't raise in an at_exit handler on Windows
+
 2.4.0 (18-Mar-2016)
 * mirage-unix now builds on win32
 * Add appveyor support
