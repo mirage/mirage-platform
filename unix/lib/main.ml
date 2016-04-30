@@ -28,7 +28,7 @@ let run t =
      then we don't need to ignore it, so it's safe to continue. *)
   (try Sys.(set_signal sigpipe Signal_ignore) with Invalid_argument _ -> ());
   let t = call_hooks enter_hooks <&> t in
-  Lwt_unix.run t
+  Lwt_main.run t
 
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)
