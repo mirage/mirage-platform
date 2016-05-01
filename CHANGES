@@ -1,3 +1,8 @@
+2.5.0 (1-May-2016)
+* Remove use of deprecated `Lwt_unix.run`
+* Support cstruct.2.0.0 (#163)
+* Fix typos in license field.
+
 2.4.1 (22-Mar-2016)
 * Don't raise in an at_exit handler on Windows
 
