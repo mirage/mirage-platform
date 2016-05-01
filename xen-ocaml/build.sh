@@ -41,7 +41,8 @@ cp -r `ocamlfind query ocaml-src` ocaml-src
 chmod -R u+w ocaml-src
 
 case `ocamlopt -version` in
-4.01.* | 4.02.[01]) patch < trace-gc.patch -p 0
+4.01.* | 4.02.[01]) patch < trace-gc.patch -p 0 ;;
+4.03.0) cp config/version.h ocaml-src/byterun/caml/version.h ;;
 esac
 
 cp config/s.h ocaml-src/config/
