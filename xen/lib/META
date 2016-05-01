@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 28fe78332ae432741591ca9d0125bd64)
-version = "2.4.1"
+# DO NOT EDIT (digest: 8e7281bc662052581fc28e8bab1c0409)
+version = "2.5.0"
 description = "Library support for the Mirage/Xen backend"
 requires =
 "lwt cstruct xen-evtchn xen-gnt xenstore.client shared-memory-ring shared-memory-ring.lwt shared-memory-ring.xenstore shared-memory-ring.console mirage-types mirage-clock-xen io-page mirage-profile"
