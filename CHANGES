@@ -1,3 +1,8 @@
+2.6.0
+* [xen-ocaml] Add support for OCaml 4.03.0
+* Add `strtod` and `strtol` implementations.
+* Add stubbed out `isatty` function stub.
+
 2.5.0 (1-May-2016)
 * Remove use of deprecated `Lwt_unix.run`
 * Support cstruct.2.0.0 (#163)

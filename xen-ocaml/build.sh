@@ -32,7 +32,7 @@ fi
 CC=${CC:-cc}
 PWD=`pwd`
 CFLAGS="-Wall -Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} ${CI_CFLAGS} -DSYS_xen -USYS_linux \
-  -fno-builtin-fprintf -DHAS_UNISTD \
+  -fno-builtin-fprintf -DHAS_UNISTD -Werror=format \
   $(pkg-config --cflags $PKG_CONFIG_DEPS) \
   "
 
@@ -40,8 +40,17 @@ rm -rf ocaml-src
 cp -r `ocamlfind query ocaml-src` ocaml-src
 chmod -R u+w ocaml-src
 
+echo Detected OCaml version `ocamlopt -version`
 case `ocamlopt -version` in
-4.01.* | 4.02.[01]) patch < trace-gc.patch -p 0
+4.01.* | 4.02.[01])
+  echo Applying GC trace patch
+  patch < trace-gc.patch -p 0
+  ;;
+4.03.0)
+  echo Applying OCaml 4.03 config
+  cp config/version.h ocaml-src/byterun/caml/version.h
+  patch < clambda-warnings.patch -p 0
+  ;;
 esac
 
 cp config/s.h ocaml-src/config/

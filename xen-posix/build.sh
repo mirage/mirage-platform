@@ -32,8 +32,8 @@ CFLAGS="$EXTRA_CFLAGS ${CI_CFLAGS} -I ${PWD}/include/ -I ${PWD}/src/ \
     -D__XEN_INTERFACE_VERSION__=0x00030205 -D__INSIDE_MINIOS__ \
     $(pkg-config --cflags $PKG_CONFIG_DEPS) \
     -Wextra -Wchar-subscripts -Wno-switch -Wno-unused -Wredundant-decls -Wall \
-    -Wno-sign-compare \
+    -Wno-sign-compare -Werror=unused-variable \
     -fno-builtin ${ARCH_CFLAGS}"
 
 ${CC} -c ${CFLAGS} src/*.c
-ar rcs libxenposix.a mini_libc.o fmt_fp.o
+ar rcs libxenposix.a mini_libc.o fmt_fp.o dtoa.o strtol.o
