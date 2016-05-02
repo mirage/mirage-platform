@@ -36,4 +36,4 @@ CFLAGS="$EXTRA_CFLAGS ${CI_CFLAGS} -I ${PWD}/include/ -I ${PWD}/src/ \
     -fno-builtin ${ARCH_CFLAGS}"
 
 ${CC} -c ${CFLAGS} src/*.c
-ar rcs libxenposix.a mini_libc.o fmt_fp.o
+ar rcs libxenposix.a mini_libc.o fmt_fp.o dtoa.o strtol.o
