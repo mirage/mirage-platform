@@ -253,8 +253,6 @@ unsupported_function_log(int, getrusage, -1);
 unsupported_function_log(int, getrlimit, -1);
 unsupported_function_log(int, getrlimit64, -1);
 unsupported_function_log(int, __xstat64, -1);
-unsupported_function_log(long, __strtol_internal, LONG_MIN);
-unsupported_function_log(double, __strtod_internal, HUGE_VAL);
 unsupported_function_log(int, utime, -1);
 unsupported_function_log(int, truncate64, -1);
 unsupported_function_log(int, tcflow, -1);
@@ -321,7 +319,6 @@ unsupported_function(off_t, lseek, -1);
 unsupported_function_crash(fcntl);
 unsupported_function_crash(read);
 unsupported_function_crash(gmtime);
-unsupported_function_crash(strtod);
 unsupported_function_crash(rename);
 unsupported_function_crash(strerror);
 
