@@ -2499,12 +2499,12 @@ strtod
 	CONST char *s, *s0, *s1;
 	double aadj, aadj1;
 	Long L;
-	U aadj2, adj, rv, rv0;
+	U adj, rv, rv0;
 	ULong y, z;
 	BCinfo bc;
 	Bigint *bb, *bb1, *bd, *bd0, *bs, *delta;
 #ifdef Avoid_Underflow
-	ULong Lsb, Lsb1;
+	ULong Lsb, Lsb1, aadj2;
 #endif
 #ifdef SET_INEXACT
 	int oldinexact;
