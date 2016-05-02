@@ -32,7 +32,7 @@ fi
 CC=${CC:-cc}
 PWD=`pwd`
 CFLAGS="-Wall -Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} ${CI_CFLAGS} -DSYS_xen -USYS_linux \
-  -fno-builtin-fprintf -DHAS_UNISTD \
+  -fno-builtin-fprintf -DHAS_UNISTD -Werror=format \
   $(pkg-config --cflags $PKG_CONFIG_DEPS) \
   "
 
@@ -49,6 +49,7 @@ case `ocamlopt -version` in
 4.03.0)
   echo Applying OCaml 4.03 config
   cp config/version.h ocaml-src/byterun/caml/version.h
+  patch < clambda-warnings.patch -p 0
   ;;
 esac
 

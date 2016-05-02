@@ -1,0 +1,32 @@
+This undoes commit d8e802431b1cfe769956140dd127d488c24f38fb in ocaml/ocaml
+which causes format warnings as lld is not the same as the actual type in
+the ARCH defines
+--- ocaml-src/asmrun/clambda_checks.c.orig	2016-05-03 00:16:07.721188693 +0100
++++ ocaml-src/asmrun/clambda_checks.c	2016-05-03 00:16:51.401188693 +0100
+@@ -59,13 +59,13 @@
+   value orig_v = v;
+   if (v == (value) 0) {
+     fprintf(stderr, "Access to field %lld of NULL: %s\n",
+-      (ARCH_UINT64_TYPE) Long_val(pos), descr);
++      (long long int) Long_val(pos), descr);
+     abort();
+   }
+   if (!Is_block(v)) {
+     fprintf(stderr,
+       "Access to field %lld of non-boxed value %p is illegal: %s\n",
+-      (ARCH_UINT64_TYPE) Long_val(pos), (void*) v, descr);
++      (long long int) Long_val(pos), (void*) v, descr);
+     abort();
+   }
+   if (Tag_val(v) == Infix_tag) {
+@@ -77,8 +77,8 @@
+   if (Long_val(pos) >= Wosize_val(v)) {
+     fprintf(stderr,
+       "Access to field %lld of value %p of size %lld is illegal: %s\n",
+-      (ARCH_UINT64_TYPE) Long_val(pos), (void*) v,
+-      (ARCH_UINT64_TYPE) Wosize_val(v),
++      (long long int) Long_val(pos), (void*) v,
++      (long long int) Wosize_val(v),
+       descr);
+     abort();
+   }
