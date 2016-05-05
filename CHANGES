@@ -1,4 +1,4 @@
-2.6.0
+2.6.0 (5-May-2016)
 * [xen-ocaml] Add support for OCaml 4.03.0
 * Add `strtod` and `strtol` implementations.
 * Add stubbed out `isatty` function stub.
