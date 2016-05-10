@@ -11,8 +11,9 @@ install: [make "xen-install"   "PREFIX=%{prefix}%"]
 remove:  [make "xen-uninstall" "PREFIX=%{prefix}%"]
 
 depends: [
+  "ocamlfind" {build}
+  "ocamlbuild" {build}
   "cstruct" {>= "1.0.1"}
-  "ocamlfind"
   "io-page" {>= "1.5.0"}
   "mirage-clock-xen" {>= "1.0.0"}
   "lwt" {>= "2.4.3"}
@@ -24,6 +25,6 @@ depends: [
   "minios-xen" {>= "0.9"}
   "conf-pkg-config"
   "mirage-profile" {>= "0.3"}
-  "mirage-xen-ocaml"
+  "mirage-xen-ocaml" {>= "2.6.0"}
 ]
 available: [ ocaml-version >= "4.01.0" & os = "linux" ]
