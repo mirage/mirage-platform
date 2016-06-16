@@ -69,7 +69,7 @@ let run t =
         end else begin
           let timeout =
             match Time.select_next () with
-            |None -> Time.Monotonic.(time () + of_seconds 86400.0) (* one day = 24 * 60 * 60 s *)
+            |None -> Time.Monotonic.(time () + of_nanoseconds 86_400_000_000_000L) (* one day = 24 * 60 * 60 s *)
             |Some tm -> tm
           in
           MProf.Trace.(note_hiatus Wait_for_work);
