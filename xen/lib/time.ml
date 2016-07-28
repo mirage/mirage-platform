@@ -33,8 +33,7 @@ module Monotonic = struct
 
   external time : unit -> int64 = "caml_get_monotonic_time"
 
-  let of_seconds x = Int64.of_float (x *. 1_000_000_000.)
-  let to_seconds x = Int64.to_float x /.  1_000_000_000.
+  let of_nanoseconds x = x
 
   let ( + ) = ( Int64.add )
   let ( - ) = ( Int64.sub )
@@ -67,9 +66,9 @@ let sleep_queue = ref SleepQueue.empty
 *)
 let new_sleeps = ref []
 
-let sleep d =
+let sleep_ns d =
   let (res, w) = MProf.Trace.named_task "sleep" in
-  let t = if d <= 0. then 0L else Monotonic.(time () + of_seconds d) in
+  let t = Monotonic.(time () + of_nanoseconds d) in
   let sleeper = { time = t; canceled = false; thread = w } in
   new_sleeps := sleeper :: !new_sleeps;
   Lwt.on_cancel res (fun _ -> sleeper.canceled <- true);
@@ -77,7 +76,7 @@ let sleep d =
 
 exception Timeout
 
-let timeout d = sleep d >>= fun () -> Lwt.fail Timeout
+let timeout d = sleep_ns d >>= fun () -> Lwt.fail Timeout
 
 let with_timeout d f = Lwt.pick [timeout d; Lwt.apply f ()]
 

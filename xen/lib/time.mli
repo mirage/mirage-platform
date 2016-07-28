@@ -33,10 +33,9 @@ module Monotonic : sig
   val ( - ) : 'a t -> [`Interval] t -> 'a t
   val interval : [`Time] t -> [`Time] t -> [`Interval] t
 
-  (** Conversions. Note: these floats are still seconds since boot. *)
+  (** Conversions. Note: still seconds since boot. *)
+  val of_nanoseconds : int64 -> _ t
 
-  val of_seconds : float -> _ t
-  val to_seconds : _ t -> float
 end
 
 val restart_threads: (unit -> [`Time] Monotonic.t) -> unit
@@ -48,14 +47,13 @@ val select_next : unit -> [`Time] Monotonic.t option
     when one sleeping thread will wake up, or [None] if there is no
     sleeping threads. *)
 
-val sleep : float -> unit Lwt.t
-(** [sleep d] is a threads which remain suspended for [d] seconds and
-    then terminates. *)
+val sleep_ns : int64 -> unit Lwt.t
+(** [sleep_ns n] Block the current thread for n nanoseconds.  *)
 
 exception Timeout
 (** Exception raised by timeout operations *)
 
-val with_timeout : float -> (unit -> 'a Lwt.t) -> 'a Lwt.t
+val with_timeout : int64 -> (unit -> 'a Lwt.t) -> 'a Lwt.t
 (** [with_timeout d f] is a short-hand for:
 
     {[

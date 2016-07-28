@@ -18,6 +18,5 @@ type +'a io = 'a Lwt.t
 
 (** Timeout operations. *)
 
-val sleep : float -> unit Lwt.t
-(** [sleep d] is a threads which remain suspended for [d] seconds and
-    then terminates. *)
+val sleep_ns : int64 -> unit Lwt.t
+(** [sleep_ns n] Block the current thread for n nanoseconds.  *)
