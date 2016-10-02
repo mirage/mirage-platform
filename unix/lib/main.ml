@@ -1,4 +1,4 @@
-open Lwt
+open Lwt.Infix
 
 let exit_hooks = Lwt_sequence.create ()
 let enter_hooks = Lwt_sequence.create ()
@@ -6,14 +6,14 @@ let enter_hooks = Lwt_sequence.create ()
 let rec call_hooks hooks  =
   match Lwt_sequence.take_opt_l hooks with
     | None ->
-        return ()
+        Lwt.return_unit
     | Some f ->
         (* Run the hooks in parallel *)
         let _ =
           Lwt.catch f
           (fun exn ->
-            Printf.printf "enter_t: exn %s\n%!" (Printexc.to_string exn);
-            return ()
+            Logs.warn (fun m -> m "call_hooks: exn %s" (Printexc.to_string exn));
+            Lwt.return_unit
           ) in
         call_hooks hooks
 
@@ -28,7 +28,10 @@ let run t =
      then we don't need to ignore it, so it's safe to continue. *)
   (try Sys.(set_signal sigpipe Signal_ignore) with Invalid_argument _ -> ());
   let t = call_hooks enter_hooks <&> t in
-  Lwt_main.run t
+  Lwt_main.run (
+    Lwt.catch
+      (fun () -> t)
+      (fun e -> Logs.err (fun m -> m "main: %s\n%s" (Printexc.to_string e) (Printexc.get_backtrace ())); Lwt.return_unit))
 
 let () = at_exit (fun () -> run (call_hooks exit_hooks))
 let at_exit f = ignore (Lwt_sequence.add_l f exit_hooks)
