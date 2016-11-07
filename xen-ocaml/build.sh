@@ -46,11 +46,15 @@ case `ocamlopt -version` in
   echo Applying GC trace patch
   patch < trace-gc.patch -p 0
   ;;
-4.03.0)
+4.03.*)
   echo Applying OCaml 4.03 config
-  cp config/version.h ocaml-src/byterun/caml/version.h
+  cp config/version-403.h ocaml-src/byterun/caml/version.h
   patch < clambda-warnings.patch -p 0
   ;;
+4.04.*)
+  echo Applying OCaml 4.04 config
+  cp config/version-404.h ocaml-src/byterun/caml/version.h
+  patch < clambda-warnings.patch -p 0
 esac
 
 cp config/s.h ocaml-src/config/
