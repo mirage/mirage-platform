@@ -7,3 +7,4 @@
 #define ARCH_UINT64_TYPE unsigned long long
 #define ARCH_INT64_PRINTF_FORMAT "ll"
 #define ARCH_ALIGN_INT64
+#define PROFINFO_WIDTH 26
