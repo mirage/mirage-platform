@@ -59,6 +59,8 @@ export CI_CFLAGS=-Werror
 
 eval `opam config env`
 
+opam remote add dev https://github.com/mirage/mirage-dev.git
+
 opam pin add -n mirage-xen-posix .
 opam pin add -n mirage-xen-ocaml .
 opam pin add -n mirage-xen .
