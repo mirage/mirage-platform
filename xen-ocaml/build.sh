@@ -55,6 +55,7 @@ case `ocamlopt -version` in
   echo Applying OCaml 4.04 config
   cp config/version-404.h ocaml-src/byterun/caml/version.h
   patch < clambda-warnings.patch -p 0
+  patch < os-type-xen.patch -p 0
 esac
 
 cp config/s.h ocaml-src/config/
