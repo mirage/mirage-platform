@@ -72,7 +72,7 @@ void* calloc(size_t nmemb, size_t _size)
 {
   register size_t size=_size*nmemb;
   void* x=malloc(size);
-  memset(x,0,size);
+  if (x) memset(x,0,size);
   return x;
 }
 
