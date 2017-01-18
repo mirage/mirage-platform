@@ -5,6 +5,7 @@ homepage:     "https://github.com/mirage/mirage-platform"
 bug-reports:  "https://github.com/mirage/mirage-platform/issues/"
 dev-repo:     "https://github.com/mirage/mirage-platform.git"
 license:      "part ISC, part LGPL-2.1 with OCaml linking exception, part 3-clause BSD"
+tags:         ["org:mirage"]
 
 build:   [make "xen-build"]
 install: [make "xen-install"   "PREFIX=%{prefix}%"]
@@ -15,7 +16,7 @@ depends: [
   "ocamlbuild" {build}
   "cstruct" {>= "1.0.1"}
   "io-page" {>= "1.5.0"}
-  "mirage-clock-freestanding"
+  "mirage-clock-freestanding" {>= "1.2.0"}
   "lwt" {>= "2.4.3"}
   "shared-memory-ring" {>= "1.0.0"}
   "xenstore" {>= "1.2.5"}

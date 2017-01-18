@@ -7,6 +7,7 @@ dev-repo: "https://github.com/mirage/mirage-platform.git"
 build: [make "xen-ocaml-build"]
 install: [make "xen-ocaml-install" "PREFIX=%{prefix}%"]
 remove: [make "xen-ocaml-uninstall" "PREFIX=%{prefix}%"]
+tags: ["org:mirage"]
 depends: [
   "mirage-xen-posix" {>="2.6.0"}
   "conf-pkg-config"
