@@ -1,3 +1,12 @@
+3.0.0 (unreleased)
+* [xen-ocaml] Add support for OCaml 4.04.0 (#173, by @yomimono)
+* don't embed Str into the ocaml runtime (#175, by @hannesm)
+* sleep in nanoseconds, not seconds (#168, by @hannesm)
+* avoid memsetting NULL (#179, by @rixed)
+* use mirage-clock-freestanding instead of mirage-clock-xen (#177, by @hannesm)
+* use logs for errors (#171, by @hannesm)
+* [xen-ocaml] for compiler version 4.04, set OCAML_OS_TYPE to "xen" (#178, by @yomimono)
+
 2.6.0 (5-May-2016)
 * [xen-ocaml] Add support for OCaml 4.03.0
 * Add `strtod` and `strtol` implementations.
