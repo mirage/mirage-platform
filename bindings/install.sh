@@ -5,8 +5,7 @@ if [ "$prefix" = "" ]; then
   prefix=`opam config var prefix`
 fi
 
-odir=$prefix/lib
-mkdir -p $odir/pkgconfig $odir/mirage-xen
-cp mirage-xen-ocaml-bindings.pc $odir/pkgconfig/mirage-xen-ocaml-bindings.pc
-cp mirage-xen.pc $odir/pkgconfig/mirage-xen.pc
-cp libxencamlbindings.a $odir/mirage-xen/
+mkdir -p $prefix/share/pkgconfig $prefix/lib/mirage-xen
+cp mirage-xen-ocaml-bindings.pc $prefix/share/pkgconfig/mirage-xen-ocaml-bindings.pc
+cp mirage-xen.pc $prefix/share/pkgconfig/mirage-xen.pc
+cp libxencamlbindings.a $prefix/lib/mirage-xen/
