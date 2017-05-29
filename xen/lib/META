@@ -1,9 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: 17a3c92dc1f700f3501de499070c5dc0)
+# DO NOT EDIT (digest: 106e1d383e2c1fe9710ba543ff341477)
 version = "2.6.0"
 description = "Library support for the Mirage/Xen backend"
 requires =
-"lwt cstruct xen-evtchn xen-gnt xenstore.client shared-memory-ring shared-memory-ring.lwt shared-memory-ring.xenstore shared-memory-ring.console mirage-clock-freestanding io-page mirage-profile logs"
+"lwt cstruct xen-evtchn xen-gnt xenstore.client shared-memory-ring shared-memory-ring-lwt mirage-clock-freestanding io-page mirage-profile logs"
 archive(byte) = "OS.cma"
 archive(byte, plugin) = "OS.cma"
 archive(native) = "OS.cmxa"
