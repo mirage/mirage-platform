@@ -1,3 +1,8 @@
+## 3.0.1 (2017-05-29)
+* [xen]: Depend on the new shared-memory-ring-lwt package
+* Update appveyor configuration
+* Reformat CHANGES.md to the topkg/Mirage style
+
 ## 3.0.0 (2017-01-24)
 * [xen-ocaml] Add support for OCaml 4.04.0 (#173, by @yomimono)
 * don't embed Str into the ocaml runtime (#175, by @hannesm)
