@@ -1,4 +1,4 @@
-3.0.0 (unreleased)
+3.0.0 (2017-01-24)
 * [xen-ocaml] Add support for OCaml 4.04.0 (#173, by @yomimono)
 * don't embed Str into the ocaml runtime (#175, by @hannesm)
 * sleep in nanoseconds, not seconds (#168, by @hannesm)
