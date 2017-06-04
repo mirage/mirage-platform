@@ -11,7 +11,7 @@ Library "OS"
   Path: lib
   Findlibname: mirage-xen
   Pack: true
-  Modules: Activations, Device_state, Env, Lifecycle, Main, MM, Sched, Start_info, Time, Xenctrl, Xs
+  Modules: Activations, Device_state, Lifecycle, Main, MM, Sched, Start_info, Time, Xenctrl, Xs
   BuildDepends: lwt,cstruct,xen-evtchn,xen-gnt,xenstore.client,
                 shared-memory-ring,shared-memory-ring-lwt,
                 mirage-clock-freestanding,
