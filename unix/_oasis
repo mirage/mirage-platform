@@ -12,4 +12,4 @@ Library "OS"
   Findlibname: mirage-unix
   Pack: true
   Modules: Env, Lifecycle, Main, Time
-  BuildDepends:	cstruct, lwt, lwt.unix, mirage-clock-unix, logs
+  BuildDepends:	io-page-unix, cstruct, lwt, lwt.unix, mirage-clock-unix, logs
