@@ -1,3 +1,7 @@
+## 3.0.3 (2017-06-16)
+* xen: re-add the dependency on io-page-xen to mirage-xen until we can
+  break the link between mirage-xen and xen-gnt (needed for suspend/resume)
+
 ## 3.0.2 (2017-06-16)
 * Remove dependency on io-page. Note this changes the exposed interface
   of the console and xenstore rings to be Cstruct.ts
