@@ -1,3 +1,7 @@
+## 3.0.2 (2017-06-16)
+* Remove dependency on io-page. Note this changes the exposed interface
+  of the console and xenstore rings to be Cstruct.ts
+
 ## 3.0.1 (2017-05-29)
 * [xen]: Depend on the new shared-memory-ring-lwt package
 * Update appveyor configuration
