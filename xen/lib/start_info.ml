@@ -18,5 +18,10 @@ type t = {
 }
 
 external get: unit -> t = "stub_start_info_get"
-external console_start_page: unit -> Io_page.t = "caml_console_start_page"
-external xenstore_start_page: unit -> Io_page.t = "caml_xenstore_start_page"
+
+type page = (char, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+
+external console_start_page': unit -> page = "caml_console_start_page"
+let console_start_page () = Cstruct.of_bigarray @@ console_start_page' ()
+external xenstore_start_page': unit -> page = "caml_xenstore_start_page"
+let xenstore_start_page () = Cstruct.of_bigarray @@ xenstore_start_page' ()

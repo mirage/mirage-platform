@@ -15,4 +15,4 @@ Library "OS"
   BuildDepends: lwt,cstruct,xen-evtchn,xen-gnt,xenstore.client,
                 shared-memory-ring,shared-memory-ring-lwt,
                 mirage-clock-freestanding,
-                io-page,mirage-profile,logs
+                mirage-profile,logs

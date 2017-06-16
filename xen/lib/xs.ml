@@ -38,7 +38,7 @@ module IO = struct
       match !singleton_client with 
       | Some x -> Lwt.return x 
       | None -> 
-        let page = Io_page.to_cstruct Start_info.(xenstore_start_page ()) in
+        let page = Start_info.(xenstore_start_page ()) in
         Xenstore_ring.Ring.init page;
         let evtchn = Eventchn.of_int Start_info.((get ()).store_evtchn) in
         Eventchn.unmask h evtchn;
@@ -49,7 +49,7 @@ module IO = struct
     let refresh () =
       match !singleton_client with
       | Some x -> 
-        x.page <- Io_page.to_cstruct Start_info.(xenstore_start_page ());
+        x.page <- Start_info.(xenstore_start_page ());
         Xenstore_ring.Ring.init x.page;
         x.evtchn <- Eventchn.of_int Start_info.((get ()).store_evtchn);
         Eventchn.unmask h x.evtchn
