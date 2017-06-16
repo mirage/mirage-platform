@@ -1,3 +1,23 @@
+## 3.0.3 (2017-06-16)
+* xen: we need io-page-xen because
+  - mirage-xen depends on xen-gnt (for suspend/resume callbacks)
+  - xen-gnt depends on io-page (to represent the types of page mappings)
+  - io-page needs either io-page-unix or io-page-xen. We can't hardcode
+    a dependency because it needs to be different on Unix / Xen / Solo5.
+    In future we could break the link by adding some kind of `pre suspend`
+    `post resume` callback mechanism and then remove the `xen-gnt` dependency.
+
+* unix: we need io-page-unix because
+  - mirage-types-lwt is in the `common` set linked into all Unikernels by
+    the `mirage` tool
+  - mirage-types-lwt depends on `mirage-block-lwt` and `mirage-net-lwt`
+  - mirage-block-lwt depends on io-page
+  - io-page needs either io-page-unix or io-page-xen. We can't hardcode
+    a dependency because it needs to be different on Unix / Xen / Solo5
+    In future we could break the link by rethinking the alignment requirements
+    of the interfaces. Perhaps FLOW could be unaligned but raw NETIF
+    and BLOCKIF aligned?
+
 ## 3.0.2 (2017-06-16)
 * Remove dependency on io-page. Note this changes the exposed interface
   of the console and xenstore rings to be Cstruct.ts
