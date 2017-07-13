@@ -55,7 +55,7 @@ fi
 
 export OPAMYES=1
 export OPAMVERBOSE=1
-export CI_CFLAGS=-Werror
+#export CI_CFLAGS=-Werror
 
 eval `opam config env`
 
