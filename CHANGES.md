@@ -1,8 +1,8 @@
-## 3.0.4
+## 3.0.4 (2017-07-14)
 
 * remove support for versions of OCaml older than 4.04.2, and add support
-  for OCaml 4.04.2 and OCaml 4.05.0.  For older revisions of OCaml, use
-  an older revision of mirage-xen-ocaml.
+  for OCaml 4.04.2.  For older revisions of OCaml, use an older revision of
+  mirage-xen-ocaml.
 
 ## 3.0.3 (2017-06-16)
 * xen: we need io-page-xen because

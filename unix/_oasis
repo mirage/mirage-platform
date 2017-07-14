@@ -1,6 +1,6 @@
 OASISFormat: 0.4
-Name:        mirage-xen
-Version:     3.0.1
+Name:        mirage-unix
+Version:     3.0.4
 Synopsis:    Library support for the Mirage/Unix backend
 Authors:     Anil Madhavapeddy, Dave Scott, Thomas Gazagnaire, Thomas Leonard
 License:     ISC
