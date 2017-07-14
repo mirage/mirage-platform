@@ -28,8 +28,14 @@ fi
 
 PUBLIC_INCLUDES="alloc.h callback.h config.h custom.h fail.h hash.h intext.h \
   memory.h misc.h mlvalues.h printexc.h signals.h compatibility.h"
-for i in ${PUBLIC_INCLUDES}; do
-  sed -f ../tools/cleanup-header $HEADERS_SRC/$i > $idir/caml/$i
-done
-cd ../otherlibs/bigarray
-sed -f ../../tools/cleanup-header bigarray.h > $idir/caml/bigarray.h
+if [ -e ../tools/cleanup-header ]; then
+  for i in ${PUBLIC_INCLUDES}; do
+    sed -f ../tools/cleanup-header $HEADERS_SRC/$i > $idir/caml/$i
+  done
+  cd ../otherlibs/bigarray
+  sed -f ../../tools/cleanup-header bigarray.h > $idir/caml/bigarray.h
+else
+  for i in ${PUBLIC_INCLUDES} bigarray.h; do
+    cp ${HEADERS_SRC}/$i $idir/caml/$i
+  done
+fi

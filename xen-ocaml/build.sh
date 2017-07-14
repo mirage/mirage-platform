@@ -51,6 +51,7 @@ case `ocamlopt -version` in
   echo Applying OCaml 4.05 config
   cp config/version-405.h ocaml-src/byterun/caml/version.h
   BIGARRAY_OBJ=""
+  CFLAGS="-D__ANDROID__"
   ;;
 *)
   echo unsupported OCaml version `ocamlopt -version`
