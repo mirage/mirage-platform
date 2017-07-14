@@ -192,6 +192,11 @@ clock_t times(struct tms *buf)
     return now;
 }
 
+uid_t geteuid() { return 0; }
+uid_t getuid() { return 0; }
+uid_t getgid() { return 0; }
+uid_t getegid() { return 0; }
+
 /* Not supported by FS yet.  */
 unsupported_function_crash(link);
 unsupported_function(int, readlink, -1);
