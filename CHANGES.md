@@ -1,3 +1,7 @@
+## 3.0.5 (2017-11-19)
+
+* xen: add support for OCaml 4.05.0 (@talex5, #195)
+
 ## 3.0.4 (2017-07-14)
 
 * remove support for versions of OCaml older than 4.04.2, and add support
