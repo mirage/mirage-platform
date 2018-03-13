@@ -1,3 +1,16 @@
+# Status update, March 2018
+
+mirage-platform is currently undergoing major refactoring.  Please read
+[this issue](https://github.com/mirage/mirage-platform/issues/199) for detailed
+information.
+
+The goal is to reuse the [ocaml-freestanding](https://github.com/mirage/ocaml-freestanding) work for the xen backend as well:
+- `unix` moved to [mirage-unix](https://github.com/mirage/mirage-unix) (release pending) and switched to topkg and ocamlbuild
+- `xen` and `bindings` subdirectories moved to [mirage-xen](https://github.com/mirage/mirage-xen) (release pending), also switched to topkg and ocamlbuild
+- the remaining `xen-ocaml` and `xen-posix` subdirectories will be deprecated once the move to ocaml-freestanding is complete
+
+# MirageOS
+
 Mirage OS is a library operating system that constructs [unikernels](http://queue.acm.org/detail.cfm?id=2566628)
 for secure, high-performance network applications across a variety
 of cloud computing and mobile platforms.  Code can be developed on a normal OS
