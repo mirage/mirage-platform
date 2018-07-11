@@ -37,7 +37,7 @@ CFLAGS="-Wall -Wno-attributes ${ARCH_CFLAGS} ${EXTRA_CFLAGS} ${CI_CFLAGS} -DSYS_
   "
 
 rm -rf ocaml-src
-cp -r `opam config exec -- ocamlfind query ocaml-src` ocaml-src
+cp -r `ocamlfind query ocaml-src` ocaml-src
 chmod -R u+w ocaml-src
 
 echo Detected OCaml version `ocamlopt -version`
