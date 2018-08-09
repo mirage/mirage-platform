@@ -1,3 +1,8 @@
+## 3.0.6 (2019-08-09)
+
+* xen: do not use `opam config exec` during the build to be compatible
+  with opam2 (#201, @reynir)
+
 ## 3.0.5 (2017-11-19)
 
 * xen: add support for OCaml 4.05.0 (@talex5, #195)
