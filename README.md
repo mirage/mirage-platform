@@ -28,17 +28,10 @@ development, but become operating system drivers when being compiled for
 production deployment. The framework is fully event-driven, with no support for
 preemptive threading.
 
-This contains the OS bindings for the Mirage operating system, primarily
-through an `OS` OCaml module. The following backends are available:
-
-* Unix: maps POSIX resources and executes Mirage apps as normal binaries.
-
-* Xen: a microkernel backend that can run against Xen3+
+This repository contains an OCaml runtime used on Xen - the opam packages
+`mirage-xen-posix` and `mirage-xen-ocaml`.
 
 For documentation, visit <http://openmirage.org>.
-
-The older "unified" tree is also present for historical reasons into the
-`old-master` branch.
 
 ### Repository Contents
 
@@ -51,6 +44,3 @@ The older "unified" tree is also present for historical reasons into the
 - `xen-ocaml/` contains only the OCaml runtime (patches and build system),
   installation into `.opam/x/lib/mirage-xen-ocaml` and
   `.opam/x/include/mirage-xen-ocaml`
-
-- `bindings/` and `xen/` subdirectories form the `mirage-xen` OPAM  package --
-  this consists of various bindings and the OCaml OS module (in xen/).

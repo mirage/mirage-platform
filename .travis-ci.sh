@@ -61,11 +61,6 @@ eval `opam config env`
 
 opam pin add -n mirage-xen-posix .
 opam pin add -n mirage-xen-ocaml .
-opam pin add -n mirage-xen .
-opam pin add -n mirage-unix .
 
-opam install mirage-unix
-opam remove -a mirage-unix
-
-opam install mirage-xen-posix mirage-xen-ocaml mirage-xen
-opam remove -a mirage-xen-posix mirage-xen-ocaml mirage-xen
+opam install mirage-xen-posix mirage-xen-ocaml
+opam remove -a mirage-xen-posix mirage-xen-ocaml
