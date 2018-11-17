@@ -1,3 +1,8 @@
+## 3.1.0 (2019-11-18)
+
+* mirage-xen-posix, mirage-xen-ocaml: install META files to be recognized by
+  build systems (#204, @hannesm)
+
 ## 3.0.6 (2019-08-09)
 
 * xen: do not use `opam config exec` during the build to be compatible
