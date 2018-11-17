@@ -8,6 +8,7 @@ fi
 odir=$prefix/lib
 mkdir -p $odir/mirage-xen-posix
 cp libxenposix.a $odir/mirage-xen-posix/libxenposix.a
+touch $odir/mirage-xen-posix/META
 mkdir -p $odir/pkgconfig
 cp mirage-xen-minios.pc $odir/pkgconfig/mirage-xen-minios.pc
 cp mirage-xen-posix.pc $odir/pkgconfig/mirage-xen-posix.pc
