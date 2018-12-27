@@ -138,6 +138,15 @@ int printf(const char *fmt, ...)
   return 1;
 }
 
+int vfprintf(void *stream UNUSED, const char *fmt, va_list ap)
+{
+  va_list args;
+  va_copy(args, ap);
+  print(0, fmt, args);
+  va_end(args);
+  return 1;
+}
+
 int fflush (void * stream UNUSED)
 {
   return 0;
@@ -243,7 +252,7 @@ unsupported_function_log(char *, if_indextoname, (char *) NULL);
 unsupported_function_log(struct  if_nameindex *, if_nameindex, (struct  if_nameindex *) NULL);
 unsupported_function_crash(if_freenameindex);
 
-/* Linuxish abi for the Caml runtime, don't support 
+/* Linuxish abi for the Caml runtime, don't support
    Log, and return an error code if possible.  If it is not possible
    to inform the application of an error, then crash instead!
 */
