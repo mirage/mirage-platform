@@ -1,9 +1,14 @@
-## 3.1.0 (2019-11-18)
+## 3.2.0 (2018-01-02)
+
+* add support for OCaml 4.06 and 4.07 in the xen backend (#205 by @anmonteiro)
+* update opam metadata to 2.0 format (@avsm)
+
+## 3.1.0 (2018-11-18)
 
 * mirage-xen-posix, mirage-xen-ocaml: install META files to be recognized by
   build systems (#204, @hannesm)
 
-## 3.0.6 (2019-08-09)
+## 3.0.6 (2018-08-09)
 
 * xen: do not use `opam config exec` during the build to be compatible
   with opam2 (#201, @reynir)
