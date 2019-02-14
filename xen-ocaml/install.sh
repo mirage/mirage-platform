@@ -5,12 +5,24 @@ if [ "$prefix" = "" ]; then
   prefix=`opam config var prefix`
 fi
 
+OCAMLOPT_VERSION=$(ocamlopt -version)
+echo Detected OCaml version $OCAMLOPT_VERSION
+case $OCAMLOPT_VERSION in
+4.08.*)
+  ASMRUN_FOLDER=runtime
+  BYTERUN_FOLDER=runtime
+  ;;
+*)
+  ASMRUN_FOLDER=asmrun
+  BYTERUN_FOLDER=byterun
+  ;;
+esac
 pwd=`pwd`
 odir=$prefix/lib
 mkdir -p $odir/mirage-xen-ocaml
 #We dont install the bytecode version yet
 #cd ocaml-src/byterun && make install LIBDIR="${pwd}/obj" BINDIR="${pwd}/obj"
-cp ocaml-src/asmrun/libasmrun.a $odir/mirage-xen-ocaml/libxenasmrun.a
+cp ocaml-src/$ASMRUN_FOLDER/libasmrun.a $odir/mirage-xen-ocaml/libxenasmrun.a
 cp ocaml-src/libxenotherlibs.a $odir/mirage-xen-ocaml/libxenotherlibs.a
 touch $odir/mirage-xen-ocaml/META
 mkdir -p $odir/pkgconfig
@@ -20,7 +32,7 @@ cp mirage-xen-ocaml.pc $odir/pkgconfig/mirage-xen-ocaml.pc
 idir=$prefix/include/mirage-xen-ocaml/include
 mkdir -p $idir/caml
 
-cd ocaml-src/byterun
+cd ocaml-src/$BYTERUN_FOLDER
 if [ -f caml/alloc.h ]; then
   HEADERS_SRC=caml
 else
