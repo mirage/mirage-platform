@@ -1,0 +1,1 @@
+%{mirage-xen-posix:lib}%/libxenposix.a

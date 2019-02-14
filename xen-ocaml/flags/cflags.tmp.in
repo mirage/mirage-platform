@@ -1,0 +1,1 @@
+-I%{prefix}%/include/mirage-xen-ocaml/include -I%{prefix}%/include/mirage-xen-posix/include

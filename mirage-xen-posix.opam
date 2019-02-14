@@ -9,6 +9,10 @@ depends: [
   "mirage-xen-minios" {>= "0.7.0"}
   "conf-pkg-config"
 ]
+substs: [
+  "xen-posix/flags/posix-cflags.tmp"
+  "xen-posix/flags/posix-libs.tmp"
+  ]
 available: os = "linux"
 build: [make "xen-posix-build"]
 install: [make "xen-posix-install" "PREFIX=%{prefix}%"]
