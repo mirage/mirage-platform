@@ -101,6 +101,13 @@ case $OCAMLOPT_VERSION in
   BIGARRAY_OBJ="mmap.o mmap_ba.o"
   CFLAGS="-D__ANDROID__ $CFLAGS"
   ;;
+4.08.*)
+  echo Applying OCaml 4.08.0 config
+  cp config/version-4080.h ocaml-src/runtime/caml/version.h
+  S_H_LOCATION="ocaml-src/runtime/caml/"
+  BIGARRAY_OBJ="mmap.o mmap_ba.o"
+  CFLAGS="-D__ANDROID__ $CFLAGS"
+  ;;
 *)
   echo unsupported OCaml version $OCAMLOPT_VERSION
   exit 1
@@ -121,11 +128,16 @@ case $OCAMLOPT_VERSION in
 4.06.*|4.07.*)
   cd asmrun && make -j${NJOBS} UNIX_OR_WIN32=unix CPPFLAGS="-DNATIVE_CODE ${CFLAGS} -I../byterun -DTARGET_${TARGET_ARCH}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
   ;;
+4.08.*)
+  cd runtime && make -j${NJOBS} UNIX_OR_WIN32=unix CPPFLAGS="-DNATIVE_CODE ${CFLAGS} -DTARGET_${TARGET_ARCH}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
+  ;;
 *)
   echo unsupported OCaml version $OCAMLOPT_VERSION
   exit 1
   ;;
 esac
+# This directory doesn't really exist on 4.08, but it's also unneeded, so it's
+# effectively harmless to leave it here.
 CFLAGS="$CFLAGS -I../../byterun"
 cd otherlibs/bigarray && make CFLAGS="${CFLAGS} -I../unix -DIN_OCAML_BIGARRAY" ${BIGARRAY_OBJ}
 ar rcs ../../libxenotherlibs.a ${BIGARRAY_OBJ}
