@@ -1,3 +1,16 @@
+## v3.3.0 (2019-02-16)
+
+* Add support for OCaml 4.08 (#206 by @anmonteiro)
+* `libxenasmrun.a` is symlinked in the ocaml directory in order to be able to use ocamlopt's `-runtime-variant` option.
+* Expose flags through files as well as pkg-config (#205 by @TheLortex). Instead of pkg-config, one can use the following files to get compilation flags:
+  * mirage-xen-ocaml/libs
+  * mirage-xen-ocaml/cflags
+  * mirage-xen-posix/minios-cflags
+  * mirage-xen-posix/minios-libs
+  * mirage-xen-posix/posix-cflags
+  * mirage-xen-posix/posix-libs
+  With dune this allows us to write `%{lib:mirage-xen-posix:posix-libs}` to get the flags instead of having a script invoking `pkg-config mirage-xen-posix --libs`.
+
 ## 3.2.0 (2018-01-02)
 
 * add support for OCaml 4.06 and 4.07 in the xen backend (#205 by @anmonteiro)
