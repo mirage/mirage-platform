@@ -141,3 +141,8 @@ esac
 CFLAGS="$CFLAGS -I../../byterun"
 cd otherlibs/bigarray && make CFLAGS="${CFLAGS} -I../unix -DIN_OCAML_BIGARRAY" ${BIGARRAY_OBJ}
 ar rcs ../../libxenotherlibs.a ${BIGARRAY_OBJ}
+
+cd ../../..
+
+echo "($(pkg-config libminios-xen --libs)$(pkg-config openlibm --libs)$(cat flags/libs.tmp))" > flags/libs
+echo "($(pkg-config libminios-xen --cflags)$(pkg-config openlibm --cflags)$(cat flags/cflags.tmp))" > flags/cflags

@@ -37,3 +37,8 @@ CFLAGS="$EXTRA_CFLAGS ${CI_CFLAGS} -I ${PWD}/include/ -I ${PWD}/src/ \
 
 ${CC} -c ${CFLAGS} src/*.c
 ar rcs libxenposix.a mini_libc.o fmt_fp.o dtoa.o strtol.o
+
+echo "($(pkg-config libminios-xen --libs)$(pkg-config openlibm --libs)$(cat flags/minios-libs.tmp))" > flags/minios-libs
+echo "($(pkg-config libminios-xen --cflags)$(pkg-config openlibm --cflags)$(cat flags/minios-cflags.tmp))" > flags/minios-cflags
+echo "($(pkg-config libminios-xen --libs)$(pkg-config openlibm --libs)$(cat flags/posix-libs.tmp))" > flags/posix-libs
+echo "($(pkg-config libminios-xen --cflags)$(pkg-config openlibm --cflags)$(cat flags/posix-cflags.tmp))" > flags/posix-cflags
