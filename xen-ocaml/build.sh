@@ -136,13 +136,21 @@ case $OCAMLOPT_VERSION in
   exit 1
   ;;
 esac
-# This directory doesn't really exist on 4.08, but it's also unneeded, so it's
-# effectively harmless to leave it here.
-CFLAGS="$CFLAGS -I../../byterun"
-cd otherlibs/bigarray && make CFLAGS="${CFLAGS} -I../unix -DIN_OCAML_BIGARRAY" ${BIGARRAY_OBJ}
-ar rcs ../../libxenotherlibs.a ${BIGARRAY_OBJ}
 
-cd ../../..
+case $OCAMLOPT_VERSION in
+4.04.2|4.05.*|4.06.*|4.07.*)
+  CFLAGS="$CFLAGS -I../../byterun"  cd otherlibs/bigarray && make CFLAGS="${CFLAGS} -I../unix -DIN_OCAML_BIGARRAY" ${BIGARRAY_OBJ}
+  ar rcs ../../libxenotherlibs.a ${BIGARRAY_OBJ}
+  cd ../../..
+  ;;
+4.08.*)
+  cp `ocamlfind query mmap`/libmmap_stubs.a libxenotherlibs.a
+  cd ..
+  ;;
+*)  echo unsupported OCaml version $OCAMLOPT_VERSION
+  exit 1
+  ;;
+esac
 
 echo "($(pkg-config libminios-xen --libs)$(pkg-config openlibm --libs)$(cat flags/libs.tmp))" > flags/libs
 echo "($(pkg-config libminios-xen --cflags)$(pkg-config openlibm --cflags)$(cat flags/cflags.tmp))" > flags/cflags

@@ -11,6 +11,7 @@ depends: [
   "conf-pkg-config"
   "ocamlfind" {build}
   "ocaml-src"
+  "mmap"
 ]
 substs: [
   "xen-ocaml/flags/cflags.tmp"

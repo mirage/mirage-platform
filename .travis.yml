@@ -6,3 +6,5 @@ env:
   - OCAML_VERSION=4.05
   - OCAML_VERSION=4.06
   - OCAML_VERSION=4.07
+# Enable when 4.08 is released
+#  - OCAML_VERSION=4.08
