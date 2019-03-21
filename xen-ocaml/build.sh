@@ -144,5 +144,5 @@ ar rcs ../../libxenotherlibs.a ${BIGARRAY_OBJ}
 
 cd ../../..
 
-echo "($(pkg-config libminios-xen --libs)$(pkg-config openlibm --libs)$(cat flags/libs.tmp))" > flags/libs
-echo "($(pkg-config libminios-xen --cflags)$(pkg-config openlibm --cflags)$(cat flags/cflags.tmp))" > flags/cflags
+echo "($(cat flags/libs.tmp) -cclib \"$(pkg-config libminios-xen openlibm --libs | xargs)\")" > flags/libs
+echo "($(pkg-config libminios-xen openlibm --cflags | xargs) $(cat flags/cflags.tmp))" > flags/cflags
