@@ -1,1 +1,1 @@
-%{mirage-xen-posix:lib}%/libxenposix.a
+-cclib %{mirage-xen-posix:lib}%/libxenposix.a

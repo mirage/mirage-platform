@@ -5,6 +5,7 @@ if [ "$prefix" = "" ]; then
   prefix=`opam config var prefix`
 fi
 
+OCAML_LIB_DIR=$(ocamlopt -config )
 OCAMLOPT_VERSION=$(ocamlopt -version)
 echo Detected OCaml version $OCAMLOPT_VERSION
 case $OCAMLOPT_VERSION in
@@ -22,8 +23,7 @@ odir=$prefix/lib
 mkdir -p $odir/mirage-xen-ocaml
 #We dont install the bytecode version yet
 #cd ocaml-src/byterun && make install LIBDIR="${pwd}/obj" BINDIR="${pwd}/obj"
-cp ocaml-src/$ASMRUN_FOLDER/libasmrun.a $odir/mirage-xen-ocaml/libxenasmrun.a
-ln -s $odir/mirage-xen-ocaml/libxenasmrun.a $odir/ocaml/libasmrunxen.a
+cp ocaml-src/$ASMRUN_FOLDER/libasmrun.a $odir/mirage-xen-ocaml/libasmrunxen.a
 cp ocaml-src/libxenotherlibs.a $odir/mirage-xen-ocaml/libxenotherlibs.a
 cp flags/cflags $odir/mirage-xen-ocaml/
 cp flags/libs $odir/mirage-xen-ocaml/

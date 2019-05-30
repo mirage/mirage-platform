@@ -1,1 +1,1 @@
-%{mirage-xen-ocaml:lib}%/libxenasmrun.a %{mirage-xen-ocaml:lib}%/libxenotherlibs.a %{mirage-xen-posix:lib}%/libxenposix.a
+-I %{mirage-xen-ocaml:lib}% -cclib "%{mirage-xen-ocaml:lib}%/libasmrunxen.a %{mirage-xen-ocaml:lib}%/libxenotherlibs.a %{mirage-xen-posix:lib}%/libxenposix.a"
