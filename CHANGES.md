@@ -1,3 +1,7 @@
+## v3.3.1 (2019-06-25)
+
+* Fix CFLAGS generation with repeated spaces on Linux (#210 @TheLortex)
+
 ## v3.3.0 (2019-02-16)
 
 * Add support for OCaml 4.08 (#206 by @anmonteiro)
