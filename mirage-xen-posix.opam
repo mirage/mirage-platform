@@ -9,6 +9,9 @@ depends: [
   "mirage-xen-minios" {>= "0.7.0"}
   "conf-pkg-config"
 ]
+conflicts: [
+  "minios-xen" {< "0.10"}
+]
 substs: [
   "xen-posix/flags/posix-cflags.tmp"
   "xen-posix/flags/posix-libs.tmp"

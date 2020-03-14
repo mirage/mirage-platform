@@ -97,7 +97,7 @@ void exit(int status)
 
 int atoi(const char *nptr)
 {
-  return simple_strtoul(nptr, NULL, 10);
+  return strtoul(nptr, NULL, 10);
 }
 
 int open64(const char *pathname, int flags UNUSED, ...)
