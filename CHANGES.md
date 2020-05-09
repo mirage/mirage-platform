@@ -1,3 +1,7 @@
+## v3.3.2 (2020-05-09)
+
+* Add support for 4.09 and 4.10 (#213 by @linse @hannesm)
+
 ## v3.3.1 (2019-06-25)
 
 * Fix CFLAGS generation with repeated spaces on Linux (#210 @TheLortex)
