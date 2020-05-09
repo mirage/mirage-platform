@@ -109,6 +109,22 @@ case $OCAMLOPT_VERSION in
   CFLAGS="-D__ANDROID__ $CFLAGS"
   CONFIGURE_OPTS="--disable-vmthreads --disable-systhreads --disable-graph-lib --disable-str-lib --disable-unix-lib --disable-ocamldoc"
   ;;
+4.09.*)
+  echo Applying OCaml 4.09.0 config
+  cp config/version-4090.h ocaml-src/runtime/caml/version.h
+  S_H_LOCATION="ocaml-src/runtime/caml/"
+  BIGARRAY_OBJ=""
+  CFLAGS="-D__ANDROID__ $CFLAGS"
+  CONFIGURE_OPTS="--disable-systhreads --disable-str-lib --disable-unix-lib --disable-ocamldoc"
+  ;;
+4.10.*)
+  echo Applying OCaml 4.10.0 config
+  cp config/version-4100.h ocaml-src/runtime/caml/version.h
+  S_H_LOCATION="ocaml-src/runtime/caml/"
+  BIGARRAY_OBJ=""
+  CFLAGS="-D__ANDROID__ $CFLAGS"
+  CONFIGURE_OPTS="--disable-systhreads --disable-str-lib --disable-unix-lib --disable-ocamldoc"
+  ;;
 *)
   echo unsupported OCaml version $OCAMLOPT_VERSION
   exit 1
@@ -129,7 +145,7 @@ case $OCAMLOPT_VERSION in
   cd asmrun && make -j${NJOBS} UNIX_OR_WIN32=unix CPPFLAGS="-DNATIVE_CODE ${CFLAGS} -I../byterun -DTARGET_${TARGET_ARCH}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
   IS_408_OR_MORE=0
   ;;
-4.08.*)
+4.08.*|4.09.*|4.10.*)
   cd runtime && make -j${NJOBS} UNIX_OR_WIN32=unix OC_NATIVE_CPPFLAGS="-DNATIVE_CODE -DXXXX=1 ${CFLAGS} -DTARGET_${TARGET_ARCH}" libasmrun.a && cd ..
   IS_408_OR_MORE=1
   ;;

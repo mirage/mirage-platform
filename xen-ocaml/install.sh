@@ -9,7 +9,7 @@ OCAML_LIB_DIR=$(ocamlopt -config )
 OCAMLOPT_VERSION=$(ocamlopt -version)
 echo Detected OCaml version $OCAMLOPT_VERSION
 case $OCAMLOPT_VERSION in
-4.08.*)
+4.08.*|4.09.*|4.10.*)
   ASMRUN_FOLDER=runtime
   BYTERUN_FOLDER=runtime
   ;;
@@ -51,7 +51,5 @@ if [ -e ../tools/cleanup-header ]; then
   cd ../otherlibs/bigarray
   sed -f ../../tools/cleanup-header bigarray.h > $idir/caml/bigarray.h
 else
-  for i in ${PUBLIC_INCLUDES} bigarray.h s.h m.h; do
-    cp ${HEADERS_SRC}/$i $idir/caml/$i
-  done
+  cp ${HEADERS_SRC}/* $idir/caml/
 fi
