@@ -17,7 +17,7 @@ substs: [
   "xen-ocaml/flags/libs.tmp"
   ]
 available: os = "linux"
-build: [make "xen-ocaml-build"]
+build: [make "xen-ocaml-build" "PREFIX=%{prefix}%"]
 install: [make "xen-ocaml-install" "PREFIX=%{prefix}%"]
 remove: [make "xen-ocaml-uninstall" "PREFIX=%{prefix}%"]
 dev-repo: "git+https://github.com/mirage/mirage-platform.git"

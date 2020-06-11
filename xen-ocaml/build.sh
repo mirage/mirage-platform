@@ -1,5 +1,10 @@
 #!/bin/sh -ex
 
+PREFIX=${1:-$PREFIX}
+if [ "$PREFIX" = "" ]; then
+  PREFIX="$(opam config var prefix)"
+fi
+
 MJOBS=${4:-NJOBS}
 PKG_CONFIG_DEPS="mirage-xen-posix openlibm libminios-xen >= 0.5"
 check_deps () {
@@ -8,7 +13,7 @@ check_deps () {
 
 if ! check_deps 2>/dev/null; then
   # only rely on `opam` if deps are unavailable
-  export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
+  export PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
 fi
 
 check_deps || exit 1
