@@ -18,5 +18,4 @@ substs: [
 available: os = "linux"
 build: [make "xen-posix-build"]
 install: [make "xen-posix-install" "PREFIX=%{prefix}%"]
-remove: [make "xen-posix-uninstall" "PREFIX=%{prefix}%"]
 dev-repo: "git+https://github.com/mirage/mirage-platform.git"

@@ -1,5 +1,10 @@
 #!/bin/sh -ex
 
+PREFIX=${1:-$PREFIX}
+if [ "$PREFIX" = "" ]; then
+  PREFIX="$(opam config var prefix)"
+fi
+
 MJOBS=${4:-NJOBS}
 PKG_CONFIG_DEPS="mirage-xen-posix openlibm libminios-xen >= 0.5"
 check_deps () {
@@ -8,7 +13,7 @@ check_deps () {
 
 if ! check_deps 2>/dev/null; then
   # only rely on `opam` if deps are unavailable
-  export PKG_CONFIG_PATH=`opam config var prefix`/lib/pkgconfig
+  export PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig"
 fi
 
 check_deps || exit 1
@@ -125,6 +130,14 @@ case $OCAMLOPT_VERSION in
   CFLAGS="-D__ANDROID__ $CFLAGS"
   CONFIGURE_OPTS="--disable-systhreads --disable-str-lib --disable-unix-lib --disable-ocamldoc"
   ;;
+4.11.*)
+  echo Applying OCaml 4.11.0 config
+  cp config/version-4110.h ocaml-src/runtime/caml/version.h
+  S_H_LOCATION="ocaml-src/runtime/caml/"
+  BIGARRAY_OBJ=""
+  CFLAGS="-D__ANDROID__ $CFLAGS"
+  CONFIGURE_OPTS="--disable-systhreads --disable-str-lib --disable-unix-lib --disable-ocamldoc"
+  ;;
 *)
   echo unsupported OCaml version $OCAMLOPT_VERSION
   exit 1
@@ -145,7 +158,7 @@ case $OCAMLOPT_VERSION in
   cd asmrun && make -j${NJOBS} UNIX_OR_WIN32=unix CPPFLAGS="-DNATIVE_CODE ${CFLAGS} -I../byterun -DTARGET_${TARGET_ARCH}" NATIVECCPROFOPTS="-DNATIVE_CODE ${CFLAGS}" libasmrun.a && cd ..
   IS_408_OR_MORE=0
   ;;
-4.08.*|4.09.*|4.10.*)
+4.08.*|4.09.*|4.10.*|4.11.*)
   cd runtime && make -j${NJOBS} UNIX_OR_WIN32=unix OC_NATIVE_CPPFLAGS="-DNATIVE_CODE -DXXXX=1 ${CFLAGS} -DTARGET_${TARGET_ARCH}" libasmrun.a && cd ..
   IS_408_OR_MORE=1
   ;;

@@ -9,7 +9,7 @@ OCAML_LIB_DIR=$(ocamlopt -config )
 OCAMLOPT_VERSION=$(ocamlopt -version)
 echo Detected OCaml version $OCAMLOPT_VERSION
 case $OCAMLOPT_VERSION in
-4.08.*|4.09.*|4.10.*)
+4.08.*|4.09.*|4.10.*|4.11.*)
   ASMRUN_FOLDER=runtime
   BYTERUN_FOLDER=runtime
   ;;
