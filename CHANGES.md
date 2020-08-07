@@ -1,3 +1,7 @@
+## v3.3.3 (2020-08-07)
+
+* Add support for OCaml 4.11 (#214 by @kit-ty-kate)
+
 ## v3.3.2 (2020-05-09)
 
 * Add support for 4.09 and 4.10 (#213 by @linse @hannesm)
